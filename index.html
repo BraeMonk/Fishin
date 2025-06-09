@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fishing Log">
+    <title>Barrie Ontario Fishing Logbook</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>🎣 Fishing Log</h1>
+                </div>
+                <div class="total-catch">
+                    <div class="number" id="totalCatch">0</div>
+                    <div class="label">Total Catch</div>
+                </div>
+            </div>
+            <div class="location">📍 Barrie, ON • Lake Simcoe</div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('species')">🐟 Species</button>
+                <button class="nav-tab" onclick="showTab('notes')">📝 Notes</button>
+            </div>
+        </div>
+        <div id="species-tab" class="tab-content active"></div>
+        <div id="notes-tab" class="tab-content">
+            <div class="notes-container">
+                <div class="note-card">
+                    <div class="note-inputs">
+                        <div class="input-group">
+                            <label class="input-label">Date</label>
+                            <input type="date" class="input-field" id="date1">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Location</label>
+                            <input type="text" class="input-field" id="location1" placeholder="Lake Simcoe - Kempenfelt Bay">
+                        </div>
+                        <div class="input-group full-width">
+                            <label class="input-label">Title</label>
+                            <input type="text" class="input-field" id="title1" placeholder="First Muskie, Perfect Morning...">
+                        </div>
+                        <div class="input-group full-width">
+                            <label class="input-label">Notes</label>
+                            <textarea class="input-field" id="notes1" placeholder="Describe the catch, conditions, techniques used, weather, time of day, bait..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">© 2025 Barrie Fishing Log</div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
