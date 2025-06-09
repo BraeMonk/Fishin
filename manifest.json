@@ -3,8 +3,8 @@
   "short_name": "Fishing Log",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5efe3",
-  "theme_color": "#3e8e41",
+  "background_color": "000000",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "1E44A4B3-867E-4276-AAB4-502B760C8F57.png",
