@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Fish%20Tally%22,%22short_name%22:%22FishTally%22,%22description%22:%22Track%20your%20fishing%20catches%20and%20memories%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%23000000%22,%22theme_color%22:%22%23000000%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ctext x='50' y='60' font-size='50' text-anchor='middle' fill='gold'%3E🎣%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22},{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23000'/%3E%3Ctext x='50' y='60' font-size='50' text-anchor='middle' fill='gold'%3E🎣%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}">
+    <title>Fish Tally</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #f0d68c;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background: #8b0000;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            background: #8b0000;
+            color: gold;
+            border: none;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background: #b22222;
+        }
+        .tab-content {
+            padding: 10px;
+        }
+        .season-total {
+            background: #330000;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .fish-item {
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+        }
+        .fish-title {
+            font-weight: bold;
+            cursor: pointer;
+            background: #330000;
+            padding: 10px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .fish-title:hover {
+            background: #440000;
+        }
+        .fish-count {
+            background: #8b0000;
+            color: gold;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        .fish-info {
+            background: #1a0000;
+            padding: 15px;
+            margin-top: 5px;
+            display: none;
+        }
+        .fish-info.active {
+            display: block;
+        }
+        .buttons {
+            margin: 10px 0;
+        }
+        .buttons button {
+            margin: 0 5px;
+            padding: 8px 15px;
+            color: black;
+            background-color: gold;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .buttons button:hover {
+            background-color: #ffd700;
+        }
+        .bait-rigging {
+            margin-top: 10px;
+            padding: 10px;
+            background: #2a0000;
+            border-radius: 3px;
+        }
+        .bait-rigging h4 {
+            margin: 0 0 5px 0;
+            color: #ffd700;
+        }
+        .bait-rigging p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        textarea {
+            width: calc(100% - 20px);
+            height: 150px;
+            background: #1a0000;
+            color: gold;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 5px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+        .photo-upload {
+            margin: 20px 0;
+        }
+        .photo-upload label {
+            display: block;
+            background: #8b0000;
+            color: gold;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .photo-container {
+            position: relative;
+        }
+        .photo {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border: 2px solid gold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .photo-delete {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .reset-btn {
+            background: #8b0000 !important;
+            color: gold !important;
+            padding: 15px 20px;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .reset-btn:hover {
+            background: #a00000 !important;
+        }
+        .debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="debugInfo" class="debug">Debug: Loading...</div>
+
+```
+<div class="tabs">
+    <button id="tabTally" class="tab-button active">Tally</button>
+    <button id="tabNotes" class="tab-button">Memories</button>
+</div>
+<div id="tallyTab" class="tab-content">
+    <div class="season-total">
+        <div>Season Total: <span id="grandTotal">0</span> Fish</div>
+    </div>
+    <div id="fishList"></div>
+    <button id="resetBtn" class="reset-btn">Reset Season</button>
+</div>
+<div id="notesTab" class="tab-content" style="display: none;">
+    <textarea id="notes" placeholder="Add memories, moments, or notes from your fishing adventures..."></textarea>
+    <div class="photo-upload">
+        <label for="photoInput">📷 Add Photos</label>
+        <input type="file" id="photoInput" multiple accept="image/*">
+    </div>
+    <div id="photoGallery" class="gallery"></div>
+</div>
+
+<script>
+    // Debug function
+    function debug(msg) {
+        console.log(msg);
+        document.getElementById('debugInfo').textContent = `Debug: ${msg}`;
+    }
+
+    // Fish species common to Barrie, Ontario area
+    const fishSpecies = [
+        {
+            name: "Largemouth Bass",
+            bait: "Plastic worms, spinnerbaits, topwater lures, live minnows",
+            rigging: "Texas rig for worms, retrieve spinnerbaits steadily, fish topwater early morning/evening"
+        },
+        {
+            name: "Smallmouth Bass", 
+            bait: "Tube jigs, drop shot rigs, crankbaits, crayfish",
+            rigging: "Drop shot near rocky areas, bounce tube jigs along bottom, crank around structure"
+        },
+        {
+            name: "Northern Pike",
+            bait: "Large spoons, pike minnows, jerkbaits, live suckers",
+            rigging: "Steel leader essential, cast near weed edges, troll along drop-offs"
+        },
+        {
+            name: "Walleye",
+            bait: "Jigs with minnows, crawler harnesses, crankbaits",
+            rigging: "Bottom bouncing, slow trolling 1-2 mph, fish at dawn/dusk"
+        },
+        {
+            name: "Yellow Perch",
+            bait: "Small jigs, worms, minnows, maggots",
+            rigging: "Light tackle, fish near bottom in schools, ice fishing favorite"
+        },
+        {
+            name: "Lake Trout",
+            bait: "Downriggers with spoons, tube jigs, smelt",
+            rigging: "Deep water trolling, fish 40-80 feet deep in summer"
+        },
+        {
+            name: "Muskie",
+            bait: "Large bucktails, jerkbaits, topwater lures, sucker minnows",
+            rigging: "Heavy tackle, figure-8 at boat, fish weed edges and structure"
+        },
+        {
+            name: "Rainbow Trout",
+            bait: "Spinners, spoons, PowerBait, worms",
+            rigging: "Light line, cast and retrieve, still fish with bait"
+        },
+        {
+            name: "Brown Trout",
+            bait: "Streamers, minnows, worms, small spoons",
+            rigging: "Early morning/evening, fish deeper during day, near structure"
+        },
+        {
+            name: "White Perch",
+            bait: "Small jigs, worms, minnows",
+            rigging: "Light tackle, fish in schools, good eating size"
+        },
+        {
+            name: "Rock Bass",
+            bait: "Worms, small jigs, crayfish, minnows",
+            rigging: "Fish around rocks and structure, easy to catch"
+        },
+        {
+            name: "Pumpkinseed Sunfish",
+            bait: "Worms, small jigs, bread, crickets",
+            rigging: "Shallow water, around weeds, great for kids"
+        }
+    ];
+
+    // Simple localStorage-based data storage (more reliable than IndexedDB for debugging)
+    let fishData = {};
+    let notes = '';
+    let photos = [];
+
+    // Load data from localStorage
+    function loadData() {
+        debug('Loading data...');
+        try {
+            const savedData = localStorage.getItem('fishTallyData');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                fishData = parsed.fishData || {};
+                notes = parsed.notes || '';
+                photos = parsed.photos || [];
+                debug(`Loaded: ${Object.keys(fishData).length} fish, ${photos.length} photos`);
+            } else {
+                debug('No saved data found');
+            }
+            
+            document.getElementById('notes').value = notes;
+            updateGrandTotal();
+            renderFishList();
+            renderPhotos();
+        } catch (error) {
+            debug(`Load error: ${error.message}`);
+        }
+    }
+
+    // Save data to localStorage
+    function saveData() {
+        debug('Saving data...');
+        try {
+            const dataToSave = {
+                fishData: fishData,
+                notes: document.getElementById('notes').value,
+                photos: photos
+            };
+            localStorage.setItem('fishTallyData', JSON.stringify(dataToSave));
+            debug(`Saved: ${Object.keys(fishData).length} fish, ${photos.length} photos`);
+            return true;
+        } catch (error) {
+            debug(`Save error: ${error.message}`);
+            return false;
+        }
+    }
+
+    // Initialize fish data
+    function initializeFishData() {
+        fishSpecies.forEach(fish => {
+            if (!fishData[fish.name]) {
+                fishData[fish.name] = {
+                    count: 0,
+                    bait: fish.bait,
+                    rigging: fish.rigging
+                };
+            }
+        });
+    }
+
+    // Update grand total
+    function updateGrandTotal() {
+        const total = Object.values(fishData).reduce((sum, fish) => sum + fish.count, 0);
+        document.getElementById('grandTotal').textContent = total;
+    }
+
+    // Render fish list
+    function renderFishList() {
+        const fishList = document.getElementById('fishList');
+        fishList.innerHTML = '';
+
+        fishSpecies.forEach(species => {
+            const fishItem = document.createElement('div');
+            fishItem.className = 'fish-item';
+
+            const count = fishData[species.name]?.count || 0;
+
+            fishItem.innerHTML = `
+                <div class="fish-title" onclick="toggleFishInfo('${species.name}')">
+                    <span>${species.name}</span>
+                    <span class="fish-count">${count}</span>
+                </div>
+                <div class="fish-info" id="info-${species.name}">
+                    <div class="buttons">
+                        <button onclick="addFish('${species.name}')">+1</button>
+                        <button onclick="removeFish('${species.name}')">-1</button>
+                    </div>
+                    <div class="bait-rigging">
+                        <h4>🎣 Best Bait:</h4>
+                        <p>${species.bait}</p>
+                        <h4>🪝 Rigging Tips:</h4>
+                        <p>${species.rigging}</p>
+                    </div>
+                </div>
+            `;
+
+            fishList.appendChild(fishItem);
+        });
+    }
+
+    // Toggle fish info display
+    function toggleFishInfo(fishName) {
+        const info = document.getElementById(`info-${fishName}`);
+        info.classList.toggle('active');
+    }
+
+    // Add fish
+    function addFish(fishName) {
+        if (!fishData[fishName]) fishData[fishName] = { count: 0 };
+        fishData[fishName].count++;
+        updateGrandTotal();
+        renderFishList();
+        saveData();
+    }
+
+    // Remove fish
+    function removeFish(fishName) {
+        if (!fishData[fishName]) fishData[fishName] = { count: 0 };
+        if (fishData[fishName].count > 0) {
+            fishData[fishName].count--;
+            updateGrandTotal();
+            renderFishList();
+            saveData();
+        }
+    }
+
+    // Reset season
+    function resetSeason() {
+        if (confirm('Are you sure you want to reset all fish counts for the season? This cannot be undone.')) {
+            Object.keys(fishData).forEach(fish => {
+                fishData[fish].count = 0;
+            });
+            updateGrandTotal();
+            renderFishList();
+            saveData();
+        }
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+        document.getElementById('tallyTab').style.display = 'none';
+        document.getElementById('notesTab').style.display = 'none';
+        
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        if (tabName === 'tally') {
+            document.getElementById('tallyTab').style.display = 'block';
+            document.getElementById('tabTally').classList.add('active');
+        } else {
+            document.getElementById('notesTab').style.display = 'block';
+            document.getElementById('tabNotes').classList.add('active');
+        }
+    }
+
+    // Handle photo upload
+    function handlePhotoUpload(event) {
+        debug('Uploading photos...');
+        const files = Array.from(event.target.files);
+        
+        files.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const newPhoto = {
+                        id: Date.now() + Math.random(),
+                        data: e.target.result,
+                        name: file.name,
+                        notes: ''
+                    };
+                    photos.push(newPhoto);
+                    debug(`Added photo: ${file.name}`);
+                    renderPhotos();
+                    saveData();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        event.target.value = '';
+    }
+
+    // Render photos
+    function renderPhotos() {
+        const gallery = document.getElementById('photoGallery');
+        gallery.innerHTML = '';
+
+        photos.forEach(photo => {
+            const photoContainer = document.createElement('div');
+            photoContainer.className = 'photo-container';
+            
+            photoContainer.innerHTML = `
+                <img src="${photo.data}" alt="${photo.name}" class="photo" onclick="viewPhoto('${photo.data}')">
+                <button class="photo-delete" onclick="deletePhoto('${photo.id}')" title="Delete photo">×</button>
+            `;
+            
+            gallery.appendChild(photoContainer);
+        });
+        debug(`Rendered ${photos.length} photos`);
+    }
+
+    // View photo
+    function viewPhoto(src) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        `;
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = `
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border: 2px solid gold;
+            border-radius: 5px;
+            cursor: pointer;
+        `;
+        
+        modal.addEventListener('click', () => {
+            document.body.removeChild(modal);
+        });
+        
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+    }
+
+    // Delete photo
+    function deletePhoto(photoId) {
+        debug(`Attempting to delete photo: ${photoId}`);
+        if (confirm('Delete this photo?')) {
+            const oldLength = photos.length;
+            photos = photos.filter(photo => photo.id != photoId);
+            debug(`Photos: ${oldLength} -> ${photos.length}`);
+            renderPhotos();
+            saveData();
+        }
+    }
+
+    // Save notes
+    function saveNotes() {
+        debug('Saving notes...');
+        saveData();
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        debug('App starting...');
+        
+        // Initialize data
+        initializeFishData();
+        loadData();
+
+        // Tab buttons
+        document.getElementById('tabTally').addEventListener('click', () => switchTab('tally'));
+        document.getElementById('tabNotes').addEventListener('click', () => switchTab('notes'));
+
+        // Reset button
+        document.getElementById('resetBtn').addEventListener('click', resetSeason);
+
+        // Photo upload
+        document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
+
+        // Notes auto-save
+        document.getElementById('notes').addEventListener('input', saveNotes);
+        document.getElementById('notes').addEventListener('blur', saveNotes);
+
+        // Make functions global for onclick handlers
+        window.addFish = addFish;
+        window.removeFish = removeFish;
+        window.toggleFishInfo = toggleFishInfo;
+        window.viewPhoto = viewPhoto;
+        window.deletePhoto = deletePhoto;
+        
+        debug('App loaded successfully');
+    });
+
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="fish-tally-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>response||fetch(event.request)))});')
+        .then(registration => debug('SW registered'))
+        .catch(error => debug('SW failed'));
+    }
+</script>
+```
+
+</body>
+</html>
