@@ -193,9 +193,6 @@
     </style>
 </head>
 <body>
-    <div id="debugInfo" class="debug">Debug: Loading...</div>
-
-```
 <div class="tabs">
     <button id="tabTally" class="tab-button active">Tally</button>
     <button id="tabNotes" class="tab-button">Memories</button>
@@ -209,6 +206,8 @@
 </div>
 <div id="notesTab" class="tab-content" style="display: none;">
     <textarea id="notes" placeholder="Add memories, moments, or notes from your fishing adventures..."></textarea>
+    <button id="saveNoteBtn" class="buttons">💾 Save Note</button>
+    <div id="notesList" class="gallery" style="display: block; margin-top: 20px;"></div>
     <div class="photo-upload">
         <label for="photoInput">📷 Add Photos</label>
         <input type="file" id="photoInput" multiple accept="image/*">
@@ -537,11 +536,75 @@
         }
     }
 
-    // Save notes
-    function saveNotes() {
-        debug('Saving notes...');
-        saveData();
+    // Save new note to localStorage
+document.getElementById('saveNoteBtn').addEventListener('click', () => {
+    const noteText = document.getElementById('noteInput').value.trim();
+    if (noteText) {
+        const notes = JSON.parse(localStorage.getItem('fishingNotes') || '[]');
+        const timestamp = new Date().toLocaleString();
+        notes.push({ text: noteText, time: timestamp });
+        localStorage.setItem('fishingNotes', JSON.stringify(notes));
+        document.getElementById('noteInput').value = '';
+        debug("Note saved.");
+        renderNotes();
+    } else {
+        alert("⚠️ Please write something before saving.");
     }
+});
+
+// Render notes from localStorage
+function renderNotes() {
+    const notes = JSON.parse(localStorage.getItem('fishingNotes') || '[]');
+    const notesList = document.getElementById('notesList');
+    notesList.innerHTML = '';
+
+    notes.slice().reverse().forEach((note, index) => {
+        const noteDiv = document.createElement('div');
+        noteDiv.style.background = '#1a0000';
+        noteDiv.style.color = 'gold';
+        noteDiv.style.padding = '10px';
+        noteDiv.style.borderRadius = '5px';
+        noteDiv.style.marginBottom = '10px';
+        noteDiv.style.border = '1px solid #444';
+
+        const time = document.createElement('div');
+        time.style.fontSize = '12px';
+        time.style.opacity = '0.7';
+        time.textContent = note.time;
+
+        const text = document.createElement('div');
+        text.textContent = note.text;
+        text.style.marginTop = '5px';
+
+        // Optional delete button
+        const delBtn = document.createElement('button');
+        delBtn.textContent = '❌';
+        delBtn.style.float = 'right';
+        delBtn.style.background = 'red';
+        delBtn.style.color = 'white';
+        delBtn.style.border = 'none';
+        delBtn.style.borderRadius = '3px';
+        delBtn.style.padding = '2px 6px';
+        delBtn.style.cursor = 'pointer';
+        delBtn.onclick = () => {
+            if (confirm("Delete this note?")) {
+                notes.splice(notes.length - 1 - index, 1);
+                localStorage.setItem('fishingNotes', JSON.stringify(notes));
+                renderNotes();
+            }
+        };
+
+        noteDiv.appendChild(delBtn);
+        noteDiv.appendChild(time);
+        noteDiv.appendChild(text);
+        notesList.appendChild(noteDiv);
+    });
+}
+
+// Load notes on startup
+window.addEventListener('DOMContentLoaded', () => {
+    renderNotes();
+});
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
