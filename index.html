@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <title>Fish Tally</title>
+</head>
+<body>
+    <div class="tabs">
+        <button id="tabTally" class="tab-button active">Tally</button>
+        <button id="tabNotes" class="tab-button">Memories</button>
+    </div>
+    <div id="tallyTab" class="tab-content">
+        <ul id="fishList"></ul>
+        <button id="resetBtn">Reset Season</button>
+    </div>
+    <div id="notesTab" class="tab-content" style="display: none;">
+        <textarea id="notes" placeholder="Add memories, moments, or notes..."></textarea>
+        <input type="file" id="photoInput" multiple accept="image/*">
+        <div id="photoGallery" class="gallery"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
