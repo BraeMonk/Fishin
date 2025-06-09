@@ -192,6 +192,29 @@ body {
   box-shadow: 0 0 0 2px rgba(62, 142, 65, 0.2);
 }
 
+#memories {
+  margin-top: 2em;
+  padding: 1em;
+  background-color: #f5f0e6;
+  border: 2px solid #d1b98b;
+  border-radius: 10px;
+}
+
+#photo-album {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+#photo-album img {
+  width: 100px;
+  height: auto;
+  border: 2px solid #8c7853;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .footer {
   text-align: center;
   padding: 12px;
