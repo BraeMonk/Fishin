@@ -1,6 +1,6 @@
 
 // Full fish species list with rig and bait suggestions
-const fishData = [
+const fishList = [
     {
         name: "Largemouth Bass",
         rig: "Texas Rig, Wacky Rig",
