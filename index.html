@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <nav>
+    <button id="tallyTab" class="active">Tally</button>
+    <button id="notesTab">Memories</button>
+  </nav>
+
+  <section id="tallySection">
+    <!-- Dynamically populated list of species here -->
+    <div id="fishList"></div>
+  </section>
+
+  <section id="notesSection" style="display: none;">
+    <textarea id="notes" placeholder="Write your fishing memories here..."></textarea>
+    <input type="file" accept="image/*" id="photoUpload">
+    <div id="photoGallery"></div>
+  </section>
+</body>
