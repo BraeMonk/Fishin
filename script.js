@@ -77,7 +77,7 @@ function saveData() {
 function updateDisplay() {
     const list = document.getElementById("fishList");
     list.innerHTML = "";
-    fishData.forEach(fish => {
+    fishList.forEach(fish => {
         if (!tally[fish.name]) tally[fish.name] = 0;
 
         const item = document.createElement("li");
