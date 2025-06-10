@@ -89,8 +89,10 @@ function resetSeason() {
 function showTab(tabName) {
   document.getElementById('tallyTab').style.display = (tabName === 'tally') ? 'block' : 'none';
   document.getElementById('memoriesTab').style.display = (tabName === 'memories') ? 'block' : 'none';
+
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+  const activeBtn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
 }
 
 // --- Photos ---
