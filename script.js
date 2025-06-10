@@ -1,19 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
-  loadTallies();
-  refreshGallery();
-  showTab('tally');
-
-  document.querySelectorAll('.tab-button').forEach(btn =>
-    btn.addEventListener('click', () => showTab(btn.dataset.tab))
-  );
-
-  document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
-  document.getElementById('savePostBtn').addEventListener('click', savePhotoPost);
-});
-
-let currentUploadedPhoto = null;
-
-const fishSpecies = [
+document.addEventListener("DOMContentLoaded", () => {
+  const fishData = [
   { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
   { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
   { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait' },
@@ -37,110 +23,121 @@ const fishSpecies = [
   { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls' }
 ];
 
-function loadTallies() {
-  const fishList = document.getElementById('fishList');
-  fishList.innerHTML = '';
-  let total = 0;
+  const fishList = document.getElementById("fishList");
+  const grandTotalEl = document.getElementById("grandTotal");
+  let grandTotal = 0;
 
-  fishSpecies.forEach((fish, i) => {
-    let tally = +localStorage.getItem(`fish-${i}`) || 0;
-    total += tally;
-    let div = document.createElement('div');
-    div.className = 'fish-item';
-    div.innerHTML = `
-      <strong class="fish-name" data-index="${i}" style="cursor: pointer;">${fish.name}</strong><br> 
-      <div class="fish-suggestions" id="suggestions-${i}" style="display: none;"> 
-        Rig: ${fish.rig} | Bait: ${fish.bait}<br> 
-      </div> 
-      <button onclick="changeTally(${i}, -1)">-</button> 
-      <span>${tally}</span> 
-      <button onclick="changeTally(${i}, +1)">+</button>`;
-
-    fishList.appendChild(div);
-
-    const fishNameElement = fishList.querySelector(`[data-index="${i}"]`);
-    fishNameElement.addEventListener('click', () => toggleSuggestions(i));
+  // Render fish tally list
+  fishData.forEach(({ name, bait }) => {
+    const item = document.createElement("div");
+    item.className = "fish-item";
+    item.innerHTML = `
+      <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
+      <div class="tally-controls">
+        <button onclick="adjustCount('${name}', 1)">+</button>
+        <button onclick="adjustCount('${name}', -1)">-</button>
+        <button onclick="toggleBait('${name}')">Bait</button>
+        <div id="${name}-bait" style="display:none; margin-top:0.5rem; color:#cc3300;">Tips: ${bait}</div>
+      </div>
+    `;
+    fishList.appendChild(item);
   });
 
-  document.getElementById('grandTotal').textContent = total;
-}
+  window.adjustCount = function (name, delta) {
+    const countEl = document.getElementById(`${name}-count`);
+    let count = parseInt(countEl.textContent, 10) + delta;
+    count = Math.max(0, count);
+    countEl.textContent = count;
 
-function toggleSuggestions(i) {
-  const suggestions = document.getElementById(`suggestions-${i}`);
-  if (suggestions.style.display === 'none') {
-    suggestions.style.display = 'block';
-  } else {
-    suggestions.style.display = 'none';
+    recalculateTotal();
+  };
+
+  window.toggleBait = function (name) {
+    const baitEl = document.getElementById(`${name}-bait`);
+    baitEl.style.display = baitEl.style.display === "none" ? "block" : "none";
+  };
+
+  function recalculateTotal() {
+    let total = 0;
+    fishData.forEach(({ name }) => {
+      total += parseInt(document.getElementById(`${name}-count`).textContent, 10);
+    });
+    grandTotal = total;
+    grandTotalEl.textContent = grandTotal;
   }
-}
 
-function changeTally(i, delta) {
-  let n = +localStorage.getItem(`fish-${i}`) || 0;
-  n = Math.max(0, n + delta);
-  localStorage.setItem(`fish-${i}`, n);
-  loadTallies();
-}
+  window.resetSeason = function () {
+    fishData.forEach(({ name }) => {
+      document.getElementById(`${name}-count`).textContent = "0";
+    });
+    grandTotal = 0;
+    grandTotalEl.textContent = "0";
+  };
 
-function resetSeason() {
-  fishSpecies.forEach((_, i) => localStorage.removeItem(`fish-${i}`));
-  loadTallies();
-}
+  // Tab navigation
+  document.querySelectorAll(".tab-button").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
+      button.classList.add("active");
 
-function showTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(sec => sec.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
-  document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.tab-button[data-tab="${tab}"]`).classList.add('active');
-
-  if (tab === 'memory') refreshGallery();
-}
-
-function handlePhotoUpload(e) {
-  const file = e.target.files[0];
-  if (!file) { currentUploadedPhoto = null; return; }
-  const reader = new FileReader();
-  reader.onload = () => currentUploadedPhoto = reader.result;
-  reader.readAsDataURL(file);
-}
-
-function savePhotoPost() {
-  if (!currentUploadedPhoto) return alert('Select a photo first.');
-  const caption = document.getElementById('photoCaption').value.trim() || 'No caption';
-  const loc = document.getElementById('photoLocationInput').value.trim() || 'No location';
-  let arr = JSON.parse(localStorage.getItem('photoPosts') || '[]');
-  arr.push({ image: currentUploadedPhoto, caption, loc, timestamp: Date.now() });
-  localStorage.setItem('photoPosts', JSON.stringify(arr));
-  refreshGallery();
-  document.getElementById('photoInput').value = '';
-  document.getElementById('photoCaption').value = '';
-  document.getElementById('photoLocationInput').value = '';
-  currentUploadedPhoto = null;
-}
-
-function refreshGallery() {
-  const gal = document.getElementById('photoGallery');
-  gal.innerHTML = '';
-  let arr = JSON.parse(localStorage.getItem('photoPosts') || '[]');
-  arr.sort((a, b) => b.timestamp - a.timestamp);
-  arr.forEach((p, i) => {
-    const c = document.createElement('div');
-    c.className = 'photo-container';
-    c.innerHTML = `
-      <img src="${p.image}" class="gallery-photo" /> 
-      <div>${p.caption}</div> 
-      <div>${p.loc}</div> 
-      <button onclick="deletePost(${p.timestamp})">Delete</button>`;
-    c.querySelector('img').addEventListener('click', e => e.target.classList.toggle('expanded-photo'));
-    gal.appendChild(c);
+      const selectedTab = button.getAttribute("data-tab");
+      document.querySelectorAll(".tab-content").forEach(content => {
+        content.classList.remove("active");
+        if (content.id === selectedTab) content.classList.add("active");
+      });
+    });
   });
-}
 
-function deletePost(ts) {
-  let arr = JSON.parse(localStorage.getItem('photoPosts') || '[]');
-  arr = arr.filter(p => p.timestamp !== ts);
-  localStorage.setItem('photoPosts', JSON.stringify(arr));
-  refreshGallery();
-}
+  // Photo memory tab
+  const photoInput = document.getElementById("photoInput");
+  const photoCaption = document.getElementById("photoCaption");
+  const photoLocation = document.getElementById("photoLocationInput");
+  const photoGallery = document.getElementById("photoGallery");
+
+  document.getElementById("savePostBtn").addEventListener("click", () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const container = document.createElement("div");
+      container.className = "photo-container";
+
+      const img = document.createElement("img");
+      img.src = e.target.result;
+      img.alt = photoCaption.value;
+      img.className = "gallery-photo";
+      img.addEventListener("click", () => expandPhoto(img.src));
+
+      const caption = document.createElement("p");
+      caption.textContent = photoCaption.value || "No Caption";
+
+      const location = document.createElement("p");
+      location.textContent = photoLocation.value || "Unknown Location";
+      location.style.fontStyle = "italic";
+      location.style.fontSize = "0.9rem";
+
+      container.appendChild(img);
+      container.appendChild(caption);
+      container.appendChild(location);
+
+      photoGallery.appendChild(container);
+      photoInput.value = "";
+      photoCaption.value = "";
+      photoLocation.value = "";
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  function expandPhoto(src) {
+    const overlay = document.createElement("div");
+    overlay.className = "expanded-photo";
+    overlay.innerHTML = `<img src="${src}" style="width:100%; height:auto; border-radius:6px;" />`;
+    overlay.addEventListener("click", () => overlay.remove());
+    document.body.appendChild(overlay);
+  }
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () =>
