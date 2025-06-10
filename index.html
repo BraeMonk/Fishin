@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>Fishin Buddy</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/webp" href="icon_192x192.webp">
+    <link rel="apple-touch-icon" href="icon_192x192.webp">
+</head>
+<body>
+    <div class="tabs">
+        <button class="tab-button active" onclick="showTab('tally')">Tally</button>
+        <button class="tab-button" onclick="showTab('memories')">Memories</button>
+    </div>
+
+    <div id="tallyTab" class="tab-content">
+        <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
+        <div id="fishList"></div>
+        <button class="reset-btn" onclick="resetSeason()">Reset Season</button>
+    </div>
+
+    <div id="memoriesTab" class="tab-content" style="display:none;">
+        <textarea id="noteInput" placeholder="Write your memories and notes here..."></textarea>
+        <button class="save-note-btn" onclick="saveNote()">Save Note</button>
+        <div class="notes-list" id="notesList"></div>
+
+        <!-- 👇 NEW Photo Upload Section -->
+        <div id="photoUploader" class="photo-upload">
+            <textarea id="photoCaption" placeholder="Write a caption..."></textarea>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+            <button onclick="document.getElementById('photoInput').click()">Upload Photo</button>
+        </div>
+
+        <div class="gallery" id="photoGallery"></div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" onclick="closeModal()" style="display:none;">
+        <div>
+            <div id="modalDate"></div>
+            <img id="modalImg" src="" alt="">
+            <div id="modalCaption"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
