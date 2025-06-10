@@ -60,9 +60,9 @@ window.onload = function() {
     fishList.appendChild(item);
   });
 
+  renderPhotoPosts();
   recalculateTotal();
   setupTabs();
-  renderPhotoPosts();
 };
 
 // Move these functions **outside** window.onload to fix button issues
@@ -74,6 +74,49 @@ function adjustCount(name, delta) {
   countEl.textContent = count;
   localStorage.setItem(name, count);
   recalculateTotal();
+}
+
+function handleUpload() {
+  const fileInput = document.getElementById("photoInput");
+  const caption = document.getElementById("photoCaption").value.trim();
+  const location = document.getElementById("photoLocationInput").value.trim();
+
+  if (fileInput.files.length > 0) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+      savedPosts.push({
+        image: event.target.result, // Converts image to Base64
+        caption,
+        location,
+        timestamp: new Date().toLocaleString(),
+      });
+
+      localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+      renderPhotoPosts();  // Refresh gallery display
+    };
+    reader.readAsDataURL(fileInput.files[0]); // Converts image file to Base64
+  } else {
+    console.error("No file selected.");
+  }
+}
+
+  function renderPhotoPosts() {
+  const photoGallery = document.getElementById("photoGallery");
+  photoGallery.innerHTML = "";  // Clears previous entries
+
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  savedPosts.forEach(post => {
+    const container = document.createElement("div");
+    container.className = "photo-container";
+    container.innerHTML = `
+      <img src="${post.image}" class="gallery-photo" onclick="expandImage('${post.image}')" />
+      <div><strong>${post.caption}</strong></div>
+      <div>${post.location}</div>
+      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+    `;
+    photoGallery.appendChild(container);
+  });
 }
 
 function toggleInfo(name) {
@@ -104,6 +147,8 @@ function setupTabs() {
     });
   });
 }
+
+document.getElementById("savePostBtn").addEventListener("click", handleUpload);
 
 // Now your buttons should work properly! 🚀🐟
 
