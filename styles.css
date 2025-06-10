@@ -98,23 +98,6 @@ body {
   text-align: center;
 }
 
-/* Buttons */
-button {
-  background: #2b1d1d;
-  color: #b4a790;
-  border: none;
-  padding: 8px 14px;
-  cursor: pointer;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 1rem;
-  box-shadow: 0 2px 4px #000;
-  transition: background 0.2s ease;
-}
-
-button:hover {
-  background: #3a2929;
-}
 
 /* Notes */
 .notes-list .note-item {
