@@ -35,20 +35,28 @@ document.addEventListener("DOMContentLoaded", () => {
   let grandTotal = 0;
 
   // Render fish tally list
-  fishData.forEach(({ name, bait }) => {
-    const item = document.createElement("div");
-    item.className = "fish-item";
-    item.innerHTML = `
-      <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
-      <div class="tally-controls">
-        <button onclick="adjustCount('${name}', 1)">+</button>
-        <button onclick="adjustCount('${name}', -1)">-</button>
-        <button onclick="toggleBait('${name}')">Bait</button>
-        <div id="${name}-bait" style="display:none; margin-top:0.5rem; color:#cc3300;">Tips: ${bait}</div>
+  fishData.forEach(({ name, rig, bait }) => {
+  const item = document.createElement("div");
+  item.className = "fish-item";
+  item.innerHTML = `
+    <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
+    <div class="tally-controls">
+      <button onclick="adjustCount('${name}', 1)">+</button>
+      <button onclick="adjustCount('${name}', -1)">-</button>
+      <button onclick="toggleInfo('${name}')">Info</button>
+      <div id="${name}-info" style="display:none; margin-top:0.5rem; color:#cc3300;">
+        <strong>Rig:</strong> ${rig}<br>
+        <strong>Bait:</strong> ${bait}
       </div>
-    `;
-    fishList.appendChild(item);
-  });
+    </div>
+  `;
+  fishList.appendChild(item);
+});
+
+window.toggleInfo = function (name) {
+  const infoEl = document.getElementById(`${name}-info`);
+  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
+};
 
   window.adjustCount = function (name, delta) {
     const countEl = document.getElementById(`${name}-count`);
