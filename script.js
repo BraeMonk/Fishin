@@ -160,3 +160,17 @@ function openModal(src) {
 function closeModal() {
     document.getElementById('photoModal').style.display = 'none';
 }
+
+function deleteNote(index) {
+    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+    notes.splice(index, 1);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes();
+}
+
+function deletePhoto(index) {
+    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+    photos.splice(index, 1);
+    localStorage.setItem('photos', JSON.stringify(photos));
+    loadPhotos();
+}
