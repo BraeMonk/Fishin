@@ -1,14 +1,15 @@
-const CACHE_NAME = 'fish-tally-v2';
+caches.open('fish-tally-v2') // <--- change the cache name
 
-const urlsToCache = [
-  '/Fishin/',
-  '/Fishin/index.html',
-  '/Fishin/manifest.json',
-  '/Fishin/styles.css',
-  '/Fishin/script.js',
-  '/Fishin/icon_192x192.webp',
-  '/Fishin/icon_512x512.webp'
-];
+// and update cached icon paths
+return cache.addAll([
+  './',
+  './index.html',
+  './manifest.json',
+  './styles.css',
+  './script.js',
+  './icon_192x192.png',
+  './icon_512x512.png'
+]);
 
 self.addEventListener('install', e => {
   e.waitUntil(
