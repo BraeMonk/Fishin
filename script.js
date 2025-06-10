@@ -137,11 +137,21 @@ function loadPhotos() {
     const gallery = document.getElementById('photoGallery');
     const photos = JSON.parse(localStorage.getItem('photos') || '[]');
     gallery.innerHTML = '';
+
     photos.forEach((photo, idx) => {
-        const photoEl = document.createElement('div');
-        photoEl.innerHTML = `<div class="photo-date">${photo.date}</div>
-                             <img src="${photo.src}" class="photo">
-                             <button onclick="deletePhoto(${idx})">X</button>`;
-        gallery.appendChild(photoEl);
+        const div = document.createElement('div');
+        div.className = 'photo-container';
+        div.innerHTML = `
+            <div class="photo-date">${photo.date}</div>
+            <img src="${photo.src}" class="photo-thumb" onclick="togglePhotoPreview(${idx})">
+            <img src="${photo.src}" id="photo-${idx}-preview" class="photo-preview" style="display: none;" onclick="togglePhotoPreview(${idx})">
+            <button onclick="deletePhoto(${idx})">X</button>
+        `;
+        gallery.appendChild(div);
     });
+}
+
+function togglePhotoPreview(index) {
+    const preview = document.getElementById(`photo-${index}-preview`);
+    preview.style.display = (preview.style.display === 'none') ? 'block' : 'none';
 }
