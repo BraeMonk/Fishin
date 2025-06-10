@@ -20,7 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
   { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad' },
   { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms' },
   { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs' },
-  { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls' }
+  { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls' },
+  { name: 'Northern Sunfish', rig: 'Bobber Rig', bait: 'Worms, Insects' }, // Less common but local
+  { name: 'Muskellunge (Muskie)', rig: 'Large Crankbait Rig, Jig', bait: 'Large Minnows, Topwater Lures' }, // Popular game fish in Ontario
+  { name: 'Yellow Bullhead', rig: 'Slip Sinker Rig', bait: 'Worms, Cut Bait' }, // Catfish species present locally
+  { name: 'White Perch (White Bass)', rig: 'Spinnerbait, Jig', bait: 'Minnows' }, // You have White Bass, but White Perch can be separate species
+  { name: 'Freshwater Drum', rig: 'Bottom Rig', bait: 'Worms, Small Fish' }, // Present locally in some lakes and rivers
+  { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies' }, // Seasonal, smaller fish
+  { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' }, // Related to Pike, common in Ontario waters
 ];
 
   const fishList = document.getElementById("fishList");
