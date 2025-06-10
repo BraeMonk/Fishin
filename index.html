@@ -184,40 +184,30 @@ button:focus {
 </style>
 </head>
 <body>
+  <!-- Tabs buttons container -->
   <div class="tabs" role="tablist" aria-label="Main Tabs">
-    <div class="tab-buttons">
-  <button type="button" onclick="document.getElementById('photoInput').click()">Upload Photo</button>
-<button type="button" onclick="savePhotoPost()">Save Post</button>
-</div>
+    <button class="tab-button active" id="tabTally" role="tab" aria-selected="true" aria-controls="tallyTab" onclick="openTab('tallyTab', this)">Tally</button>
+    <button class="tab-button" id="tabMemories" role="tab" aria-selected="false" aria-controls="memoriesTab" onclick="openTab('memoriesTab', this)">Memories</button>
   </div>
 
+  <!-- Tabs content containers -->
+
+  <!-- Tally Tab Content -->
   <section id="tallyTab" class="tab-content active" role="tabpanel" aria-labelledby="tabTally">
     <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
     <div id="fishList" aria-live="polite"></div>
     <button class="reset-btn" onclick="resetSeason()">Reset Season</button>
   </section>
 
+  <!-- Memories Tab Content -->
   <section id="memoriesTab" class="tab-content" role="tabpanel" aria-labelledby="tabMemories" tabindex="0">
-  
-  <!-- Put your photo upload inputs here -->
-  <input type="file" id="photoInput" accept="image/*" />
-  <input type="text" id="photoCaption" placeholder="Caption" />
-  <input type="text" id="photoLocationInput" placeholder="Location" />
-  <button id="savePostBtn">Save Post</button>
-  
-  <!-- Photo gallery container -->
-  <div id="photoGallery"></div>
-  
-</section>
+    <input type="file" id="photoInput" accept="image/*" />
+    <input type="text" id="photoCaption" placeholder="Caption" />
+    <input type="text" id="photoLocationInput" placeholder="Location" />
+    <button id="savePostBtn">Save Post</button>
 
-  <!-- Photo Modal -->
-  <div id="photoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalCaption" aria-describedby="modalDate modalLocation">
-    <span class="close" id="modalClose" role="button" aria-label="Close modal">&times;</span>
-    <img class="modal-content" id="modalImg" alt="Full Size Photo" />
-    <div id="modalCaption"></div>
-    <div id="modalDate"></div>
-    <div id="modalLocation"></div>
-  </div>
+    <div id="photoGallery"></div>
+  </section>
 
   <script src="script.js"></script>
 </body>
