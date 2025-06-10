@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' },
   ];
 
-  const fishList = document.querySelector(".fishList");
+  const fishList = document.getElementById("fishList");
   const grandTotalEl = document.getElementById("grandTotal");
   const photoGallery = document.getElementById("photoGallery");
   let grandTotal = 0;
