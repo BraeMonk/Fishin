@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTallies();
   loadPhotos();
 
+  // Set initial visible tab
+  showTab('tally');
+
+  // Set up photo input listener
   document.getElementById('photoInput').addEventListener('change', uploadPhoto);
 });
 
