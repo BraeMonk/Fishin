@@ -3,8 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshGallery();
   showTab('tally');
 
-  document.getElementById('photoInput').addEventListener('change', savePhotoPost);
+  // When user selects a photo, read it and store temporarily
+  document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
+
+  // Save button triggers saving the photo post to localStorage
+  document.getElementById('savePostBtn').addEventListener('click', savePhotoPost);
 });
+
+// Temporary storage for uploaded photo data URL before saving
+let currentUploadedPhoto = null;
 
 // --- Fish Species Data ---
 const fishSpecies = [
@@ -97,42 +104,54 @@ function showTab(tabName) {
   if (tabName === 'memories') refreshGallery();
 }
 
-// --- Photo Logic ---
-function savePhotoPost(event) {
-  const caption = document.getElementById('photoCaption').value.trim();
-  const location = document.getElementById('photoLocationInput').value.trim();
-  const input = document.getElementById('photoInput');
-  const file = event.target.files[0];
+// --- Photo Upload Logic ---
 
+// When user selects a photo, read file and store it temporarily
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
   if (!file) {
-    alert("Please select a photo first.");
+    currentUploadedPhoto = null;
     return;
   }
 
   const reader = new FileReader();
   reader.onload = function (e) {
-    const newPost = {
-      image: e.target.result,
-      caption: caption || "No caption",
-      location: location || "No location",
-      timestamp: Date.now()
-    };
-
-    let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-    savedPosts.push(newPost);
-    localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
-
-    refreshGallery();
-
-    // Clear form
-    input.value = '';
-    document.getElementById('photoCaption').value = '';
-    document.getElementById('photoLocationInput').value = '';
+    currentUploadedPhoto = e.target.result;
   };
-
   reader.readAsDataURL(file);
 }
 
+// When user clicks Save Post button, save currentUploadedPhoto with caption and location
+function savePhotoPost() {
+  if (!currentUploadedPhoto) {
+    alert("Please select a photo first.");
+    return;
+  }
+
+  const caption = document.getElementById('photoCaption').value.trim() || "No caption";
+  const location = document.getElementById('photoLocationInput').value.trim() || "No location";
+
+  const newPost = {
+    image: currentUploadedPhoto,
+    caption,
+    location,
+    timestamp: Date.now()
+  };
+
+  let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+  savedPosts.push(newPost);
+  localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
+
+  refreshGallery();
+
+  // Clear inputs and reset
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoCaption').value = '';
+  document.getElementById('photoLocationInput').value = '';
+  currentUploadedPhoto = null;
+}
+
+// --- Gallery Logic ---
 function refreshGallery() {
   const gallery = document.getElementById('photoGallery');
   gallery.innerHTML = '';
@@ -180,10 +199,10 @@ function deletePost(index) {
   refreshGallery();
 }
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker registered:', reg.scope))
-        .catch(err => console.error('Service Worker registration failed:', err));
-    });
-  }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker registered:', reg.scope))
+      .catch(err => console.error('Service Worker registration failed:', err));
+  });
+}
