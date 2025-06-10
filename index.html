@@ -38,13 +38,14 @@
     </div>
 
     <!-- Photo Modal -->
-    <div id="photoModal" onclick="closeModal()" style="display:none;">
-        <div>
-            <div id="modalDate"></div>
-            <img id="modalImg" src="" alt="">
-            <div id="modalCaption"></div>
-        </div>
-    </div>
+    <!-- Photo Modal -->
+<div id="photoModal" class="modal" style="display:none;">
+  <span class="close" id="modalClose">&times;</span>
+  <img class="modal-content" id="modalImg" alt="Full Size Photo">
+  <div id="modalCaption"></div>
+  <div id="modalDate"></div>
+  <div id="modalLocation"></div>
+</div>
 
     <script src="script.js"></script>
 </body>
