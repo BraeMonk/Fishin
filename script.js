@@ -1,4 +1,6 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = function(){
+  const fishList = document.getElementById("fishList");
+  
   const fishData = [
     { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
     { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
@@ -29,8 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies' },
     { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' },
   ];
-
-  const fishList = document.getElementById("fishList");
+  
   const grandTotalEl = document.getElementById("grandTotal");
   const photoGallery = document.getElementById("photoGallery");
   let grandTotal = 0;
@@ -189,4 +190,5 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then(r => console.log('SW regd:', r.scope))
       .catch(console.error));
+}
 }
