@@ -145,7 +145,7 @@ function uploadPhoto(event) {
 
 function savePhotoPost() {
   const caption = document.getElementById('photoCaption').value.trim();
-  const location = document.getElementById('photoLocation').value.trim();
+  const locationInput = document.getElementById('photoLocationInput').value.trim();
   const input = document.getElementById('photoInput');
   const file = input.files[0];
 
@@ -158,17 +158,38 @@ function savePhotoPost() {
   reader.onload = function (e) {
     const newPost = {
       image: e.target.result,
-      caption: caption || "No caption",
-      location: location || "No location",
+      caption: caption || "(No caption)",
+      location: locationInput || null,
       timestamp: Date.now()
     };
 
-    let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-    savedPosts.push(newPost);
-    localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
+    // If no manual location, try GPS
+    if (!newPost.location && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        newPost.location = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
+        finishSave(newPost);
+      }, () => {
+        finishSave(newPost); // Permission denied
+      });
+    } else {
+      finishSave(newPost);
+    }
 
-    addPostToGallery(newPost);
+    // Reset form
+    document.getElementById('photoCaption').value = '';
+    document.getElementById('photoLocationInput').value = '';
+    input.value = '';
+  };
 
+  reader.readAsDataURL(file);
+}
+
+function finishSave(post) {
+  let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+  savedPosts.push(post);
+  localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
+  refreshGallery();
+}
     // Reset form
     document.getElementById('photoCaption').value = '';
     document.getElementById('photoLocation').value = '';
@@ -224,8 +245,10 @@ function refreshGallery() {
 
 function loadPhotos() {
   const gallery = document.getElementById('photoGallery');
-  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
   gallery.innerHTML = '';
+  const photos = JSON.parse(localStorage.getItem('photoPosts') || '[]');
+  photos.forEach((post, idx) => addPostToGallery(post, idx));
+}
 
   photos.forEach(photo => {
     const div = document.createElement('div');
