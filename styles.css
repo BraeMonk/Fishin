@@ -222,24 +222,48 @@ button:focus {
 }
 
 /* Modal background */
+/* The Modal background */
 .modal {
-  display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.85);
+  display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
-  z-index: 1000;
+  flex-direction: column;
 }
 
 /* Modal image */
-.modal-img {
+.modal-content {
   max-width: 90%;
-  max-height: 90%;
+  max-height: 80vh;
   border-radius: 8px;
-  box-shadow: 0 0 15px 3px #f0d68ccc;
+  box-shadow: 0 0 20px #000;
+}
+
+/* Close button */
+.close {
+  position: absolute;
+  top: 20px;
+  right: 35px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Caption and info */
+#modalCaption, #modalDate, #modalLocation {
+  color: #ddd;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
 }
 
 /* Responsive adjustments */
