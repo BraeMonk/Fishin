@@ -143,15 +143,20 @@ function loadPhotos() {
         div.className = 'photo-container';
         div.innerHTML = `
             <div class="photo-date">${photo.date}</div>
-            <img src="${photo.src}" class="photo-thumb" onclick="togglePhotoPreview(${idx})">
-            <img src="${photo.src}" id="photo-${idx}-preview" class="photo-preview" style="display: none;" onclick="togglePhotoPreview(${idx})">
+            <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.src}')">
             <button onclick="deletePhoto(${idx})">X</button>
         `;
         gallery.appendChild(div);
     });
 }
 
-function togglePhotoPreview(index) {
-    const preview = document.getElementById(`photo-${index}-preview`);
-    preview.style.display = (preview.style.display === 'none') ? 'block' : 'none';
+function openModal(src) {
+    const modal = document.getElementById('photoModal');
+    const modalImage = document.getElementById('modalImg');
+    modal.style.display = 'flex';
+    modalImage.src = src;
+}
+
+function closeModal() {
+    document.getElementById('photoModal').style.display = 'none';
 }
