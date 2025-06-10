@@ -143,11 +143,83 @@ function uploadPhoto(event) {
   reader.readAsDataURL(event.target.files[0]);
 }
 
-function savePhoto(photo) {
-  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-  photos.unshift(photo); // Newest first
-  localStorage.setItem('photos', JSON.stringify(photos));
-  loadPhotos();
+function savePhotoPost() {
+  const caption = document.getElementById('photoCaption').value.trim();
+  const location = document.getElementById('photoLocation').value.trim();
+  const input = document.getElementById('photoInput');
+  const file = input.files[0];
+
+  if (!file) {
+    alert("Please select a photo first.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const newPost = {
+      image: e.target.result,
+      caption: caption || "No caption",
+      location: location || "No location",
+      timestamp: Date.now()
+    };
+
+    let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+    savedPosts.push(newPost);
+    localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
+
+    addPostToGallery(newPost);
+
+    // Reset form
+    document.getElementById('photoCaption').value = '';
+    document.getElementById('photoLocation').value = '';
+    input.value = '';
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function addPostToGallery(post, index) {
+  const gallery = document.getElementById('photoGallery');
+  const container = document.createElement('div');
+  container.className = 'photo-container';
+  container.setAttribute('data-index', index);
+
+  const img = document.createElement('img');
+  img.src = post.image;
+
+  const captionEl = document.createElement('div');
+  captionEl.textContent = post.caption;
+
+  const locationEl = document.createElement('div');
+  locationEl.textContent = post.location;
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.onclick = function () {
+    deletePost(index);
+  };
+
+  container.appendChild(img);
+  container.appendChild(captionEl);
+  container.appendChild(locationEl);
+  container.appendChild(deleteBtn);
+
+  gallery.appendChild(container);
+}
+
+function deletePost(index) {
+  let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+  savedPosts.splice(index, 1); // remove the item at this index
+  localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
+  refreshGallery();
+}
+
+function refreshGallery() {
+  const gallery = document.getElementById('photoGallery');
+  gallery.innerHTML = ''; // Clear existing
+  const savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+  savedPosts.forEach((post, idx) => addPostToGallery(post, idx));
 }
 
 function loadPhotos() {
@@ -167,13 +239,6 @@ function loadPhotos() {
     `;
     gallery.appendChild(div);
   });
-}
-
-function deletePhoto(photoId) {
-  let photos = JSON.parse(localStorage.getItem('photos') || '[]');
-  photos = photos.filter(p => p.id !== photoId);
-  localStorage.setItem('photos', JSON.stringify(photos));
-  loadPhotos();
 }
 
 function openModal(photoId) {
@@ -204,6 +269,12 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+  savedPosts.forEach(addPostToGallery);
+  refreshGallery();
+});
 // --- Service Worker Registration ---
 
 if ('serviceWorker' in navigator) {
