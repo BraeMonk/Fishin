@@ -34,8 +34,13 @@
         </div>
         <div class="gallery" id="photoGallery"></div>
     </div>
-    <div id="photoModal" class="modal" onclick="closeModal()">
-    <img id="modalImg" class="modal-img">
+    <!-- For photo modal -->
+<div id="photoModal" onclick="closeModal()" style="display:none;">
+  <div>
+    <div id="modalDate"></div>
+    <img id="modalImg" src="" alt="">
+    <div id="modalCaption"></div>
+  </div>
 </div>
 
     <script src="script.js"></script>
