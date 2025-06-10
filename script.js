@@ -119,6 +119,18 @@ function handleUpload() {
   });
 }
 
+function openModal(imageSrc) {
+  const modal = document.getElementById("imageModal");
+  const modalImage = document.getElementById("modalImage");
+
+  modalImage.src = imageSrc;
+  modal.style.display = "flex";  // Show modal
+}
+
+function closeModal() {
+  document.getElementById("imageModal").style.display = "none"; // Hide modal
+}
+
 function toggleInfo(name) {
   const infoEl = document.getElementById(`${name}-info`);
   if (!infoEl) return;
