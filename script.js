@@ -168,14 +168,21 @@ function refreshGallery() {
   savedPosts.forEach(post => addPostToGallery(post));
 }
 
-function addPostToGallery(post) {
+function addPostToGallery(post, index) {
   const gallery = document.getElementById('photoGallery');
   const container = document.createElement('div');
   container.className = 'photo-container';
-  container.setAttribute('data-timestamp', post.timestamp);
+  container.setAttribute('data-index', index);
 
   const img = document.createElement('img');
   img.src = post.image;
+  img.alt = post.caption;
+  img.className = 'gallery-photo';
+  
+  // Toggle full view on click
+  img.addEventListener('click', () => {
+    img.classList.toggle('expanded-photo');
+  });
 
   const captionEl = document.createElement('div');
   captionEl.textContent = post.caption;
@@ -186,9 +193,15 @@ function addPostToGallery(post) {
   const deleteBtn = document.createElement('button');
   deleteBtn.textContent = 'Delete';
   deleteBtn.className = 'delete-btn';
-  deleteBtn.onclick = function () {
-    deletePost(post.timestamp);
-  };
+  deleteBtn.onclick = () => deletePost(index);
+
+  container.appendChild(img);
+  container.appendChild(captionEl);
+  container.appendChild(locationEl);
+  container.appendChild(deleteBtn);
+
+  gallery.appendChild(container);
+}
 
   container.appendChild(img);
   container.appendChild(captionEl);
