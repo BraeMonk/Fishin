@@ -48,11 +48,11 @@ div.className = ‘fish-item’;
 div.innerHTML = `<strong class="fish-name" data-index="${i}" style="cursor: pointer;">${fish.name}</strong><br> <div class="fish-suggestions" id="suggestions-${i}" style="display: none;"> Rig: ${fish.rig} | Bait: ${fish.bait}<br> </div> <button onclick="changeTally(${i}, -1)">-</button> <span>${tally}</span> <button onclick="changeTally(${i}, +1)">+</button>`;
 
 ```
-// Add click event listener to the fish name
-const fishNameElement = div.querySelector('.fish-name');
-fishNameElement.addEventListener('click', () => toggleSuggestions(i));
-
 fishList.appendChild(div);
+
+// Add click event listener to the fish name after it's in the DOM
+const fishNameElement = fishList.querySelector(`[data-index="${i}"]`);
+fishNameElement.addEventListener('click', () => toggleSuggestions(i));
 ```
 
 });
