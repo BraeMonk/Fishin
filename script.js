@@ -80,6 +80,15 @@ function resetSeason() {
     loadTallies();
 }
 
+//Switch Tabs
+function showTab(tabName) {
+    document.getElementById('tallyTab').style.display = (tabName === 'tally') ? 'block' : 'none';
+    document.getElementById('memoriesTab').style.display = (tabName === 'memories') ? 'block' : 'none';
+
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+}
+
 // Notes functionality
 function saveNote() {
     const text = document.getElementById('noteInput').value.trim();
