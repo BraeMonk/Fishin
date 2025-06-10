@@ -10,145 +10,162 @@
   <link rel="icon" type="image/webp" href="icon_192x192.webp" />
   <link rel="apple-touch-icon" href="icon_192x192.webp" />
   <style>
-    /* Minimal inline styles to keep basic layout intact */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0 1rem;
-      background: #f9f9f9;
-    }
-    .tabs {
-      display: flex;
-      margin-top: 1rem;
-      border-bottom: 2px solid #ccc;
-    }
-    .tab-button {
-      flex: 1;
-      padding: 0.75rem;
-      background: #eee;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .tab-button.active {
-      background: #0077cc;
-      color: white;
-      border-bottom: 3px solid #004a8c;
-    }
-    .tab-content {
-      display: none;
-      padding: 1rem 0 2rem 0;
-    }
-    .tab-content.active {
-      display: block;
-    }
-    .season-total {
-      font-weight: bold;
-      color: #0077cc;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-    }
-    .reset-btn {
-      margin-top: 1rem;
-      background: #cc3300;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0 1rem;
+    background: #000;
+    color: #f5f5dc; /* Beige text */
+  }
 
-    /* Memories photo upload */
-    #photoUploader {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
-      box-shadow: 0 0 5px #ccc;
-      margin-bottom: 1rem;
-    }
-    #photoUploader textarea,
-    #photoUploader input[type="text"] {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0.5rem;
-      margin: 0.3rem 0 1rem 0;
-      font-size: 1rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      resize: vertical;
-    }
-    #photoUploader button {
-      background: #0077cc;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1rem;
-    }
+  .tabs {
+    display: flex;
+    margin-top: 1rem;
+    border-bottom: 2px solid #8b0000; /* Dark red border */
+  }
 
-    /* Gallery */
-    #photoGallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1rem;
-    }
-    .photo-container {
-      background: white;
-      border-radius: 6px;
-      box-shadow: 0 0 6px #ccc;
-      padding: 0.5rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #333;
-      cursor: pointer;
-    }
-    .photo-container img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-bottom: 0.4rem;
-    }
+  .tab-button {
+    flex: 1;
+    padding: 0.75rem;
+    background: #111;
+    border: none;
+    color: #f5f5dc;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+  }
 
-    /* Modal */
-    #photoModal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      padding-top: 60px;
-      left: 0; top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.8);
-    }
-    #photoModal img {
-      margin: auto;
-      display: block;
-      max-width: 90%;
-      max-height: 80vh;
-      border-radius: 8px;
-    }
-    #modalCaption, #modalDate, #modalLocation {
-      color: white;
-      text-align: center;
-      margin: 0.5rem 0;
-      font-size: 1rem;
-    }
-    #modalClose {
-      position: absolute;
-      top: 20px;
-      right: 35px;
-      color: white;
-      font-size: 40px;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-    }
-  </style>
+  .tab-button.active {
+    background: #8b0000;
+    color: #f5f5dc;
+    border-bottom: 3px solid #ff0000;
+  }
+
+  .tab-content {
+    display: none;
+    padding: 1rem 0 2rem 0;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .season-total {
+    font-weight: bold;
+    color: #ff6347; /* Tomato red */
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .reset-btn {
+    margin-top: 1rem;
+    background: #8b0000;
+    color: #f5f5dc;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  #photoUploader {
+    background: #111;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 0 5px #222;
+    margin-bottom: 1rem;
+  }
+
+  #photoUploader textarea,
+  #photoUploader input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.5rem;
+    margin: 0.3rem 0 1rem 0;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #8b0000;
+    background: #222;
+    color: #f5f5dc;
+    resize: vertical;
+  }
+
+  #photoUploader button {
+    background: #8b0000;
+    color: #f5f5dc;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+
+  #photoGallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
+
+  .photo-container {
+    background: #111;
+    border-radius: 6px;
+    box-shadow: 0 0 6px #222;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #f5f5dc;
+    cursor: pointer;
+  }
+
+  .photo-container img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+  }
+
+  #photoModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+  }
+
+  #photoModal img {
+    margin: auto;
+    display: block;
+    max-width: 90%;
+    max-height: 80vh;
+    border-radius: 8px;
+  }
+
+  #modalCaption,
+  #modalDate,
+  #modalLocation {
+    color: #f5f5dc;
+    text-align: center;
+    margin: 0.5rem 0;
+    font-size: 1rem;
+  }
+
+  #modalClose {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: #f5f5dc;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
   <div class="tabs" role="tablist" aria-label="Main Tabs">
