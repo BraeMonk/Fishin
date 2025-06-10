@@ -185,29 +185,29 @@ button:focus {
 </head>
 <body>
   <!-- Tabs buttons container -->
-  <div class="tabs" role="tablist" aria-label="Main Tabs">
-    <button class="tab-button active" id="tallyTab" role="tab" aria-selected="true" aria-controls="tallyTab" onclick="openTab('tallyTab', this)">Tally</button>
-    <button class="tab-button" id="memoriesTab" role="tab" aria-selected="false" aria-controls="memoriesTab" onclick="openTab('memoriesTab', this)">Memories</button>
-  </div>
+<div class="tabs" role="tablist" aria-label="Main Tabs">
+  <button class="tab-button active" id="tabButtonTally" role="tab" aria-selected="true" aria-controls="tallyTab" onclick="openTab('tallyTab', this)">Tally</button>
+  <button class="tab-button" id="tabButtonMemories" role="tab" aria-selected="false" aria-controls="memoriesTab" onclick="openTab('memoriesTab', this)">Memories</button>
+</div>
 
-  <!-- Tabs content containers -->
+<!-- Tabs content containers -->
 
-  <!-- Tally Tab Content -->
-  <section id="tallyTab" class="tab-content active" role="tabpanel" aria-labelledby="tabTally">
-    <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
-    <div id="fishList" aria-live="polite"></div>
-    <button class="reset-btn" onclick="resetSeason()">Reset Season</button>
-  </section>
+<!-- Tally Tab Content -->
+<section id="tallyTab" class="tab-content active" role="tabpanel" aria-labelledby="tabButtonTally">
+  <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
+  <div id="fishList" aria-live="polite"></div>
+  <button class="reset-btn" onclick="resetSeason()">Reset Season</button>
+</section>
 
-  <!-- Memories Tab Content -->
-  <section id="memoriesTab" class="tab-content" role="tabpanel" aria-labelledby="tabMemories" tabindex="0">
-    <input type="file" id="photoInput" accept="image/*" />
-    <input type="text" id="photoCaption" placeholder="Caption" />
-    <input type="text" id="photoLocationInput" placeholder="Location" />
-    <button id="savePostBtn">Save Post</button>
+<!-- Memories Tab Content -->
+<section id="memoriesTab" class="tab-content" role="tabpanel" aria-labelledby="tabButtonMemories" tabindex="0">
+  <input type="file" id="photoInput" accept="image/*" />
+  <input type="text" id="photoCaption" placeholder="Caption" />
+  <input type="text" id="photoLocationInput" placeholder="Location" />
+  <button id="savePostBtn">Save Post</button>
 
-    <div id="photoGallery"></div>
-  </section>
+  <div id="photoGallery"></div>
+</section>
 
   <script src="script.js"></script>
 </body>
