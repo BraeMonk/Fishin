@@ -1,15 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadTallies();
-  loadPhotos();
-
-  // Set initial visible tab
+  refreshGallery();
   showTab('tally');
 
-  // Set up photo input listener
-  document.getElementById('photoInput').addEventListener('change', uploadPhoto);
+  document.getElementById('photoInput').addEventListener('change', savePhotoPost);
 });
 
-// Fish species list
+// --- Fish Species Data ---
 const fishSpecies = [
   { name: 'Largemouth Bass', rig: 'Texas Rig', bait: 'Plastic Worm' },
   { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
@@ -33,8 +30,7 @@ const fishSpecies = [
   { name: 'Burbot', rig: 'Deep Jigging', bait: 'Cut Minnows' }
 ];
 
-// --- Tally logic ---
-
+// --- Tally Logic ---
 function loadTallies() {
   const fishList = document.getElementById('fishList');
   fishList.innerHTML = '';
@@ -89,7 +85,6 @@ function resetSeason() {
 }
 
 // --- Tabs ---
-
 function showTab(tabName) {
   document.getElementById('tallyTab').style.display = (tabName === 'tally') ? 'block' : 'none';
   document.getElementById('memoriesTab').style.display = (tabName === 'memories') ? 'block' : 'none';
@@ -98,56 +93,16 @@ function showTab(tabName) {
   const activeBtn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
   if (activeBtn) activeBtn.classList.add('active');
 
-  if (tabName === 'tally') {
-    loadTallies();
-  }
+  if (tabName === 'tally') loadTallies();
+  if (tabName === 'memories') refreshGallery();
 }
 
-// --- Photos ---
-
-function uploadPhoto(event) {
-  const captionInput = document.getElementById('photoCaption');
-  const locationInput = document.getElementById('photoLocationInput');
-  const userLocation = locationInput.value.trim();
-
-  if (!event.target.files[0]) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    const photoData = {
-      id: generateId(),
-      src: reader.result,
-      caption: captionInput.value.trim() || '(No caption)',
-      date: new Date().toLocaleString(),
-      location: userLocation || null  // use user input if provided
-    };
-
-    // If no user location, try to get GPS location
-    if (!userLocation && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        photoData.location = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
-        savePhoto(photoData);
-      }, () => {
-        // GPS permission denied or error, save without GPS location
-        savePhoto(photoData);
-      });
-    } else {
-      // user provided location or no GPS support
-      savePhoto(photoData);
-    }
-
-    captionInput.value = ''; // clear inputs after upload
-    locationInput.value = '';
-    event.target.value = '';
-  };
-  reader.readAsDataURL(event.target.files[0]);
-}
-
-function savePhotoPost() {
+// --- Photo Logic ---
+function savePhotoPost(event) {
   const caption = document.getElementById('photoCaption').value.trim();
-  const locationInput = document.getElementById('photoLocationInput').value.trim();
+  const location = document.getElementById('photoLocationInput').value.trim();
   const input = document.getElementById('photoInput');
-  const file = input.files[0];
+  const file = event.target.files[0];
 
   if (!file) {
     alert("Please select a photo first.");
@@ -158,45 +113,34 @@ function savePhotoPost() {
   reader.onload = function (e) {
     const newPost = {
       image: e.target.result,
-      caption: caption || "(No caption)",
-      location: locationInput || null,
+      caption: caption || "No caption",
+      location: location || "No location",
       timestamp: Date.now()
     };
 
-    // If no manual location, try GPS
-    if (!newPost.location && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        newPost.location = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
-        finishSave(newPost);
-      }, () => {
-        finishSave(newPost); // Permission denied
-      });
-    } else {
-      finishSave(newPost);
-    }
+    let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
+    savedPosts.push(newPost);
+    localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
 
-    // Reset form
+    refreshGallery();
+
+    // Clear form
+    input.value = '';
     document.getElementById('photoCaption').value = '';
     document.getElementById('photoLocationInput').value = '';
-    input.value = '';
   };
 
   reader.readAsDataURL(file);
 }
 
-function finishSave(post) {
+function refreshGallery() {
+  const gallery = document.getElementById('photoGallery');
+  gallery.innerHTML = '';
+
   let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-  savedPosts.push(post);
-  localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
-  refreshGallery();
-}
-    // Reset form
-    document.getElementById('photoCaption').value = '';
-    document.getElementById('photoLocation').value = '';
-    input.value = '';
-  };
+  savedPosts.sort((a, b) => b.timestamp - a.timestamp); // newest first
 
-  reader.readAsDataURL(file);
+  savedPosts.forEach((post, idx) => addPostToGallery(post, idx));
 }
 
 function addPostToGallery(post, index) {
@@ -231,83 +175,15 @@ function addPostToGallery(post, index) {
 
 function deletePost(index) {
   let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-  savedPosts.splice(index, 1); // remove the item at this index
+  savedPosts.splice(index, 1);
   localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
   refreshGallery();
 }
 
-function refreshGallery() {
-  const gallery = document.getElementById('photoGallery');
-  gallery.innerHTML = ''; // Clear existing
-  const savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-  savedPosts.forEach((post, idx) => addPostToGallery(post, idx));
-}
-
-function loadPhotos() {
-  const gallery = document.getElementById('photoGallery');
-  gallery.innerHTML = '';
-  const photos = JSON.parse(localStorage.getItem('photoPosts') || '[]');
-  photos.forEach((post, idx) => addPostToGallery(post, idx));
-}
-
-  photos.forEach(photo => {
-    const div = document.createElement('div');
-    div.className = 'photo-container';
-    div.innerHTML = `
-      <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.id}')" alt="Photo" />
-      <div class="photo-caption">${escapeHtml(photo.caption)}</div>
-      <div class="photo-date">${photo.date}</div>
-      <div class="photo-location">${photo.location || '(Location not specified)'}</div>
-      <button onclick="deletePhoto('${photo.id}')">Delete</button>
-    `;
-    gallery.appendChild(div);
-  });
-}
-
-function openModal(photoId) {
-  const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-  const photo = photos.find(p => p.id === photoId);
-  if (!photo) return;
-
-  const modal = document.getElementById('photoModal');
-  modal.querySelector('img').src = photo.src;
-  modal.querySelector('.modal-caption').textContent = photo.caption;
-  modal.querySelector('.modal-date').textContent = photo.date;
-  modal.querySelector('.modal-location').textContent = photo.location || '(Location not specified)';
-  modal.style.display = 'block';
-}
-
-function closeModal() {
-  document.getElementById('photoModal').style.display = 'none';
-}
-
-// Utility: Simple ID generator for photos
-function generateId() {
-  return '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Utility: Escape HTML to avoid injection
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  const savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-  savedPosts.forEach(addPostToGallery);
-  refreshGallery();
-});
-// --- Service Worker Registration ---
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      })
-      .catch(error => {
-        console.error('Service Worker registration failed:', error);
-      });
-  });
-}
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker registered:', reg.scope))
+        .catch(err => console.error('Service Worker registration failed:', err));
+    });
+  }
