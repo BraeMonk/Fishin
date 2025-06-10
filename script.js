@@ -1,15 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Initial load
   loadTallies();
   refreshGallery();
   showTab('tally');
 
-  // When user selects a photo, read it and store temporarily
-  document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
+  // Attach click handlers for tabs
+  document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const tab = button.getAttribute('data-tab');
+      showTab(tab);
+    });
+  });
 
-  // Save button triggers saving the photo post to localStorage
+  // Your other listeners
+  document.getElementById('photoInput').addEventListener('change', handlePhotoUpload);
   document.getElementById('savePostBtn').addEventListener('click', savePhotoPost);
 });
-
 // Temporary storage for uploaded photo data URL before saving
 let currentUploadedPhoto = null;
 
