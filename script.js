@@ -97,7 +97,9 @@ function showTab(tabName) {
 
 function uploadPhoto(event) {
   const captionInput = document.getElementById('photoCaption');
-  const caption = captionInput.value.trim();
+  const locationInput = document.getElementById('photoLocationInput');
+  const userLocation = locationInput.value.trim();
+
   if (!event.target.files[0]) return;
 
   const reader = new FileReader();
@@ -105,27 +107,28 @@ function uploadPhoto(event) {
     const photoData = {
       id: generateId(),
       src: reader.result,
-      caption: caption || '(No caption)',
-      date: new Date().toLocaleString()
+      caption: captionInput.value.trim() || '(No caption)',
+      date: new Date().toLocaleString(),
+      location: userLocation || null  // use user input if provided
     };
 
-    // Attempt to get GPS
-    if (navigator.geolocation) {
+    // If no user location, try to get GPS location
+    if (!userLocation && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
-        photoData.location = {
-          lat: pos.coords.latitude.toFixed(6),
-          lng: pos.coords.longitude.toFixed(6)
-        };
+        photoData.location = `Lat: ${pos.coords.latitude.toFixed(6)}, Lng: ${pos.coords.longitude.toFixed(6)}`;
         savePhoto(photoData);
       }, () => {
-        savePhoto(photoData); // No GPS or permission denied
+        // GPS permission denied or error, save without GPS location
+        savePhoto(photoData);
       });
     } else {
-      savePhoto(photoData); // GPS not supported
+      // user provided location or no GPS support
+      savePhoto(photoData);
     }
 
-    captionInput.value = ''; // Clear caption input
-    event.target.value = ''; // Clear file input
+    captionInput.value = ''; // clear inputs after upload
+    locationInput.value = '';
+    event.target.value = '';
   };
   reader.readAsDataURL(event.target.files[0]);
 }
@@ -149,11 +152,18 @@ function loadPhotos() {
       <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.id}')" alt="Photo" />
       <div class="photo-caption">${escapeHtml(photo.caption)}</div>
       <div class="photo-date">${photo.date}</div>
-      ${photo.location ? `<div class="photo-location">Lat: ${photo.location.lat}, Lng: ${photo.location.lng}</div>` : ''}
+      <div class="photo-location">${photo.location || '(Location not specified)'}</div>
       <button onclick="deletePhoto('${photo.id}')">Delete</button>
     `;
     gallery.appendChild(div);
   });
+}
+
+function deletePhoto(photoId) {
+  let photos = JSON.parse(localStorage.getItem('photos') || '[]');
+  photos = photos.filter(p => p.id !== photoId);
+  localStorage.setItem('photos', JSON.stringify(photos));
+  loadPhotos();
 }
 
 function openModal(photoId) {
@@ -165,8 +175,7 @@ function openModal(photoId) {
   modal.querySelector('img').src = photo.src;
   modal.querySelector('.modal-caption').textContent = photo.caption;
   modal.querySelector('.modal-date').textContent = photo.date;
-  modal.querySelector('.modal-location').textContent = photo.location ? `Lat: ${photo.location.lat}, Lng: ${photo.location.lng}` : '';
-
+  modal.querySelector('.modal-location').textContent = photo.location || '(Location not specified)';
   modal.style.display = 'block';
 }
 
@@ -174,25 +183,17 @@ function closeModal() {
   document.getElementById('photoModal').style.display = 'none';
 }
 
-function deletePhoto(photoId) {
-  let photos = JSON.parse(localStorage.getItem('photos') || '[]');
-  photos = photos.filter(photo => photo.id !== photoId);
-  localStorage.setItem('photos', JSON.stringify(photos));
-  loadPhotos();
-}
-
-// --- Utility functions ---
-
+// Utility: Simple ID generator for photos
 function generateId() {
   return '_' + Math.random().toString(36).substr(2, 9);
 }
 
+// Utility: Escape HTML to avoid injection
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 }
-
 // --- Service Worker Registration ---
 
 if ('serviceWorker' in navigator) {
