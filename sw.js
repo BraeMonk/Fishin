@@ -1,4 +1,4 @@
-caches.open('fish-tally-v2') // <--- change the cache name
+caches.open('fish-tally-v3') // <--- change the cache name
 
 // and update cached icon paths
 return cache.addAll([
