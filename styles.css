@@ -1,99 +1,85 @@
 @import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;600&display=swap');
 
-/* Base styles */
 body {
-  background-color: #000; /* deep night sky */
-  color: #f0d68c; /* warm golden yellow, like morning sun on water */
-  font-family: 'Cabin', Arial, sans-serif;
+  background-color: #0c0c0c;
+  color: #ccc5a8;
+  font-family: 'Cabin', sans-serif;
   margin: 0;
   padding: 0 1rem;
   line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Tabs container */
+/* Tabs */
 .tabs {
   display: flex;
   justify-content: space-around;
-  background: #8b0000; /* dark crimson */
-  border-bottom: 3px solid #b8860b; /* bronze */
-  box-shadow: 0 3px 6px rgba(184, 134, 11, 0.7);
-  user-select: none;
-  overflow-x: auto;
+  background: #1a0e0e;
+  border-bottom: 2px solid #2e2e2e;
+  box-shadow: 0 2px 4px #000;
 }
 
-/* Tab buttons */
 .tab-button {
   flex: 1;
   padding: 12px 0;
-  font-size: 1.1rem;
-  background: #8b0000;
-  color: gold;
+  font-size: 1rem;
+  background: #1a0e0e;
+  color: #a0896b;
   border: none;
   cursor: pointer;
-  font-weight: 700;
-  text-shadow: 1px 1px 0 #551111;
-  transition: background 0.3s ease;
+  font-weight: 600;
+  transition: background 0.2s ease;
+  text-shadow: 1px 1px 0 #000;
   white-space: nowrap;
-  letter-spacing: 0.05em;
 }
 
 .tab-button.active,
 .tab-button:hover {
-  background: #b22222; /* firebrick red */
-  box-shadow: inset 0 0 8px 1px #f0d68c;
+  background: #2c1a1a;
+  box-shadow: inset 0 0 6px 1px #3a2b2b;
 }
 
-/* Content area */
+/* Tab content */
 .tab-content {
-  padding: 15px 0 30px 0;
+  padding: 16px 0 24px;
   font-size: 1rem;
 }
 
-/* Fish Item container */
+/* Fish items */
 .fish-item {
-  background: #222;
-  padding: 15px;
-  margin: 12px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(240, 214, 140, 0.3);
+  background: #181818;
+  padding: 14px;
+  margin: 10px 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px #111;
   text-align: center;
-  transition: background 0.3s ease;
   cursor: pointer;
-  font-family: 'Georgia', serif;
+  transition: background 0.2s ease;
 }
 
 .fish-item:hover {
-  background: #2a2a2a;
-  box-shadow: 0 0 12px 2px #f0d68c;
+  background: #222;
 }
 
 /* Fish name button */
 .fish-name {
   background: none;
   border: none;
-  color: #f0d68c;
-  font-size: 1.25rem;
+  color: #ccc5a8;
+  font-size: 1.2rem;
   font-weight: 700;
-  cursor: pointer;
   font-family: 'Georgia', serif;
-  letter-spacing: 0.05em;
-  user-select: none;
-  text-shadow: 1px 1px 2px #331a00;
+  text-shadow: 0 0 1px #111;
+  cursor: pointer;
 }
 
 /* Fish details */
 .fish-details {
   display: none;
-  background: #333;
-  padding: 10px 15px;
+  background: #1f1f1f;
+  padding: 12px;
   margin-top: 8px;
-  border-radius: 6px;
-  box-shadow: inset 0 0 6px 1px #f0d68c33;
-  font-family: 'Cabin', Arial, sans-serif;
-  font-size: 1rem;
-  color: #f0d68cdd;
+  border-radius: 5px;
+  color: #c1b89c;
 }
 
 /* Tally controls */
@@ -104,119 +90,81 @@ body {
   margin-top: 10px;
 }
 
-/* Tally count */
 .tally-count {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #ffd700;
-  font-family: 'Georgia', serif;
-  text-shadow: 0 0 5px #b8860b;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #d0c8ae;
   min-width: 48px;
   text-align: center;
-  user-select: none;
 }
 
-/* General buttons */
+/* Buttons */
 button {
-  background: #8b0000;
-  color: gold;
+  background: #2b1d1d;
+  color: #b4a790;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 14px;
   cursor: pointer;
   border-radius: 6px;
   font-weight: 600;
   font-size: 1rem;
-  box-shadow: 0 2px 6px #551111aa;
-  transition: background 0.3s ease;
-  user-select: none;
-  min-width: 72px;
+  box-shadow: 0 2px 4px #000;
+  transition: background 0.2s ease;
 }
 
-button:hover,
-button:focus {
-  background: #b22222;
-  box-shadow: 0 0 10px 2px #f0d68c;
-  outline: none;
+button:hover {
+  background: #3a2929;
 }
 
-/* Notes list */
+/* Notes */
 .notes-list .note-item {
-  background: #333;
-  padding: 12px 15px;
-  margin: 8px 0;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px #f0d68c55;
-  font-family: 'Georgia', serif;
-  font-size: 1rem;
-  color: #fff7cc;
+  background: #202020;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px #111;
+  color: #d4cdbc;
 }
 
 .note-text {
-  color: #fff;
-  font-size: 1rem;
-  margin-top: 6px;
-  line-height: 1.4;
-  font-family: 'Cabin', Arial, sans-serif;
+  font-size: 0.95rem;
+  color: #ccc5a8;
 }
 
-/* Photo upload */
-.photo-upload {
-  margin-top: 15px;
-}
-
-/* Gallery images */
-.gallery img {
-  width: 100%;
-  max-width: 160px;
-  border-radius: 8px;
-  margin: 6px;
-  box-shadow: 0 2px 6px #8b000044;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.gallery img:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 12px 2px #f0d68caa;
-}
-
-/* Photo metadata and styling */
+/* Photo area */
 .photo-container {
-  border: 1px solid #444;
-  border-radius: 10px;
-  margin: 15px 0;
+  background: #151515;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
   padding: 10px;
-  background: #1a1a1a;
+  margin: 16px 0;
 }
 
 .photo-thumb {
   width: 100%;
-  max-height: 300px;
+  max-height: 280px;
   object-fit: cover;
   border-radius: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .photo-caption,
 .photo-date,
 .photo-location {
-  font-size: 0.9em;
-  margin: 2px 0;
-  color: #f0d68c;
-  font-family: 'Cabin', Arial, sans-serif;
+  font-size: 0.85rem;
+  color: #aaa08c;
+  font-style: italic;
 }
 
-/* Preview photo */
+/* Preview */
 .photo-preview {
-  width: 90%;
-  height: auto;
-  border-radius: 8px;
+  width: 100%;
+  border-radius: 6px;
   margin-top: 8px;
-  cursor: pointer;
-  box-shadow: 0 0 10px 2px #f0d68caa;
+  box-shadow: 0 0 8px #111;
 }
 
-/* Modal background */
+/* Modal */
 .modal {
   position: fixed;
   z-index: 1000;
@@ -224,66 +172,67 @@ button:focus {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.85);
+  background: rgba(10, 10, 10, 0.95);
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
 }
 
 .modal-content {
   max-width: 90%;
   max-height: 80vh;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 0 20px #000;
 }
 
 .close {
   position: absolute;
-  top: 20px;
-  right: 35px;
-  color: #fff;
-  font-size: 40px;
+  top: 16px;
+  right: 30px;
+  color: #ccc;
+  font-size: 36px;
   font-weight: bold;
   cursor: pointer;
-  user-select: none;
 }
 
+/* Modal captions */
 #modalCaption,
 #modalDate,
 #modalLocation {
-  color: #ddd;
+  color: #bbb199;
   margin-top: 10px;
+  font-size: 0.9rem;
   text-align: center;
-  font-size: 14px;
 }
 
-/* Responsive adjustments */
+/* Gallery */
+.gallery img {
+  width: 100%;
+  max-width: 160px;
+  border-radius: 6px;
+  margin: 5px;
+  box-shadow: 0 0 4px #111;
+  transition: transform 0.2s ease;
+}
+
+.gallery img:hover {
+  transform: scale(1.03);
+}
+
+/* Responsive */
 @media (max-width: 700px) {
   body {
-    padding: 0 0.75rem;
     font-size: 16px;
   }
 
   .tab-button {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 10px 0;
   }
 
-  .fish-item {
-    padding: 12px 10px;
-    margin: 10px 0;
-  }
-
-  .tally-controls {
-    gap: 8px;
-  }
-
   button {
+    font-size: 0.95rem;
     padding: 8px 12px;
-    min-width: 60px;
-    font-size: 0.9rem;
   }
 }
 
@@ -293,14 +242,9 @@ button:focus {
   }
 
   .tab-button {
-    flex: none;
     width: 48%;
-    margin: 2px 0;
     font-size: 0.9rem;
-  }
-
-  .tally-count {
-    font-size: 1.2rem;
+    margin: 2px 0;
   }
 
   .gallery img,
