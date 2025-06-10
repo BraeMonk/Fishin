@@ -1,7 +1,7 @@
 {
   "name": "Fishin' Buddy",
   "short_name": "FishnBuddy",
-  "start_url": "./index.html",
+  "start_url": "/Fishin/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
