@@ -198,20 +198,17 @@ button:focus {
   </section>
 
   <section id="memoriesTab" class="tab-content" role="tabpanel" aria-labelledby="tabMemories" tabindex="0">
-    <div id="photoUploader" class="photo-upload" aria-label="Upload photo with caption and location">
-      <label for="photoCaption">Caption:</label>
-      <textarea id="photoCaption" placeholder="Write a caption..."></textarea>
-      <br>
-      <label for="photoLocation">Enter Location:</label>
-      <input type="text" id="photoLocation" placeholder="Enter location" />
-      <br>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" />
-      <button type="button" onclick="document.getElementById('photoInput').click()">Upload Photo</button>
-      <button type="button" onclick="savePhotoPost()">Save Post</button>
-    </div>
-
-    <div id="photoGallery" aria-live="polite" aria-label="Photo gallery"></div>
-  </section>
+  
+  <!-- Put your photo upload inputs here -->
+  <input type="file" id="photoInput" accept="image/*" />
+  <input type="text" id="photoCaption" placeholder="Caption" />
+  <input type="text" id="photoLocationInput" placeholder="Location" />
+  <button id="savePostBtn">Save Post</button>
+  
+  <!-- Photo gallery container -->
+  <div id="photoGallery"></div>
+  
+</section>
 
   <!-- Photo Modal -->
   <div id="photoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalCaption" aria-describedby="modalDate modalLocation">
