@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
     item.innerHTML = `
       <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
       <div class="tally-controls">
-        <button onclick="adjustCount('${name}', 1)">+</button>
         <button onclick="adjustCount('${name}', -1)">-</button>
+        <button onclick="adjustCount('${name}', 1)">+</button>
         <button onclick="toggleInfo('${name}')">Info</button>
         <div id="${name}-info" style="display:none; margin-top:0.5rem; color:#cc3300;">
           <strong>Rig:</strong> ${rig}<br>
