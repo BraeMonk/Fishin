@@ -112,3 +112,23 @@ button:hover {
     text-align: center;
     margin-bottom: 5px;
 }
+
+.photo-container {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.photo-thumb {
+    width: 100px;
+    height: auto;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.photo-preview {
+    width: 90%;
+    height: auto;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+}
