@@ -2,7 +2,7 @@
 body {
   background-color: #000; /* deep night sky */
   color: #f0d68c; /* warm golden yellow, like morning sun on water */
-  font-family: 'Treasure Map Deadhand', cursive, Arial, sans-serif;
+  font-family: 'Cabin', Arial, sans-serif;
   margin: 0;
   padding: 0 1rem;
   line-height: 1.5;
@@ -292,7 +292,6 @@ button:focus {
   .photo-thumb {
     max-width: 100px;
   }
-}
 
-/* Optional font import for outdoorsy feel */
-@import url('https://fonts.googleapis.com/css2?family=Treasure+Map+Deadhand&display=swap');
+  /* Add this at the top of your CSS */
+@import url('https://fonts.googleapis.com/css2?family=Cabin:wght@400;600&display=swap');
