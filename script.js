@@ -61,47 +61,9 @@ window.onload = function() {
     fishList.appendChild(item);
   });
 
-  window.toggleInfo = function(name) {
-  const infoEl = document.getElementById(`${name}-info`);
-  if (!infoEl) {
-    console.error(`Error: Info element for ${name} not found.`);
-    return;
-  }
-  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
-  };
-
   recalculateTotal();
 
-  window.adjustCount = function (name, delta) {
-    const countEl = document.getElementById(`${name}-count`);
-    if (!countEl) return;
-    let count = parseInt(countEl.textContent, 10) + delta;
-    count = Math.max(0, count);
-    countEl.textContent = count;
-    localStorage.setItem(name, count);
-    recalculateTotal();
-  };
-
-  function recalculateTotal() {
-    let total = 0;
-    fishData.forEach(({ name }) => {
-      const countEl = document.getElementById(`${name}-count`);
-      total += countEl ? parseInt(countEl.textContent, 10) : 0;
-    });
-    grandTotal = total;
-    grandTotalEl.textContent = grandTotal;
-  }
-
-  window.resetSeason = function () {
-    fishData.forEach(({ name }) => {
-      const countEl = document.getElementById(`${name}-count`);
-      if (countEl) countEl.textContent = "0";
-      localStorage.removeItem(name);
-    });
-    grandTotalEl.textContent = "0";
-  };
-
-  // Tab navigation **(Moved Inside window.onload)**
+  // Tab navigation setup
   document.querySelectorAll(".tab-button").forEach(button => {
     button.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
@@ -115,56 +77,46 @@ window.onload = function() {
     });
   });
 
-  // Load photo memory posts **(Moved Inside window.onload)**
-  // Add event listener for saving photos
+  // Load saved photo memory posts
+  renderPhotoPosts();
+};
+
+// Ensure photos are saved to localStorage
 document.getElementById("savePostBtn").addEventListener("click", handleUpload);
 
-// Handles photo upload and saves to localStorage
 function handleUpload() {
   const fileInput = document.getElementById("photoInput");
   const caption = document.getElementById("photoCaption").value.trim();
   const location = document.getElementById("photoLocationInput").value.trim();
 
   if (fileInput.files.length > 0) {
-    const photoFile = fileInput.files[0];
     const reader = new FileReader();
-
     reader.onload = function(event) {
-      const imageBase64 = event.target.result;
-
-      // Retrieve existing memory posts or create new array
       const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
       savedPosts.push({
-        image: imageBase64,
-        caption: caption,
-        location: location,
+        image: event.target.result,
+        caption,
+        location,
         timestamp: new Date().toLocaleString(),
       });
 
       localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-      renderPhotoPosts(); // Refresh displayed posts
-      fileInput.value = "";
-      document.getElementById("photoCaption").value = "";
-      document.getElementById("photoLocationInput").value = "";
+      renderPhotoPosts();
     };
-
-    reader.readAsDataURL(photoFile);
-  } else {
-    console.error("No file selected.");
+    reader.readAsDataURL(fileInput.files[0]);
   }
 }
 
-// Renders stored photo memory posts
 function renderPhotoPosts() {
   const photoGallery = document.getElementById("photoGallery");
-  photoGallery.innerHTML = ""; // Clear previous entries
-
+  photoGallery.innerHTML = "";
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  
   savedPosts.forEach(post => {
     const container = document.createElement("div");
     container.className = "photo-container";
     container.innerHTML = `
-      <img src="${post.image}" class="gallery-photo" onclick="expandImage('${post.image}')" />
+      <img src="${post.image}" class="gallery-photo" />
       <div><strong>${post.caption}</strong></div>
       <div>${post.location}</div>
       <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
@@ -172,20 +124,6 @@ function renderPhotoPosts() {
     photoGallery.appendChild(container);
   });
 }
-
-// Expands photo when clicked
-function expandImage(imageSrc) {
-  const expandedImg = document.createElement("img");
-  expandedImg.src = imageSrc;
-  expandedImg.className = "expanded-photo";
-  expandedImg.onclick = () => document.body.removeChild(expandedImg);
-  document.body.appendChild(expandedImg);
-}
-
-// Load stored posts on page load
-  renderPhotoPosts();
-};
-};
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () =>
