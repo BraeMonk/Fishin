@@ -159,14 +159,14 @@ function refreshGallery() {
   let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
   savedPosts.sort((a, b) => b.timestamp - a.timestamp); // newest first
 
-  savedPosts.forEach((post, idx) => addPostToGallery(post, idx));
+  savedPosts.forEach(post => addPostToGallery(post));
 }
 
-function addPostToGallery(post, index) {
+function addPostToGallery(post) {
   const gallery = document.getElementById('photoGallery');
   const container = document.createElement('div');
   container.className = 'photo-container';
-  container.setAttribute('data-index', index);
+  container.setAttribute('data-timestamp', post.timestamp);
 
   const img = document.createElement('img');
   img.src = post.image;
@@ -181,7 +181,7 @@ function addPostToGallery(post, index) {
   deleteBtn.textContent = 'Delete';
   deleteBtn.className = 'delete-btn';
   deleteBtn.onclick = function () {
-    deletePost(index);
+    deletePost(post.timestamp);
   };
 
   container.appendChild(img);
@@ -192,9 +192,9 @@ function addPostToGallery(post, index) {
   gallery.appendChild(container);
 }
 
-function deletePost(index) {
+function deletePost(timestamp) {
   let savedPosts = JSON.parse(localStorage.getItem('photoPosts')) || [];
-  savedPosts.splice(index, 1);
+  savedPosts = savedPosts.filter(post => post.timestamp !== timestamp);
   localStorage.setItem('photoPosts', JSON.stringify(savedPosts));
   refreshGallery();
 }
