@@ -201,10 +201,10 @@ button:focus {
     <div id="photoUploader" class="photo-upload" aria-label="Upload photo with caption and location">
       <label for="photoCaption">Caption:</label>
       <textarea id="photoCaption" placeholder="Write a caption..."></textarea>
-
-      <label for="photoLocation">Location (enter manually):</label>
+      <br>
+      <label for="photoLocation">Enter Location:</label>
       <input type="text" id="photoLocation" placeholder="Enter location" />
-
+      <br>
       <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
       <button type="button" onclick="document.getElementById('photoInput').click()">Upload Photo</button>
     </div>
