@@ -1,7 +1,7 @@
 {
   "name": "Fish Tally",
   "short_name": "FishTally",
-  "start_url": "./",
+  "start_url": "./fish_tally_pwa.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
