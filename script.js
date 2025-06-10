@@ -219,7 +219,12 @@ function loadPhotos() {
             <div class="photo-caption"><strong>Caption:</strong> ${photo.caption}</div>
             <div class="photo-date">${photo.date}</div>
             ${photo.location ? `<div class="photo-location">📍 ${photo.location.lat}, ${photo.location.lng}</div>` : ''}
-            <button onclick="deletePhoto(${idx})">Delete</button>
+            <button class="delete-btn" onclick="deletePhoto('${photo.id}')">🗑️</button>
+            <div class="note-entry">
+  <p>${note.text}</p>
+  <small>${note.date}</small>
+  <button class="delete-btn" onclick="deleteNote('${note.id}')">🗑️</button>
+</div>
         `;
         gallery.appendChild(div);
     });
@@ -231,11 +236,22 @@ function updatePhotoCaption(index, newCaption) {
     localStorage.setItem('photos', JSON.stringify(photos));
 }
 
-function deletePhoto(index) {
-    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-    photos.splice(index, 1);
+function deletePhoto(id) {
+  if (confirm('Are you sure you want to delete this photo?')) {
+    let photos = JSON.parse(localStorage.getItem('photos')) || [];
+    photos = photos.filter(photo => photo.id !== id);
     localStorage.setItem('photos', JSON.stringify(photos));
-    loadPhotos();
+    loadPhotos(); // Refresh UI
+  }
+}
+
+function deleteNote(id) {
+  if (confirm('Are you sure you want to delete this note?')) {
+    let notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes = notes.filter(note => note.id !== id);
+    localStorage.setItem('notes', JSON.stringify(notes));
+    loadNotes(); // Refresh UI
+  }
 }
 
 // Modal viewer
