@@ -35,28 +35,34 @@ document.addEventListener("DOMContentLoaded", () => {
   let grandTotal = 0;
 
   // Render fish tally list
-  fishData.forEach(({ name, rig, bait }) => {
-  const item = document.createElement("div");
-  item.className = "fish-item";
-  item.innerHTML = `
-    <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
-    <div class="tally-controls">
-      <button onclick="adjustCount('${name}', 1)">+</button>
-      <button onclick="adjustCount('${name}', -1)">-</button>
-      <button onclick="toggleInfo('${name}')">Info</button>
-      <div id="${name}-info" style="display:none; margin-top:0.5rem; color:#cc3300;">
-        <strong>Rig:</strong> ${rig}<br>
-        <strong>Bait:</strong> ${bait}
-      </div>
-    </div>
-  `;
-  fishList.appendChild(item);
-});
+  // Load saved fish tally from localStorage
+  fishData.forEach(({ name }) => {
+    const savedCount = localStorage.getItem(name);
+    if (savedCount !== null) {
+      document.getElementById(`${name}-count`).textContent = savedCount;
+    }
+  });
 
-window.toggleInfo = function (name) {
-  const infoEl = document.getElementById(`${name}-info`);
-  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
-};
+  recalculateTotal();
+
+  // Render fish tally list
+  fishData.forEach(({ name, rig, bait }) => {
+    const item = document.createElement("div");
+    item.className = "fish-item";
+    item.innerHTML = `
+      <div style="font-weight:bold;">${name}: <span id="${name}-count">0</span></div>
+      <div class="tally-controls">
+        <button onclick="adjustCount('${name}', 1)">+</button>
+        <button onclick="adjustCount('${name}', -1)">-</button>
+        <button onclick="toggleInfo('${name}')">Info</button>
+        <div id="${name}-info" style="display:none; margin-top:0.5rem; color:#cc3300;">
+          <strong>Rig:</strong> ${rig}<br>
+          <strong>Bait:</strong> ${bait}
+        </div>
+      </div>
+    `;
+    fishList.appendChild(item);
+  });
 
   window.adjustCount = function (name, delta) {
     const countEl = document.getElementById(`${name}-count`);
@@ -64,12 +70,19 @@ window.toggleInfo = function (name) {
     count = Math.max(0, count);
     countEl.textContent = count;
 
+    // Save count to localStorage
+    localStorage.setItem(name, count);
+
     recalculateTotal();
   };
 
-  window.toggleBait = function (name) {
-    const baitEl = document.getElementById(`${name}-bait`);
-    baitEl.style.display = baitEl.style.display === "none" ? "block" : "none";
+  window.resetSeason = function () {
+    fishData.forEach(({ name }) => {
+      document.getElementById(`${name}-count`).textContent = "0";
+      localStorage.removeItem(name);
+    });
+    grandTotal = 0;
+    grandTotalEl.textContent = "0";
   };
 
   function recalculateTotal() {
@@ -81,13 +94,38 @@ window.toggleInfo = function (name) {
     grandTotalEl.textContent = grandTotal;
   }
 
-  window.resetSeason = function () {
-    fishData.forEach(({ name }) => {
-      document.getElementById(`${name}-count`).textContent = "0";
+  // Load saved photo posts from localStorage
+  function renderPhotoPosts() {
+    photoGallery.innerHTML = "";
+    const savedPosts = JSON.parse(localStorage.getItem("photoPosts") || "[]");
+
+    savedPosts.forEach(({ src, caption, location }) => {
+      const container = document.createElement("div");
+      container.className = "photo-container";
+
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = caption;
+      img.className = "gallery-photo";
+      img.addEventListener("click", () => expandPhoto(src));
+
+      const capEl = document.createElement("p");
+      capEl.textContent = caption;
+
+      const locEl = document.createElement("p");
+      locEl.textContent = location;
+      locEl.style.fontStyle = "italic";
+      locEl.style.fontSize = "0.9rem";
+
+      container.appendChild(img);
+      container.appendChild(capEl);
+      container.appendChild(locEl);
+      photoGallery.appendChild(container);
     });
-    grandTotal = 0;
-    grandTotalEl.textContent = "0";
-  };
+  }
+
+  document.addEventListener("DOMContentLoaded", renderPhotoPosts);
+});
 
   // Tab navigation
   document.querySelectorAll(".tab-button").forEach(button => {
