@@ -90,6 +90,38 @@ function showTab(tabName) {
     document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
 }
 
+document.getElementById('photoInput').addEventListener('change', function (event) {
+    const captionInput = document.getElementById('photoCaption');
+    const caption = captionInput.value.trim();
+    if (!event.target.files[0]) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        const photoData = {
+            src: reader.result,
+            caption: caption || '(No caption)',
+            date: new Date().toLocaleString()
+        };
+
+        // Get GPS if possible
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                photoData.location = {
+                    lat: pos.coords.latitude.toFixed(6),
+                    lng: pos.coords.longitude.toFixed(6)
+                };
+                savePhoto(photoData);
+            }, () => savePhoto(photoData));
+        } else {
+            savePhoto(photoData);
+        }
+
+        captionInput.value = '';
+        event.target.value = ''; // Clear file input
+    };
+    reader.readAsDataURL(event.target.files[0]);
+});
+
 // Notes
 function saveNote() {
     const text = document.getElementById('noteInput').value.trim();
