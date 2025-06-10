@@ -9,31 +9,29 @@ const urlsToCache = [
   './icon_512x512.png'
 ];
 
-// Install event - cache static assets
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// Fetch event - try cache first, then network, then fallback to cache if offline
 self.addEventListener('fetch', e => {
+  if (e.request.method === 'POST') {
+    return; // Prevent caching of uploaded photos and posts
+  }
+
   e.respondWith(
     caches.match(e.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse; // return cached asset
-      }
+      if (cachedResponse) return cachedResponse;
+
       return fetch(e.request).then(networkResponse => {
-        // Optionally cache new requests dynamically here
         return caches.open(CACHE_NAME).then(cache => {
-          // Cache only GET requests and successful responses
           if (e.request.method === 'GET' && networkResponse.status === 200) {
             cache.put(e.request, networkResponse.clone());
           }
           return networkResponse;
         });
       }).catch(() => {
-        // If both fail (offline & no cache), optionally respond with a fallback page/image
         if (e.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -42,15 +40,11 @@ self.addEventListener('fetch', e => {
   );
 });
 
-// Activate event - clean up old caches
+// Cleans up old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      )
+      Promise.all(keys.map(key => (key !== CACHE_NAME ? caches.delete(key) : null)))
     )
   );
 });
