@@ -212,7 +212,10 @@ function loadPhotos() {
         const div = document.createElement('div');
         div.className = 'photo-container';
         div.innerHTML = `
-            <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.src}')">
+  <img src="${photo.src}" 
+       class="photo-thumb" 
+       onclick="openModal('${photo.src}', '${photo.date}', '${photo.caption.replace(/'/g, "\\'")}', ${photo.location ? JSON.stringify(photo.location) : 'null'})" 
+       alt="Photo thumbnail">
             <div class="photo-caption"><strong>Caption:</strong> ${photo.caption}</div>
             <div class="photo-date">${photo.date}</div>
             ${photo.location ? `<div class="photo-location">📍 ${photo.location.lat}, ${photo.location.lng}</div>` : ''}
