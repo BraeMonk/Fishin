@@ -1,6 +1,13 @@
-window.onload = function(){
+window.onload = function() {
   const fishList = document.getElementById("fishList");
-  
+  const grandTotalEl = document.getElementById("grandTotal");
+  const photoGallery = document.getElementById("photoGallery");
+
+  if (!fishList) {
+    console.error("Error: fishList element not found!");
+    return;
+  }
+
   const fishData = [
     { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
     { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
@@ -31,9 +38,7 @@ window.onload = function(){
     { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies' },
     { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' },
   ];
-  
-  const grandTotalEl = document.getElementById("grandTotal");
-  const photoGallery = document.getElementById("photoGallery");
+
   let grandTotal = 0;
 
   // Render fish tally list with saved counts
@@ -87,40 +92,7 @@ window.onload = function(){
     grandTotalEl.textContent = "0";
   };
 
-  // Load saved photo posts from localStorage
-  function renderPhotoPosts() {
-    photoGallery.innerHTML = "";
-    const savedPosts = JSON.parse(localStorage.getItem("photoPosts") || "[]");
-
-    savedPosts.forEach(({ src, caption, location }) => {
-      const container = document.createElement("div");
-      container.className = "photo-container";
-
-      const img = document.createElement("img");
-      img.src = src;
-      img.alt = caption;
-      img.className = "gallery-photo";
-      img.addEventListener("click", () => expandPhoto(src));
-
-      const capEl = document.createElement("p");
-      capEl.textContent = caption;
-
-      const locEl = document.createElement("p");
-      locEl.textContent = location;
-      locEl.style.fontStyle = "italic";
-      locEl.style.fontSize = "0.9rem";
-
-      container.appendChild(img);
-      container.appendChild(capEl);
-      container.appendChild(locEl);
-      photoGallery.appendChild(container);
-    });
-  }
-
-  renderPhotoPosts();
-});
-
-  // Tab navigation
+  // Tab navigation **(Moved Inside window.onload)**
   document.querySelectorAll(".tab-button").forEach(button => {
     button.addEventListener("click", () => {
       document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
@@ -134,56 +106,9 @@ window.onload = function(){
     });
   });
 
-  // Photo memory tab
-  const photoInput = document.getElementById("photoInput");
-  const photoCaption = document.getElementById("photoCaption");
-  const photoLocation = document.getElementById("photoLocationInput");
-  const photoGallery = document.getElementById("photoGallery");
-
-  document.getElementById("savePostBtn").addEventListener("click", () => {
-    const file = photoInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      const container = document.createElement("div");
-      container.className = "photo-container";
-
-      const img = document.createElement("img");
-      img.src = e.target.result;
-      img.alt = photoCaption.value;
-      img.className = "gallery-photo";
-      img.addEventListener("click", () => expandPhoto(img.src));
-
-      const caption = document.createElement("p");
-      caption.textContent = photoCaption.value || "No Caption";
-
-      const location = document.createElement("p");
-      location.textContent = photoLocation.value || "Unknown Location";
-      location.style.fontStyle = "italic";
-      location.style.fontSize = "0.9rem";
-
-      container.appendChild(img);
-      container.appendChild(caption);
-      container.appendChild(location);
-
-      photoGallery.appendChild(container);
-      photoInput.value = "";
-      photoCaption.value = "";
-      photoLocation.value = "";
-    };
-
-    reader.readAsDataURL(file);
-  });
-
-  function expandPhoto(src) {
-    const overlay = document.createElement("div");
-    overlay.className = "expanded-photo";
-    overlay.innerHTML = `<img src="${src}" style="width:100%; height:auto; border-radius:6px;" />`;
-    overlay.addEventListener("click", () => overlay.remove());
-    document.body.appendChild(overlay);
-  }
-});
+  // Load photo memory posts **(Moved Inside window.onload)**
+  renderPhotoPosts();
+};
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () =>
@@ -191,4 +116,4 @@ if ('serviceWorker' in navigator) {
       .then(r => console.log('SW regd:', r.scope))
       .catch(console.error));
 }
-}
+
