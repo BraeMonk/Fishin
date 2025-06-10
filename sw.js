@@ -3,8 +3,10 @@ self.addEventListener('install', e => {
     caches.open('fish-tally').then(cache => {
       return cache.addAll([
         './',
-        './index.html',
-        './manifest.json'
+        './fish_tally_pwa.html',
+        './manifest.json',
+        './styles.css',
+        './script.js'
       ]);
     })
   );
