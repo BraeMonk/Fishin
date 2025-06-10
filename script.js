@@ -236,20 +236,43 @@ function deletePhoto(index) {
 }
 
 // Modal viewer
-function openModal(src, date, caption) {
-    const modal = document.getElementById('photoModal');
-    const modalImage = document.getElementById('modalImg');
-    const modalText = document.getElementById('modalCaption');
-    const modalDate = document.getElementById('modalDate');
-    modal.style.display = 'flex';
-    modalImage.src = src;
-    modalText.textContent = caption || '';
-    modalDate.textContent = date || '';
+// Open modal with photo info
+function openModal(src, date, caption, location) {
+  const modal = document.getElementById('photoModal');
+  const modalImg = document.getElementById('modalImg');
+  const modalCaption = document.getElementById('modalCaption');
+  const modalDate = document.getElementById('modalDate');
+  const modalLocation = document.getElementById('modalLocation');
+
+  // If modal is already open with same image, close it (tap off)
+  if (modal.style.display === 'flex' && modalImg.src === src) {
+    closeModal();
+    return;
+  }
+
+  modalImg.src = src;
+  modalCaption.textContent = caption || '(No caption)';
+  modalDate.textContent = date || '';
+  modalLocation.textContent = location ? `📍 ${location.lat}, ${location.lng}` : '';
+
+  modal.style.display = 'flex';
 }
 
+// Close modal
 function closeModal() {
-    document.getElementById('photoModal').style.display = 'none';
+  const modal = document.getElementById('photoModal');
+  modal.style.display = 'none';
 }
+
+// Close modal on click of close button
+document.getElementById('modalClose').addEventListener('click', closeModal);
+
+// Close modal on clicking outside the image
+document.getElementById('photoModal').addEventListener('click', (e) => {
+  if (e.target.id === 'photoModal') {
+    closeModal();
+  }
+});
 
 // Drag and drop
 document.addEventListener('dragover', e => e.preventDefault());
