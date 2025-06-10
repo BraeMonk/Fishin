@@ -162,8 +162,10 @@
 </head>
 <body>
   <div class="tabs" role="tablist" aria-label="Main Tabs">
-    <button class="tab-button" data-tab="tally">Tally</button>
-<button class="tab-button" data-tab="memories">Memories</button>
+    <div class="tab-buttons">
+  <button class="tab-button active" data-tab="tally" onclick="showTab('tally')">Tally</button>
+  <button class="tab-button" data-tab="memories" onclick="showTab('memories')">Memories</button>
+</div>
   </div>
 
   <section id="tallyTab" class="tab-content active" role="tabpanel" aria-labelledby="tabTally">
