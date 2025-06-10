@@ -93,6 +93,10 @@ function showTab(tabName) {
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   const activeBtn = document.querySelector(`.tab-button[data-tab="${tabName}"]`);
   if (activeBtn) activeBtn.classList.add('active');
+
+  if (tabName === 'tally') {
+    loadTallies();
+  }
 }
 
 // --- Photos ---
