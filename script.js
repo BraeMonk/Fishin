@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadTallies();
-  loadNotes();
   loadPhotos();
 
   document.getElementById('photoInput').addEventListener('change', uploadPhoto);
@@ -92,48 +91,6 @@ function showTab(tabName) {
   document.getElementById('memoriesTab').style.display = (tabName === 'memories') ? 'block' : 'none';
   document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
-}
-
-// --- Notes ---
-
-function saveNote() {
-  const text = document.getElementById('noteInput').value.trim();
-  if (!text) return;
-  const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-  notes.push({ date: new Date().toLocaleString(), text });
-  localStorage.setItem('notes', JSON.stringify(notes));
-  document.getElementById('noteInput').value = '';
-  loadNotes();
-}
-
-function loadNotes() {
-  const list = document.getElementById('notesList');
-  const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-  list.innerHTML = '';
-
-  notes.forEach((note, idx) => {
-    const noteEl = document.createElement('div');
-    noteEl.className = 'note-item';
-    noteEl.innerHTML = `
-      <div class="note-date">${note.date}</div>
-      <div contenteditable="true" class="note-text" onblur="updateNote(${idx}, this.innerText)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">${note.text}</div>
-      <button onclick="deleteNote(${idx})">Delete</button>
-    `;
-    list.appendChild(noteEl);
-  });
-}
-
-function updateNote(index, newText) {
-  const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-  notes[index].text = newText.trim();
-  localStorage.setItem('notes', JSON.stringify(notes));
-}
-
-function deleteNote(index) {
-  const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-  notes.splice(index, 1);
-  localStorage.setItem('notes', JSON.stringify(notes));
-  loadNotes();
 }
 
 // --- Photos ---
