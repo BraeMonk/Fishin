@@ -2,7 +2,8 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open('fish-tally').then(cache => {
       return cache.addAll([
-        './fish_tally_pwa.html',
+        './',
+        './index.html',
         './manifest.json',
         './styles.css',
         './script.js'
