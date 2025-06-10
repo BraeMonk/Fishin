@@ -104,12 +104,15 @@ function loadNotes() {
     const list = document.getElementById('notesList');
     const notes = JSON.parse(localStorage.getItem('notes') || '[]');
     list.innerHTML = '';
+
     notes.forEach((note, idx) => {
         const noteEl = document.createElement('div');
         noteEl.className = 'note-item';
-        noteEl.innerHTML = `<div class="note-date">${note.date}</div>
-                            <div contenteditable="true" class="note-text">${note.text}</div>
-                            <button onclick="deleteNote(${idx})">X</button>`;
+        noteEl.innerHTML = `
+            <div class="note-date">${note.date}</div>
+            <div contenteditable="true" class="note-text">${note.text}</div>
+            <button onclick="deleteNote(${idx})">Delete</button>
+        `;
         list.appendChild(noteEl);
     });
 }
@@ -144,10 +147,17 @@ function loadPhotos() {
         div.innerHTML = `
             <div class="photo-date">${photo.date}</div>
             <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.src}')">
-            <button onclick="deletePhoto(${idx})">X</button>
+            <button onclick="deletePhoto(${idx})">Delete</button>
         `;
         gallery.appendChild(div);
     });
+}
+
+function deletePhoto(index) {
+    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+    photos.splice(index, 1);
+    localStorage.setItem('photos', JSON.stringify(photos));
+    loadPhotos();
 }
 
 function openModal(src) {
@@ -159,18 +169,4 @@ function openModal(src) {
 
 function closeModal() {
     document.getElementById('photoModal').style.display = 'none';
-}
-
-function deleteNote(index) {
-    const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-    notes.splice(index, 1);
-    localStorage.setItem('notes', JSON.stringify(notes));
-    loadNotes();
-}
-
-function deletePhoto(index) {
-    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-    photos.splice(index, 1);
-    localStorage.setItem('photos', JSON.stringify(photos));
-    loadPhotos();
 }
