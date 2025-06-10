@@ -61,6 +61,15 @@ window.onload = function() {
     fishList.appendChild(item);
   });
 
+  window.toggleInfo = function(name) {
+  const infoEl = document.getElementById(`${name}-info`);
+  if (!infoEl) {
+    console.error(`Error: Info element for ${name} not found.`);
+    return;
+  }
+  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
+  };
+
   recalculateTotal();
 
   window.adjustCount = function (name, delta) {
