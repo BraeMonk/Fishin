@@ -110,7 +110,7 @@ function handleUpload() {
     const container = document.createElement("div");
     container.className = "photo-container";
     container.innerHTML = `
-      <img src="${post.image}" class="gallery-photo" onclick="expandImage('${post.image}')" />
+      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
       <div><strong>${post.caption}</strong></div>
       <div>${post.location}</div>
       <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
