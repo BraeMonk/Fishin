@@ -13,10 +13,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let currentUploadedPhoto = null;
 const fishSpecies = [
-  { name: 'Largemouth Bass', rig: 'Texas Rig', bait: 'Plastic Worm' },
+  { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
   { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
-  /* ... other species ... */
-  { name: 'Burbot', rig: 'Deep Jigging', bait: 'Cut Minnows' }
+  { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait' },
+  { name: 'Walleye', rig: 'Jig Head', bait: 'Nightcrawler' },
+  { name: 'Yellow Perch', rig: 'Slip Bobber', bait: 'Minnows' },
+  { name: 'Rainbow Trout', rig: 'Fly Rig', bait: 'Dry Fly' },
+  { name: 'Brook Trout', rig: 'Inline Spinner', bait: 'Salmon Eggs' },
+  { name: 'Lake Trout', rig: 'Downrigger', bait: 'Spoon' },
+  { name: 'Brown Trout', rig: 'Drift Rig', bait: 'Worm' },
+  { name: 'Black Crappie', rig: 'Light Jig', bait: 'Small Minnow' },
+  { name: 'White Crappie', rig: 'Micro Jig', bait: 'Grubs' },
+  { name: 'Pumpkinseed Sunfish', rig: 'Bobber Rig', bait: 'Worms' },
+  { name: 'Bluegill', rig: 'Bobber Rig', bait: 'Crickets, Worms' },
+  { name: 'Rock Bass', rig: 'Light Jig', bait: 'Minnows, Worms' },
+  { name: 'White Bass', rig: 'Spinnerbait', bait: 'Shad Imitation' },
+  { name: 'Channel Catfish', rig: 'Slip Sinker Rig', bait: 'Stinkbait, Chicken Liver' },
+  { name: 'Flathead Catfish', rig: 'Live Bait Rig', bait: 'Live Bluegill' },
+  { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad' },
+  { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms' },
+  { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs' },
+  { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls' }
 ];
 
 function loadTallies() {
