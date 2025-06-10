@@ -131,17 +131,44 @@ function deleteNote(index) {
     loadNotes();
 }
 
-// Photo uploads with caption
 function uploadPhoto(event) {
+    const captionInput = document.getElementById('photoCaption');
+    const caption = captionInput.value.trim();
+    if (!event.target.files[0]) return;
+
     const reader = new FileReader();
     reader.onload = () => {
-        const caption = prompt("Enter a caption (optional):") || '';
-        const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-        photos.push({ src: reader.result, date: new Date().toLocaleString(), caption });
-        localStorage.setItem('photos', JSON.stringify(photos));
-        loadPhotos();
+        const photoData = {
+            src: reader.result,
+            caption: caption || '(No caption)',
+            date: new Date().toLocaleString()
+        };
+
+        // Attempt to get GPS
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                photoData.location = {
+                    lat: pos.coords.latitude.toFixed(6),
+                    lng: pos.coords.longitude.toFixed(6)
+                };
+                savePhoto(photoData);
+            }, () => {
+                savePhoto(photoData); // No GPS or permission denied
+            });
+        } else {
+            savePhoto(photoData); // GPS not supported
+        }
+
+        captionInput.value = ''; // Clear caption input
     };
     reader.readAsDataURL(event.target.files[0]);
+}
+
+function savePhoto(photo) {
+    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+    photos.unshift(photo); // Newest first
+    localStorage.setItem('photos', JSON.stringify(photos));
+    loadPhotos();
 }
 
 function loadPhotos() {
@@ -153,9 +180,10 @@ function loadPhotos() {
         const div = document.createElement('div');
         div.className = 'photo-container';
         div.innerHTML = `
+            <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.src}')">
+            <div class="photo-caption"><strong>Caption:</strong> ${photo.caption}</div>
             <div class="photo-date">${photo.date}</div>
-            <img src="${photo.src}" class="photo-thumb" onclick="openModal('${photo.src}', '${photo.date}', '${photo.caption.replace(/'/g, "\\'")}')">
-            <div contenteditable="true" class="photo-caption" onblur="updatePhotoCaption(${idx}, this.innerText)">${photo.caption || ''}</div>
+            ${photo.location ? `<div class="photo-location">📍 ${photo.location.lat}, ${photo.location.lng}</div>` : ''}
             <button onclick="deletePhoto(${idx})">Delete</button>
         `;
         gallery.appendChild(div);
