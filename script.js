@@ -183,7 +183,6 @@ function expandImage(imageSrc) {
 }
 
 // Load stored posts on page load
-window.onload = function() {
   renderPhotoPosts();
 };
 };
