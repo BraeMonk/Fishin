@@ -138,37 +138,27 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-savedPosts
-  .slice()               // make a shallow copy to avoid modifying original
-  .reverse()             // newest first
-  .forEach((post, index) => {
+  // Loop in reverse order to show newest posts first
+  [...savedPosts].reverse().forEach((post, reverseIndex) => {
+    // Calculate the real index in the savedPosts array
+    const realIndex = savedPosts.length - 1 - reverseIndex;
+
     const container = document.createElement("div");
     container.className = "photo-container";
-    // ... rest of your rendering code ...
 
     container.innerHTML = `
       <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-      <input type="text" id="caption-${actualIndex}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
+      <input type="text" id="caption-${realIndex}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
       <div>${post.location}</div>
       <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-      <button onclick="saveCaption(${actualIndex})">Save Caption</button>
-      <button onclick="deletePhoto(${actualIndex})" style="margin-top:5px;">Delete</button>
+      <button onclick="saveCaption(${realIndex})">Save Caption</button>
+      <button onclick="deletePhoto(${realIndex})" style="margin-top:5px;">Delete</button>
       <div class="share-buttons">
-        <button onclick="sharePost(${actualIndex})" style="margin-top:5px;">Share</button>
-        <button onclick="generateCatchCard(${actualIndex})">Create Catch Card</button>
+        <button onclick="sharePost(${realIndex})" style="margin-top:5px;">Share</button>
+        <button onclick="generateCatchCard(${realIndex})">Create Catch Card</button>
       </div>
     `;
 
-    const actions = document.createElement("div");
-    actions.className = "share-icons";
-    actions.innerHTML = `
-      <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
-      <i class="fab fa-facebook" title="Share on Facebook" onclick="shareToFacebook(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
-      <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
-      <i class="fab fa-instagram" title="Download to share on Instagram" onclick="shareToInstagram(${actualIndex})" style="cursor:pointer;"></i>
-    `;
-
-    container.appendChild(actions);
     photoGallery.appendChild(container);
   });
 }
