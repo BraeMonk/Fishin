@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fish-tally-v4'; // Increment this when deploying new versions
+const CACHE_NAME = 'fish-tally-v5'; // Increment this when deploying new versions
 
 const urlsToCache = [
   './',
