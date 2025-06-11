@@ -99,47 +99,46 @@ function handleUpload() {
   const caption = document.getElementById("photoCaption").value.trim();
   const location = document.getElementById("photoLocationInput").value.trim();
 
-  if (fileInput.files.length > 0) {
-    const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-    let newPosts = [];
+  if (fileInput.files.length === 0) {
+    console.error("No files selected.");
+    return;
+  }
 
-    const files = Array.from(fileInput.files);
-    let filesProcessed = 0;
+  const files = Array.from(fileInput.files);
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-    files.forEach(file => {
+  // Process all files in parallel using Promises
+  const readFilePromises = files.map(file => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
-
-      // Bind caption/location per file
-      const thisCaption = caption;
-      const thisLocation = location;
-
-      reader.onload = function (event) {
-        newPosts.push({
+      reader.onload = function(event) {
+        resolve({
           image: event.target.result,
-          caption: thisCaption,
-          location: thisLocation,
+          caption,
+          location,
           timestamp: new Date().toLocaleString()
         });
-
-        filesProcessed++;
-
-        if (filesProcessed === files.length) {
-          const updatedPosts = newPosts.concat(savedPosts); // newest first
-          localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
-          renderPhotoPosts();
-
-          // Clear inputs
-          fileInput.value = "";
-          document.getElementById("photoCaption").value = "";
-          document.getElementById("photoLocationInput").value = "";
-        }
       };
-
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-  } else {
-    console.error("No files selected.");
-  }
+  });
+
+  // Wait for all to finish before saving
+  Promise.all(readFilePromises)
+    .then(newPosts => {
+      const updatedPosts = newPosts.concat(savedPosts);
+      localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
+      renderPhotoPosts();
+
+      // Reset form
+      fileInput.value = "";
+      document.getElementById("photoCaption").value = "";
+      document.getElementById("photoLocationInput").value = "";
+    })
+    .catch(error => {
+      console.error("Error reading files:", error);
+    });
 }
 
   function renderPhotoPosts() {
