@@ -132,29 +132,36 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  savedPosts.forEach((post, index) => {
+  // Reverse the order so newest appear first
+  savedPosts.slice().reverse().forEach((post, indexReversed) => {
+    const actualIndex = savedPosts.length - 1 - indexReversed; // Real index for edit/delete
+
     const container = document.createElement("div");
     container.className = "photo-container";
 
     container.innerHTML = `
-  <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-  <input type="text" id="caption-${index}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
-  <div>${post.location}</div>
-  <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-  <button onclick="saveCaption(${index})">Save Caption</button>
-  <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
-`;
+      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
+      <input type="text" id="caption-${actualIndex}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
+      <div>${post.location}</div>
+      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+      <button onclick="saveCaption(${actualIndex})">Save Caption</button>
+      <button onclick="deletePhoto(${actualIndex})" style="margin-top:5px;">Delete</button>
+      <div class="share-buttons">
+        <button onclick="sharePost(${actualIndex})" style="margin-top:5px;">Share</button>
+        <button onclick="generateCatchCard(${actualIndex})">Create Catch Card</button>
+      </div>
+    `;
 
-const actions = document.createElement("div");
-actions.className = "share-icons";
-actions.innerHTML = `
-  <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${index})" style="cursor:pointer; margin-right:10px;"></i>
-  <i class="fab fa-facebook" title="Share on Facebook" onclick="shareToFacebook(${index})" style="cursor:pointer; margin-right:10px;"></i>
-  <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${index})" style="cursor:pointer; margin-right:10px;"></i>
-  <i class="fab fa-instagram" title="Download to share on Instagram" onclick="shareToInstagram(${index})" style="cursor:pointer;"></i>
-`;
-container.appendChild(actions);
+    const actions = document.createElement("div");
+    actions.className = "share-icons";
+    actions.innerHTML = `
+      <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
+      <i class="fab fa-facebook" title="Share on Facebook" onclick="shareToFacebook(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
+      <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${actualIndex})" style="cursor:pointer; margin-right:10px;"></i>
+      <i class="fab fa-instagram" title="Download to share on Instagram" onclick="shareToInstagram(${actualIndex})" style="cursor:pointer;"></i>
+    `;
 
+    container.appendChild(actions);
     photoGallery.appendChild(container);
   });
 }
