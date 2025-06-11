@@ -131,34 +131,43 @@ function handleUpload() {
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  const processNext = (index = 0) => {
-    if (index >= files.length) {
-      fileInput.value = ""; // Reset file input
-      renderPhotoPosts();
-      return;
+  // Helper: Read file as DataURL
+  function readFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Async flow
+  (async () => {
+    for (let file of files) {
+      try {
+        const imageData = await readFile(file);
+        const caption = prompt("Enter a caption for this photo:") || "";
+        const location = prompt("Enter a location for this photo:") || "";
+
+        const newPost = {
+          image: imageData,
+          caption: caption.trim(),
+          location: location.trim(),
+          timestamp: new Date().toLocaleString()
+        };
+
+        existingPosts.unshift(newPost);
+      } catch (err) {
+        console.error("Error reading file:", err);
+        alert("There was an error processing one of your photos.");
+      }
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const caption = prompt("Enter a caption for this photo:") || "";
-      const location = prompt("Enter a location for this photo:") || "";
-
-      const newPost = {
-        image: e.target.result,
-        caption: caption.trim(),
-        location: location.trim(),
-        timestamp: new Date().toLocaleString()
-      };
-
-      existingPosts.unshift(newPost);
-      localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
-
-      processNext(index + 1);
-    };
-    reader.readAsDataURL(files[index]);
-  };
-
-  processNext();
+    // Save and render after all files are processed
+    localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
+    fileInput.value = ""; // Reset input
+    renderPhotoPosts();
+  })();
 }
 
 function renderPhotoPosts() {
