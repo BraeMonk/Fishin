@@ -29,12 +29,12 @@ function initFishList() {
     const item = document.createElement("div");
     item.className = "fish-item";
     item.innerHTML = `
-      <div style="font-weight:bold;">${name}: <span id="${name}-count">${savedCount}</span></div>
+      <div style="font-weight:bold; cursor:pointer;" onclick="toggleInfo('${name}')">${name}: <span id="${name}-count">${savedCount}</span></div>
       <div class="tally-controls">
         <button onclick="adjustCount('${name}', -1)">-</button>
         <button onclick="adjustCount('${name}', 1)">+</button>
         <button onclick="toggleInfo('${name}')">Info</button>
-        <div id="${name}-info" style="display:none;">
+        <div id="${name}-info" style="display:none; margin-top: 5px;">
           <strong>Rig:</strong> ${rig}<br>
           <strong>Bait:</strong> ${bait}
         </div>
@@ -104,10 +104,11 @@ function adjustCount(name, delta) {
   recalculateTotal();
 }
 
+// Toggle bait and rig info visibility
 function toggleInfo(name) {
   const infoEl = document.getElementById(`${name}-info`);
   if (!infoEl) return;
-  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
+  infoEl.style.display = (infoEl.style.display === "none" || infoEl.style.display === "") ? "block" : "none";
 }
 
 function recalculateTotal() {
@@ -131,7 +132,6 @@ function handleUpload() {
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  // Helper: Read file as DataURL
   function readFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -141,31 +141,88 @@ function handleUpload() {
     });
   }
 
-  // Async flow
+  function resizeImage(base64, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = maxWidth / img.width;
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.min(maxWidth, img.width);
+        canvas.height = img.height * scale;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const resizedDataUrl = canvas.toDataURL("image/jpeg", quality);
+        resolve(resizedDataUrl);
+      };
+      img.src = base64;
+    });
+  }
+
+  // Save to IndexedDB fallback
+  function saveToIndexedDB(post) {
+    const request = indexedDB.open("FishinBuddyDB", 1);
+
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains("photos")) {
+        db.createObjectStore("photos", { keyPath: "id", autoIncrement: true });
+      }
+    };
+
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction("photos", "readwrite");
+      const store = tx.objectStore("photos");
+      store.add(post);
+      tx.oncomplete = () => {
+        console.log("Saved to IndexedDB.");
+        alert("Large image stored safely offline (IndexedDB).");
+        renderPhotoPosts();
+      };
+    };
+
+    request.onerror = (e) => {
+      console.error("IndexedDB error:", e.target.error);
+      alert("Failed to store large image.");
+    };
+  }
+
   (async () => {
     for (let file of files) {
       try {
-        const imageData = await readFile(file);
+        const originalData = await readFile(file);
+        const resizedData = await resizeImage(originalData);
+
+        // Rough size check for base64 (each char is ~0.75 byte)
+        const maxLocalStorageSize = 1000000; // 1MB
+        const estimatedSize = resizedData.length * 0.75;
+
         const caption = prompt("Enter a caption for this photo:") || "";
         const location = prompt("Enter a location for this photo:") || "";
 
         const newPost = {
-          image: imageData,
+          image: resizedData,
           caption: caption.trim(),
           location: location.trim(),
           timestamp: new Date().toLocaleString()
         };
 
-        existingPosts.unshift(newPost);
+        if (estimatedSize > maxLocalStorageSize) {
+          // Too big, fallback to IndexedDB
+          saveToIndexedDB(newPost);
+        } else {
+          // Safe for localStorage
+          existingPosts.unshift(newPost);
+        }
       } catch (err) {
-        console.error("Error reading file:", err);
+        console.error("Error processing image:", err);
         alert("There was an error processing one of your photos.");
       }
     }
 
-    // Save and render after all files are processed
     localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
-    fileInput.value = ""; // Reset input
+    fileInput.value = "";
     renderPhotoPosts();
   })();
 }
@@ -178,69 +235,90 @@ function renderPhotoPosts() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
+  // Display posts from localStorage
   savedPosts.forEach((post, index) => {
-    const container = document.createElement("div");
-    container.className = "photo-container";
-    container.style = `
-      border: 1px solid #444;
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 6px;
-      background-color: #111;
-      color: #f5f5dc;
-      max-width: 400px;
-    `;
-
-    const image = document.createElement("img");
-image.src = post.image;
-image.alt = post.caption || "Photo";
-image.className = "gallery-photo thumbnail"; // Add the thumbnail class
-image.style.width = "100%";
-image.style.borderRadius = "4px";
-container.appendChild(image);
-
-    // Add class and dataset for modal functionality
-    image.classList.add("thumbnail");
-    image.dataset.fullsrc = post.image;
-
-    container.appendChild(image);
-
-    const captionDiv = document.createElement("div");
-    captionDiv.innerHTML = `Caption: <input id="caption-${index}" value="${post.caption || ""}" />`;
-    captionDiv.style.marginTop = "8px";
-    container.appendChild(captionDiv);
-
-    const locationDiv = document.createElement("div");
-    locationDiv.textContent = `Location: ${post.location || "(none)"}`;
-    container.appendChild(locationDiv);
-
-    const timestampDiv = document.createElement("div");
-    timestampDiv.textContent = post.timestamp;
-    timestampDiv.style = "font-size: 0.8rem; color: #aaa; margin-top: 6px;";
-    container.appendChild(timestampDiv);
-
-    const buttonRow = document.createElement("div");
-    buttonRow.style = "display:flex; justify-content:center; gap:0.75rem; margin-top:0.5rem;";
-
-    const buttons = [
-      { icon: '💾', title: "Save", action: () => { saveCaption(index); showSavedStatus(document.getElementById(`caption-${index}`)); } },
-      { icon: '🗑️', title: "Delete", action: () => deletePhoto(index) },
-      { icon: '📤', title: "Share", action: () => sharePost(index) },
-      { icon: '🎣', title: "Catch Card", action: () => generateCatchCard(index) },
-    ];
-
-    buttons.forEach(btn => {
-      const b = document.createElement("button");
-      b.innerHTML = btn.icon;
-      b.title = btn.title;
-      b.onclick = btn.action;
-      b.style = "background:none; border:none; color:#f5f5dc; font-size:1.3rem; cursor:pointer;";
-      buttonRow.appendChild(b);
-    });
-
-    container.appendChild(buttonRow);
-    photoGallery.appendChild(container);
+    createPhotoCard(post, index, false); // false = not IndexedDB
   });
+
+  // Display posts from IndexedDB
+  const request = indexedDB.open("FishinBuddyDB", 1);
+
+  request.onsuccess = (e) => {
+    const db = e.target.result;
+    const tx = db.transaction("photos", "readonly");
+    const store = tx.objectStore("photos");
+
+    const getAll = store.getAll();
+    getAll.onsuccess = () => {
+      getAll.result.forEach((post, index) => {
+        createPhotoCard(post, index, true); // true = from IndexedDB
+      });
+    };
+  };
+}
+
+function createPhotoCard(post, index, fromIndexedDB) {
+  const photoGallery = document.getElementById("photoGallery");
+
+  const container = document.createElement("div");
+  container.className = "photo-container";
+  container.style = `
+    border: 1px solid #444;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    background-color: #111;
+    color: #f5f5dc;
+    max-width: 400px;
+  `;
+
+  const image = document.createElement("img");
+  image.src = post.image;
+  image.alt = post.caption || "Photo";
+  image.className = "thumbnail";
+  image.style = "width: 100%; border-radius: 4px; cursor: pointer;";
+  container.appendChild(image);
+
+  const captionDiv = document.createElement("div");
+  captionDiv.innerHTML = `Caption: <input id="caption-${index}" value="${post.caption}" />`;
+  captionDiv.style.marginTop = "8px";
+  container.appendChild(captionDiv);
+
+  const locationDiv = document.createElement("div");
+  locationDiv.textContent = `Location: ${post.location || "(none)"}`;
+  container.appendChild(locationDiv);
+
+  const timestampDiv = document.createElement("div");
+  timestampDiv.textContent = post.timestamp;
+  timestampDiv.style = "font-size: 0.8rem; color: #aaa; margin-top: 6px;";
+  container.appendChild(timestampDiv);
+
+  const buttonRow = document.createElement("div");
+  buttonRow.style = "display:flex; justify-content:center; gap:0.75rem; margin-top:0.5rem;";
+
+  const buttons = [
+    {
+      icon: '💾', title: "Save", action: () => {
+        saveCaption(index, fromIndexedDB);
+        showSavedStatus(document.getElementById(`caption-${index}`));
+      }
+    },
+    { icon: '🗑️', title: "Delete", action: () => deletePhoto(index, fromIndexedDB) },
+    { icon: '📤', title: "Share", action: () => sharePost(index, fromIndexedDB) },
+    { icon: '🎣', title: "Catch Card", action: () => generateCatchCard(index) }
+  ];
+
+  buttons.forEach(btn => {
+    const b = document.createElement("button");
+    b.innerHTML = btn.icon;
+    b.title = btn.title;
+    b.onclick = btn.action;
+    b.style = "background:none; border:none; color:#f5f5dc; font-size:1.3rem; cursor:pointer;";
+    buttonRow.appendChild(b);
+  });
+
+  container.appendChild(buttonRow);
+  photoGallery.appendChild(container);
 }
 
 // ====== Caption Editing ======
