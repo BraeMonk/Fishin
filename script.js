@@ -184,6 +184,7 @@ function deleteIndexedDBPostById(id) {
 }
 
 // ===== Photo Gallery =====
+
 // Handle photo upload
 function handleUpload() {
   const input = document.getElementById("photoInput");
@@ -197,17 +198,16 @@ function handleUpload() {
     reader.onload = function (event) {
       const photoData = {
         src: event.target.result,
-        caption: "", // default empty caption
+        caption: "",
         timestamp: new Date().toLocaleString()
       };
-      storedPhotos.unshift(photoData); // newest first
+      storedPhotos.unshift(photoData);
       localStorage.setItem("photos", JSON.stringify(storedPhotos));
       renderPhotoPosts();
     };
     reader.readAsDataURL(file);
   });
 
-  // Clear input so same file can be re-uploaded if needed
   input.value = "";
 }
 
@@ -236,25 +236,52 @@ function renderPhotoPosts() {
     timestampDiv.className = "photo-timestamp";
     timestampDiv.innerText = photo.timestamp || new Date().toLocaleString();
 
-    // Button Row
     const buttonRow = document.createElement("div");
     buttonRow.className = "photo-buttons";
 
-    // Share Button
+    // Share/Download Catch Card with watermark
     const shareButton = document.createElement("button");
     shareButton.innerHTML = `<i class="fas fa-share"></i>`;
     shareButton.title = "Download Catch Card";
     shareButton.addEventListener("click", () => {
-      html2canvas(container).then(canvas => {
-        const link = document.createElement("a");
-        link.download = `catch-card-${index + 1}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        openInstagramModal(); // Optional
-      });
+      const clone = container.cloneNode(true);
+      const watermark = new Image();
+      watermark.src = "icon_192x192.png";
+      watermark.onload = () => {
+        html2canvas(clone, { allowTaint: true }).then(canvas => {
+          const ctx = canvas.getContext("2d");
+          const scale = 0.15;
+          const iconWidth = watermark.width * scale;
+          const iconHeight = watermark.height * scale;
+          ctx.drawImage(
+            watermark,
+            canvas.width - iconWidth - 20,
+            canvas.height - iconHeight - 20,
+            iconWidth,
+            iconHeight
+          );
+          const link = document.createElement("a");
+          link.download = `catch-card-${index + 1}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+          openInstagramModal();
+        });
+      };
+    });
+
+    // Delete button
+    const deleteButton = document.createElement("button");
+    deleteButton.innerHTML = `<i class="fas fa-trash-alt"></i>`;
+    deleteButton.title = "Delete Photo";
+    deleteButton.addEventListener("click", () => {
+      storedPhotos.splice(index, 1);
+      localStorage.setItem("photos", JSON.stringify(storedPhotos));
+      renderPhotoPosts();
     });
 
     buttonRow.appendChild(shareButton);
+    buttonRow.appendChild(deleteButton);
+
     container.appendChild(img);
     container.appendChild(captionDiv);
     container.appendChild(timestampDiv);
