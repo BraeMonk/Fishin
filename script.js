@@ -248,19 +248,6 @@ function renderPhotoPosts() {
   });
 }
 
-function saveCaption(index) {
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-
-  const caption = document.getElementById(`caption-${index}`)?.value || "";
-  const location = document.getElementById(`location-${index}`)?.value || "";
-
-  if (savedPosts[index]) {
-    savedPosts[index].caption = caption;
-    savedPosts[index].location = location;
-    localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-  }
-}
-
 function showSavedStatus(element) {
   const originalBorder = element.style.border;
   const originalBG = element.style.background;
@@ -423,9 +410,9 @@ function toggleInfo(name) {
 
 function recalculateTotal() {
   let total = 0;
-  document.querySelectorAll(".fish-item span").forEach(span => {
-    total += parseInt(span.textContent, 10);
-  });
+  document.querySelectorAll(".fish-item [id$='-count']").forEach(span => {
+  total += parseInt(span.textContent, 10);
+});
   document.getElementById("grandTotal").textContent = total;
 }
 
