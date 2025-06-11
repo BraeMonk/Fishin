@@ -113,11 +113,7 @@
   </div>
 
   <div id="photoGallery" class="gallery-grid"></div>
-</section>
-
-  <div id="imageModal" class="modal" onclick="closeModal()">
-  <img id="modalImage" class="modal-content" />
-</div>
+  </section>
 
 <div id="instagramModal" style="
   display: none;
@@ -158,7 +154,47 @@
     ">Got it!</button>
   </div>
 </div>
+  <!-- Your page content here, including the #imageModal div -->
 
+  <!-- Modal HTML (must be in the DOM before this script runs) -->
+  <div id="imageModal" style="display:none; position:fixed; z-index:1000; left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
+    <span id="modalClose" style="position:absolute; top:20px; right:30px; font-size:40px; color:white; cursor:pointer; user-select:none;">&times;</span>
+    <img id="modalImg" src="" alt="Full size" style="max-width:90%; max-height:90%; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.7);" />
+  </div>
+
+  <!-- Your other scripts here -->
   <script src="script.js"></script>
+  <!-- Modal script: place it here at the end of body -->
+  <script>
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalClose = document.getElementById('modalClose');
+
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('thumbnail')) {
+        modalImg.src = e.target.dataset.fullsrc || e.target.src;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // prevent background scroll
+      }
+    });
+
+    function closeModal() {
+      modal.style.display = 'none';
+      modalImg.src = '';
+      document.body.style.overflow = '';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeModal();
+      }
+    });
+  </script>
 </body>
 </html>
