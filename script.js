@@ -161,6 +161,10 @@ function renderPhotoPosts() {
     captionInput.placeholder = "Enter caption";
     captionInput.rows = 2;
     captionInput.style.width = "100%";
+    captionInput.style.maxWidth = "100%";
+    captionInput.style.overflowWrap = "break-word";
+    captionInput.style.wordBreak = "break-word";
+    captionInput.style.boxSizing = "border-box";
     captionInput.style.marginTop = "8px";
     captionInput.style.background = "#000";
     captionInput.style.color = "#f5f5dc";
