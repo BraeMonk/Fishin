@@ -196,10 +196,15 @@ function renderPhotoPosts() {
     image.alt = post.caption || "Photo";
     image.style.width = "100%";
     image.style.borderRadius = "4px";
+
+    // Add class and dataset for modal functionality
+    image.classList.add("thumbnail");
+    image.dataset.fullsrc = post.image;
+
     container.appendChild(image);
 
     const captionDiv = document.createElement("div");
-    captionDiv.innerHTML = `Caption: <input id="caption-${index}" value="${post.caption}" />`;
+    captionDiv.innerHTML = `Caption: <input id="caption-${index}" value="${post.caption || ""}" />`;
     captionDiv.style.marginTop = "8px";
     container.appendChild(captionDiv);
 
