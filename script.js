@@ -105,13 +105,13 @@ function handleUpload() {
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const files = Array.from(fileInput.files);
 
-  const postPromises = files.map((file, i) => {
+  const postPromises = files.map(file => {
     return new Promise((resolve, reject) => {
+      const caption = prompt("Enter caption for this photo:")?.trim() || "";
+      const location = prompt("Enter location for this photo:")?.trim() || "";
+
       const reader = new FileReader();
       reader.onload = e => {
-        const caption = prompt(`Enter caption for image ${i + 1}:`, "") || "";
-        const location = prompt(`Enter location for image ${i + 1}:`, "") || "";
-
         resolve({
           image: e.target.result,
           caption,
@@ -125,12 +125,11 @@ function handleUpload() {
   });
 
   Promise.all(postPromises).then(newPosts => {
-    // Add new posts to the top of the feed
     const updatedPosts = [...newPosts, ...existingPosts];
     localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
     renderPhotoPosts();
 
-    // Clear file input only (no need to clear caption/location anymore)
+    // Reset file input
     fileInput.value = "";
   }).catch(err => {
     console.error("Error uploading photos:", err);
