@@ -101,27 +101,31 @@ function handleUpload() {
 
   if (fileInput.files.length > 0) {
     const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-    const newPosts = [];
+    let newPosts = [];
 
     const files = Array.from(fileInput.files);
     let filesProcessed = 0;
 
     files.forEach(file => {
       const reader = new FileReader();
+
+      // Bind caption/location per file
+      const thisCaption = caption;
+      const thisLocation = location;
+
       reader.onload = function (event) {
         newPosts.push({
           image: event.target.result,
-          caption,
-          location,
+          caption: thisCaption,
+          location: thisLocation,
           timestamp: new Date().toLocaleString()
         });
 
         filesProcessed++;
 
         if (filesProcessed === files.length) {
-          const updatedPosts = newPosts.concat(savedPosts); // <-- NEWEST FIRST
+          const updatedPosts = newPosts.concat(savedPosts); // newest first
           localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
-          console.log("Saved posts:", updatedPosts);
           renderPhotoPosts();
 
           // Clear inputs
@@ -130,6 +134,7 @@ function handleUpload() {
           document.getElementById("photoLocationInput").value = "";
         }
       };
+
       reader.readAsDataURL(file);
     });
   } else {
