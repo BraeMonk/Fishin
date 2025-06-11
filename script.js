@@ -192,10 +192,12 @@ function renderPhotoPosts() {
     `;
 
     const image = document.createElement("img");
-    image.src = post.image;
-    image.alt = post.caption || "Photo";
-    image.style.width = "100%";
-    image.style.borderRadius = "4px";
+image.src = post.image;
+image.alt = post.caption || "Photo";
+image.className = "gallery-photo thumbnail"; // Add the thumbnail class
+image.style.width = "100%";
+image.style.borderRadius = "4px";
+container.appendChild(image);
 
     // Add class and dataset for modal functionality
     image.classList.add("thumbnail");
