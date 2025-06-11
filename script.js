@@ -227,7 +227,6 @@ function readFileAsDataURL(file) {
   });
 }
 
-// Render all photo cards
 function renderPhotoPosts() {
   const gallery = document.getElementById("photoGallery");
   gallery.innerHTML = "";
@@ -235,54 +234,56 @@ function renderPhotoPosts() {
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
   storedPhotos.forEach((photo, index) => {
-    const container = document.createElement("div");
-    container.className = "photo-container";
-    container.id = `photo-card-${index}`;
+    // Main card container with catch card style
+    const card = document.createElement("div");
+    card.className = "catch-card";
 
-    // Image
+    // Photo element inside card
     const img = document.createElement("img");
     img.src = photo.src;
-    img.alt = "Uploaded photo";
+    img.alt = "Catch photo";
+    img.className = "catch-photo";
     img.addEventListener("click", () => openModal(photo.src));
-    container.appendChild(img);
+    card.appendChild(img);
 
-    // Stamps container for caption and location (position these as overlays)
-    const stamps = document.createElement("div");
-    stamps.className = "photo-stamps";
+    // Info container below photo
+    const info = document.createElement("div");
+    info.className = "catch-info";
 
-    // Location stamp
-    if(photo.location) {
-      const locationStamp = document.createElement("div");
-      locationStamp.className = "photo-location-stamp";
-      locationStamp.innerText = photo.location;
-      stamps.appendChild(locationStamp);
+    // Caption text
+    if (photo.caption) {
+      const caption = document.createElement("p");
+      caption.className = "catch-caption";
+      caption.textContent = photo.caption;
+      info.appendChild(caption);
     }
 
-    // Caption stamp
-    if(photo.caption) {
-      const captionStamp = document.createElement("div");
-      captionStamp.className = "photo-caption-stamp";
-      captionStamp.innerText = photo.caption;
-      stamps.appendChild(captionStamp);
+    // Location text
+    if (photo.location) {
+      const location = document.createElement("p");
+      location.className = "catch-location";
+      location.textContent = "Location: " + photo.location;
+      info.appendChild(location);
     }
-    container.appendChild(stamps);
 
-    // Timestamp
-    const timestampDiv = document.createElement("div");
-    timestampDiv.className = "photo-timestamp";
-    timestampDiv.innerText = photo.timestamp || new Date().toLocaleString();
-    container.appendChild(timestampDiv);
+    // Timestamp text
+    const date = document.createElement("p");
+    date.className = "catch-date";
+    date.textContent = "Caught: " + (photo.timestamp || new Date().toLocaleString());
+    info.appendChild(date);
 
-    // Buttons container
+    card.appendChild(info);
+
+    // Buttons container (share & delete)
     const buttonRow = document.createElement("div");
-    buttonRow.className = "photo-buttons";
+    buttonRow.className = "catch-buttons";
 
-    // Share/Download Catch Card with watermark
+    // Share button
     const shareButton = document.createElement("button");
     shareButton.innerHTML = `<i class="fas fa-share"></i>`;
     shareButton.title = "Download Catch Card";
     shareButton.addEventListener("click", () => {
-      const clone = container.cloneNode(true);
+      const clone = card.cloneNode(true);
       const watermark = new Image();
       watermark.src = "icon_192x192.png";
       watermark.onload = () => {
@@ -316,6 +317,14 @@ function renderPhotoPosts() {
       localStorage.setItem("photos", JSON.stringify(storedPhotos));
       renderPhotoPosts();
     });
+
+    buttonRow.appendChild(shareButton);
+    buttonRow.appendChild(deleteButton);
+    card.appendChild(buttonRow);
+
+    gallery.appendChild(card);
+  });
+
 
     buttonRow.appendChild(shareButton);
     buttonRow.appendChild(deleteButton);
