@@ -154,48 +154,37 @@ function renderPhotoPosts() {
     image.onclick = () => openModal(post.image);
     container.appendChild(image);
 
-    // Caption (textarea)
-    const captionInput = document.createElement("textarea");
-    captionInput.id = `caption-${index}`;
-    captionInput.value = post.caption || "";
-    captionInput.placeholder = "Enter caption";
-    captionInput.rows = 2;
-    captionInput.style.width = "100%";
-    captionInput.style.maxWidth = "100%";
-    captionInput.style.overflowWrap = "break-word";
-    captionInput.style.wordBreak = "break-word";
-    captionInput.style.boxSizing = "border-box";
-    captionInput.style.marginTop = "8px";
-    captionInput.style.background = "#000";
-    captionInput.style.color = "#f5f5dc";
-    captionInput.style.border = "1px solid #444";
-    captionInput.style.borderRadius = "4px";
-    captionInput.style.padding = "0.5rem";
-    captionInput.style.resize = "vertical";
-    captionInput.onblur = () => {
-      saveCaption(index);
-      showSavedStatus(captionInput);
-    };
-    container.appendChild(captionInput);
+    // Caption display
+const captionDiv = document.createElement("div");
+captionDiv.textContent = post.caption;
+captionDiv.style.whiteSpace = "pre-wrap";
+captionDiv.style.wordWrap = "break-word";
+captionDiv.style.overflowWrap = "break-word";
+captionDiv.style.maxWidth = "100%";
+captionDiv.style.boxSizing = "border-box";
+captionDiv.style.marginTop = "8px";
+captionDiv.style.background = "#000";
+captionDiv.style.color = "#f5f5dc";
+captionDiv.style.border = "1px solid #444";
+captionDiv.style.borderRadius = "4px";
+captionDiv.style.padding = "0.5rem";
+container.appendChild(captionDiv);
 
-    // Location (input)
-    const locationInput = document.createElement("input");
-    locationInput.type = "text";
-    locationInput.id = `location-${index}`;
-    locationInput.value = post.location || "";
-    locationInput.placeholder = "Enter location";
-    locationInput.style.width = "100%";
-    locationInput.style.marginTop = "4px";
-    locationInput.style.background = "#000";
-    locationInput.style.color = "#f5f5dc";
-    locationInput.style.border = "1px solid #444";
-    locationInput.style.borderRadius = "4px";
-    locationInput.style.padding = "0.5rem";
-    locationInput.onblur = () => {
-      saveCaption(index);
-      showSavedStatus(locationInput);
-    };
-    container.appendChild(locationInput);
+// Location display
+const locationDiv = document.createElement("div");
+locationDiv.textContent = post.location;
+locationDiv.style.whiteSpace = "pre-wrap";
+locationDiv.style.wordWrap = "break-word";
+locationDiv.style.overflowWrap = "break-word";
+locationDiv.style.maxWidth = "100%";
+locationDiv.style.boxSizing = "border-box";
+locationDiv.style.marginTop = "4px";
+locationDiv.style.background = "#000";
+locationDiv.style.color = "#f5f5dc";
+locationDiv.style.border = "1px solid #444";
+locationDiv.style.borderRadius = "4px";
+locationDiv.style.padding = "0.5rem";
+container.appendChild(locationDiv);
 
     // Timestamp
     const timestampDiv = document.createElement("div");
