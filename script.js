@@ -184,67 +184,56 @@ function deleteIndexedDBPostById(id) {
 }
 
 // ===== Photo Gallery =====
-async function renderPhotoPosts() {
-  const gal = document.getElementById('photoGallery');
-  gal.innerHTML = '';
-  const posts = await getIndexedDBPosts().catch(() => []);
-  posts.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+function renderPhotoPosts() {
+  const gallery = document.getElementById("photoGallery");
+  gallery.innerHTML = "";
 
-  // Group posts by groupId
-  const grouped = posts.reduce((acc, post) => {
-    (acc[post.groupId] = acc[post.groupId] || []).push(post);
-    return acc;
-  }, {});
+  const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  // For each group, create a container
-  Object.values(grouped).forEach(group => {
-    const groupContainer = document.createElement('div');
-    groupContainer.className = 'photo-group';
+  storedPhotos.forEach((photo, index) => {
+    const container = document.createElement("div");
+    container.className = "photo-container";
+    container.id = `photo-card-${index}`;
 
-    // Show caption & location from first photo in group
-    const caption = group[0].caption || '';
-    const location = group[0].location || '';
+    const img = document.createElement("img");
+    img.src = photo.src;
+    img.alt = "Uploaded photo";
+    img.addEventListener("click", () => openModal(photo.src));
 
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'group-meta';
-    metaDiv.textContent = `${caption} ${location ? '- ' + location : ''}`;
-    groupContainer.appendChild(metaDiv);
+    const captionDiv = document.createElement("div");
+    captionDiv.className = "photo-caption";
+    captionDiv.innerText = photo.caption || "";
 
-    // Create photo containers inside group
-    group.forEach((post, idx) => {
-      const container = document.createElement('div');
-      container.className = 'photo-container';
+    const timestampDiv = document.createElement("div");
+    timestampDiv.className = "photo-timestamp";
+    timestampDiv.innerText = photo.timestamp || new Date().toLocaleString();
 
-      const img = document.createElement('img');
-      img.src = post.image;
-      img.alt = post.caption || 'Photo';
-      img.onclick = () => openModal(post.image);
+    // Button Row
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "photo-buttons";
 
-      const meta = document.createElement('div');
-      meta.className = 'photo-meta';
-      meta.textContent = new Date(post.timestamp).toLocaleString();
-
-      const btnRow = document.createElement('div');
-      btnRow.className = 'photo-buttons';
-
-      // Buttons for delete, share, etc.
-      ['🗑️','📤','🎣'].forEach(icon => {
-        const b = document.createElement('button');
-        b.innerHTML = icon;
-        b.onclick = () => {
-          if (icon === '🗑️') {
-            deleteIndexedDBPostById(post.id).then(renderPhotoPosts);
-          }
-          // TODO: Add share/catch functionality here
-        };
-        btnRow.appendChild(b);
+    // Share Button
+    const shareButton = document.createElement("button");
+    shareButton.innerHTML = `<i class="fas fa-share"></i>`;
+    shareButton.title = "Download Catch Card";
+    shareButton.addEventListener("click", () => {
+      html2canvas(container).then(canvas => {
+        const link = document.createElement("a");
+        link.download = `catch-card-${index + 1}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        openInstagramModal(); // optional
       });
-
-      container.append(img, meta, btnRow);
-      groupContainer.appendChild(container);
     });
 
-    gal.appendChild(groupContainer);
+    // Optional: Add delete or edit buttons here
+
+    buttonRow.appendChild(shareButton);
+    container.appendChild(img);
+    container.appendChild(captionDiv);
+    container.appendChild(timestampDiv);
+    container.appendChild(buttonRow);
+    gallery.appendChild(container);
   });
 }
 
@@ -286,3 +275,11 @@ function openModal(src) {
 document.getElementById('modalClose').onclick = () => {
   document.getElementById('imageModal').style.display = 'none';
 };
+
+function openInstagramModal() {
+  document.getElementById("instagramModal").style.display = "flex";
+}
+
+document.getElementById("closeInstagramModal").addEventListener("click", () => {
+  document.getElementById("instagramModal").style.display = "none";
+});
