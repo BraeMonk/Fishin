@@ -325,15 +325,6 @@ function renderPhotoPosts() {
     gallery.appendChild(card);
   });
 
-
-    buttonRow.appendChild(shareButton);
-    buttonRow.appendChild(deleteButton);
-    container.appendChild(buttonRow);
-
-    gallery.appendChild(container);
-  });
-}
-
 // Modal viewer for full-screen photo
 function openModal(src) {
   const modal = document.getElementById("imageModal");
