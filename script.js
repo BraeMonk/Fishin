@@ -118,10 +118,10 @@ function handleUpload() {
 
         filesProcessed++;
 
-        // Once all files are processed, update localStorage and render
         if (filesProcessed === files.length) {
-          const updatedPosts = savedPosts.concat(newPosts);
+          const updatedPosts = newPosts.concat(savedPosts); // <-- NEWEST FIRST
           localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
+          console.log("Saved posts:", updatedPosts);
           renderPhotoPosts();
 
           // Clear inputs
@@ -143,31 +143,26 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  savedPosts
-    .slice()                         // clone array to avoid modifying original
-    .reverse()                       // show newest first
-    .forEach((post, displayIndex) => {
-      const realIndex = savedPosts.length - 1 - displayIndex;
+  savedPosts.forEach((post, index) => {
+    const container = document.createElement("div");
+    container.className = "photo-container";
+    container.style.marginBottom = "20px";
 
-      const container = document.createElement("div");
-      container.className = "photo-container";
-      container.style.marginBottom = "20px";  // column-style layout
+    container.innerHTML = `
+      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
+      <input type="text" id="caption-${index}" value="${post.caption}" />
+      <div>${post.location}</div>
+      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+      <div class="button-row">
+        <button title="Save Caption" onclick="saveCaption(${index})">📝</button>
+        <button title="Delete Photo" onclick="deletePhoto(${index})">✖️</button>
+        <button title="Share Photo" onclick="sharePost(${index})">📤</button>
+        <button title="Generate Catch Card" onclick="generateCatchCard(${index})">🎣</button>
+      </div>
+    `;
 
-      container.innerHTML = `
-  <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-  <input type="text" id="caption-${realIndex}" value="${post.caption}" />
-  <div>${post.location}</div>
-  <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-  <div class="button-row">
-    <button title="Save Caption" onclick="saveCaption(${realIndex})">📝</button>
-    <button title="Delete Photo" onclick="deletePhoto(${realIndex})">✖️</button>
-    <button title="Share Photo" onclick="sharePost(${realIndex})">📤</button>
-    <button title="Generate Catch Card" onclick="generateCatchCard(${realIndex})">🎣</button>
-  </div>
-`;
-
-      photoGallery.appendChild(container);
-    });
+    photoGallery.appendChild(container);
+  });
 }
 
 function generateCatchCard(index) {
