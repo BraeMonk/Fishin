@@ -100,49 +100,44 @@ function handleUpload() {
   const location = document.getElementById("photoLocationInput").value.trim();
 
   if (!fileInput.files.length) {
-    console.error("No files selected.");
+    alert("Please select one or more photos to upload.");
     return;
   }
 
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  const files = Array.from(fileInput.files);
+  const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
+  const files = Array.from(fileInput.files);
   const postPromises = files.map(file => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = function (event) {
+      reader.onload = e => {
         resolve({
-          image: event.target.result,
+          image: e.target.result,
           caption,
           location,
           timestamp: new Date().toLocaleString()
         });
       };
-      reader.onerror = function () {
-        reject(new Error(`Failed to read file: ${file.name}`));
-      };
+      reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   });
 
-  Promise.all(postPromises)
-    .then(newPosts => {
-      const updatedPosts = [...newPosts, ...savedPosts]; // Newest first
-      localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
-      renderPhotoPosts();
+  Promise.all(postPromises).then(newPosts => {
+    const updatedPosts = [...newPosts, ...existingPosts];
+    localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
+    renderPhotoPosts();
 
-      // Reset input fields
-      fileInput.type = ''; // force clear
-      fileInput.type = 'file';
-      document.getElementById("photoCaption").value = "";
-      document.getElementById("photoLocationInput").value = "";
-    })
-    .catch(error => {
-      console.error("Error uploading images:", error);
-    });
+    // Reset inputs
+    fileInput.value = "";
+    document.getElementById("photoCaption").value = "";
+    document.getElementById("photoLocationInput").value = "";
+  }).catch(err => {
+    console.error("Error uploading photos:", err);
+  });
 }
 
-  function renderPhotoPosts() {
+function renderPhotoPosts() {
   const photoGallery = document.getElementById("photoGallery");
   photoGallery.innerHTML = "";
 
@@ -160,47 +155,128 @@ function handleUpload() {
     image.onclick = () => openModal(post.image);
     container.appendChild(image);
 
-    // Caption input
-    const captionInput = document.createElement("input");
-    captionInput.type = "text";
+    // Caption (textarea)
+    const captionInput = document.createElement("textarea");
     captionInput.id = `caption-${index}`;
     captionInput.value = post.caption || "";
+    captionInput.placeholder = "Enter caption";
+    captionInput.rows = 2;
+    captionInput.style.width = "100%";
+    captionInput.style.marginTop = "8px";
+    captionInput.style.background = "#000";
+    captionInput.style.color = "#f5f5dc";
+    captionInput.style.border = "1px solid #444";
+    captionInput.style.borderRadius = "4px";
+    captionInput.style.padding = "0.5rem";
+    captionInput.style.resize = "vertical";
+    captionInput.onblur = () => {
+      saveCaption(index);
+      showSavedStatus(captionInput);
+    };
     container.appendChild(captionInput);
 
-    // Location
-    const locationDiv = document.createElement("div");
-    locationDiv.textContent = post.location || "Unknown location";
-    container.appendChild(locationDiv);
+    // Location (input)
+    const locationInput = document.createElement("input");
+    locationInput.type = "text";
+    locationInput.id = `location-${index}`;
+    locationInput.value = post.location || "";
+    locationInput.placeholder = "Enter location";
+    locationInput.style.width = "100%";
+    locationInput.style.marginTop = "4px";
+    locationInput.style.background = "#000";
+    locationInput.style.color = "#f5f5dc";
+    locationInput.style.border = "1px solid #444";
+    locationInput.style.borderRadius = "4px";
+    locationInput.style.padding = "0.5rem";
+    locationInput.onblur = () => {
+      saveCaption(index);
+      showSavedStatus(locationInput);
+    };
+    container.appendChild(locationInput);
 
     // Timestamp
     const timestampDiv = document.createElement("div");
     timestampDiv.style.fontSize = "0.8rem";
     timestampDiv.style.color = "#aaa";
+    timestampDiv.style.marginTop = "4px";
     timestampDiv.textContent = post.timestamp || "";
     container.appendChild(timestampDiv);
 
-    // Button row
+    // Button row (icon-only)
     const buttonRow = document.createElement("div");
-    buttonRow.className = "button-row";
+    buttonRow.style.display = "flex";
+    buttonRow.style.justifyContent = "center";
+    buttonRow.style.gap = "0.75rem";
+    buttonRow.style.marginTop = "0.5rem";
 
     const buttons = [
-      { icon: "📝", title: "Save Caption", action: () => saveCaption(index) },
-      { icon: "✖️", title: "Delete Photo", action: () => deletePhoto(index) },
-      { icon: "📤", title: "Share Photo", action: () => sharePost(index) },
-      { icon: "🎣", title: "Generate Catch Card", action: () => generateCatchCard(index) }
+      {
+        icon: '<i class="fas fa-save"></i>',
+        title: "Save",
+        action: () => {
+          saveCaption(index);
+          showSavedStatus(captionInput);
+        }
+      },
+      {
+        icon: '<i class="fas fa-trash-alt"></i>',
+        title: "Delete",
+        action: () => deletePhoto(index)
+      },
+      {
+        icon: '<i class="fas fa-share-square"></i>',
+        title: "Share",
+        action: () => sharePost(index)
+      },
+      {
+        icon: '<i class="fas fa-fish"></i>',
+        title: "Catch Card",
+        action: () => generateCatchCard(index)
+      }
     ];
 
     buttons.forEach(btn => {
-      const b = document.createElement("button");
-      b.title = btn.title;
-      b.textContent = btn.icon;
-      b.onclick = btn.action;
-      buttonRow.appendChild(b);
+      const button = document.createElement("button");
+      button.innerHTML = btn.icon;
+      button.title = btn.title;
+      button.onclick = btn.action;
+      button.style.background = "none";
+      button.style.border = "none";
+      button.style.color = "#f5f5dc";
+      button.style.fontSize = "1.3rem";
+      button.style.cursor = "pointer";
+      buttonRow.appendChild(button);
     });
 
     container.appendChild(buttonRow);
     photoGallery.appendChild(container);
   });
+}
+
+function saveCaption(index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+
+  const caption = document.getElementById(`caption-${index}`)?.value || "";
+  const location = document.getElementById(`location-${index}`)?.value || "";
+
+  if (savedPosts[index]) {
+    savedPosts[index].caption = caption;
+    savedPosts[index].location = location;
+    localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+  }
+}
+
+function showSavedStatus(element) {
+  const originalBorder = element.style.border;
+  const originalBG = element.style.background;
+
+  element.style.border = "2px solid #4caf50";
+  element.style.background = "#003300";
+
+  setTimeout(() => {
+    element.style.border = originalBorder;
+    element.style.background = originalBG;
+  }, 1500);
 }
 
 function generateCatchCard(index) {
