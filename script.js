@@ -128,9 +128,15 @@ function handleUpload() {
   <div class="share-buttons">
   <button onclick="sharePost(${index})" style="margin-top:5px;">Share</button>
   <button onclick="generateCatchCard(${index})">Create Catch Card</button>
-  <button onclick="shareToPlatform('facebook', ${index})">Facebook</button>
-  <button onclick="shareToPlatform('twitter', ${index})">X</button>
-  <button onclick="shareToPlatform('whatsapp', ${index})">WhatsApp</button>
+  const actions = document.createElement("div");
+actions.className = "share-icons";
+actions.innerHTML = `
+  <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${index})" style="cursor:pointer; margin-right:10px;"></i>
+  <i class="fab fa-facebook" title="Share on Facebook" onclick="shareToFacebook(${index})" style="cursor:pointer; margin-right:10px;"></i>
+  <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${index})" style="cursor:pointer; margin-right:10px;"></i>
+  <i class="fab fa-instagram" title="Download to share on Instagram" onclick="generateCatchCard(${index})" style="cursor:pointer;"></i>
+`;
+container.appendChild(actions);
 </div>
 `;
 
@@ -174,6 +180,20 @@ function generateCatchCard(index) {
     link.click();
     document.body.removeChild(card); // Clean up the card after saving
   });
+}
+
+function shareToFacebook(index) {
+  const post = JSON.parse(localStorage.getItem("photoGallery"))[index];
+  const url = encodeURIComponent("https://yourapp.com"); // Replace with your app URL
+  const caption = encodeURIComponent(post.caption);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${caption}`, '_blank');
+}
+
+function shareToTwitter(index) {
+  const post = JSON.parse(localStorage.getItem("photoGallery"))[index];
+  const text = encodeURIComponent(`${post.caption} via Fishin’ Buddy 🎣`);
+  const url = encodeURIComponent("https://yourapp.com");
+  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
 }
 
 function saveCaption(index) {
