@@ -94,41 +94,49 @@ function adjustCount(name, delta) {
   recalculateTotal();
 }
 
-async function handleUpload() {
+function handleUpload() {
   const fileInput = document.getElementById("photoInput");
+  const files = Array.from(fileInput.files);
 
-  if (!fileInput.files.length) {
-    alert("Please select one or more photos to upload.");
+  if (!files.length) {
+    alert("Please select a photo to upload.");
     return;
   }
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  // Convert each file to DataURL & prompt for caption/location separately
-  for (const file of fileInput.files) {
-    const imageDataUrl = await fileToDataUrl(file);
+  // Process each image separately
+  const processNext = (index = 0) => {
+    if (index >= files.length) {
+      fileInput.value = ""; // Reset file input
+      renderPhotoPosts();
+      return;
+    }
 
-    // Prompt caption & location for EACH photo separately
-    const caption = prompt("Enter caption for this photo:", "")?.trim() || "";
-    const location = prompt("Enter location for this photo:", "")?.trim() || "";
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // Prompt user for caption and location per photo
+      const caption = prompt("Enter a caption for this photo:") || "";
+      const location = prompt("Enter a location for this photo:") || "";
 
-    const newPost = {
-      image: imageDataUrl,
-      caption,
-      location,
-      timestamp: new Date().toLocaleString()
+      const newPost = {
+        image: e.target.result,
+        caption: caption.trim(),
+        location: location.trim(),
+        timestamp: new Date().toLocaleString()
+      };
+
+      // Save to top of the list
+      existingPosts.unshift(newPost);
+      localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
+
+      // Continue to next photo
+      processNext(index + 1);
     };
+    reader.readAsDataURL(files[index]);
+  };
 
-    // Newest posts on top:
-    existingPosts.unshift(newPost);
-  }
-
-  // Save & render
-  localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
-  renderPhotoPosts();
-
-  // Reset input so same file(s) can be uploaded again
-  fileInput.value = "";
+  processNext(); // Start processing first photo
 }
 
 // Helper: converts File to DataURL Promise
