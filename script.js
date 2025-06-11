@@ -143,10 +143,10 @@ function handleUpload() {
   <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
   <button onclick="saveCaption(${index})">Save Caption</button>
   <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
-  <div class="share-buttons">
-  <button onclick="sharePost(${index})" style="margin-top:5px;">Share</button>
-  <button onclick="generateCatchCard(${index})">Create Catch Card</button>
-  const actions = document.createElement("div");
+  <div class="share-buttons"></div>
+`;
+
+const actions = document.createElement("div");
 actions.className = "share-icons";
 actions.innerHTML = `
   <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${index})" style="cursor:pointer; margin-right:10px;"></i>
@@ -154,9 +154,7 @@ actions.innerHTML = `
   <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${index})" style="cursor:pointer; margin-right:10px;"></i>
   <i class="fab fa-instagram" title="Download to share on Instagram" onclick="shareToInstagram(${index})" style="cursor:pointer;"></i>
 `;
-container.appendChild(actions);
-</div>
-`;
+container.querySelector(".share-buttons").appendChild(actions);
 
     photoGallery.appendChild(container);
   });
