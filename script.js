@@ -65,6 +65,24 @@ window.onload = function() {
   setupTabs();
 };
 
+function setupTabs() {
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  tabButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      // Remove active class from all buttons and tabs
+      tabButtons.forEach(b => b.classList.remove("active"));
+      tabContents.forEach(tc => tc.classList.remove("active"));
+
+      // Activate the clicked button and corresponding tab
+      button.classList.add("active");
+      const selectedTab = button.getAttribute("data-tab");
+      document.getElementById(selectedTab).classList.add("active");
+    });
+  });
+}
+
 // Move these functions **outside** window.onload to fix button issues
 function adjustCount(name, delta) {
   const countEl = document.getElementById(`${name}-count`);
@@ -297,21 +315,6 @@ function recalculateTotal() {
     total += parseInt(span.textContent, 10);
   });
   document.getElementById("grandTotal").textContent = total;
-}
-
-function setupTabs() {
-  document.querySelectorAll(".tab-button").forEach(button => {
-    button.addEventListener("click", () => {
-      document.querySelectorAll(".tab-button").forEach(b => b.classList.remove("active"));
-      button.classList.add("active");
-
-      const selectedTab = button.getAttribute("data-tab");
-      document.querySelectorAll(".tab-content").forEach(content => {
-        content.classList.remove("active");
-        if (content.id === selectedTab) content.classList.add("active");
-      });
-    });
-  });
 }
 
 document.getElementById("savePostBtn").addEventListener("click", handleUpload);
