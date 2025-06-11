@@ -96,8 +96,6 @@ function adjustCount(name, delta) {
 
 function handleUpload() {
   const fileInput = document.getElementById("photoInput");
-  const caption = document.getElementById("photoCaption").value.trim();
-  const location = document.getElementById("photoLocationInput").value.trim();
 
   if (!fileInput.files.length) {
     alert("Please select one or more photos to upload.");
@@ -105,12 +103,15 @@ function handleUpload() {
   }
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-
   const files = Array.from(fileInput.files);
-  const postPromises = files.map(file => {
+
+  const postPromises = files.map((file, i) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = e => {
+        const caption = prompt(`Enter caption for image ${i + 1}:`, "") || "";
+        const location = prompt(`Enter location for image ${i + 1}:`, "") || "";
+
         resolve({
           image: e.target.result,
           caption,
@@ -124,14 +125,13 @@ function handleUpload() {
   });
 
   Promise.all(postPromises).then(newPosts => {
+    // Add new posts to the top of the feed
     const updatedPosts = [...newPosts, ...existingPosts];
     localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
     renderPhotoPosts();
 
-    // Reset inputs
+    // Clear file input only (no need to clear caption/location anymore)
     fileInput.value = "";
-    document.getElementById("photoCaption").value = "";
-    document.getElementById("photoLocationInput").value = "";
   }).catch(err => {
     console.error("Error uploading photos:", err);
   });
