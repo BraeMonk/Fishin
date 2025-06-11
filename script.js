@@ -99,19 +99,17 @@ function handleUpload() {
   const caption = document.getElementById("photoCaption").value.trim();
   const location = document.getElementById("photoLocationInput").value.trim();
 
-  if (fileInput.files.length === 0) {
+  if (!fileInput.files.length) {
     console.error("No files selected.");
     return;
   }
 
-  const files = Array.from(fileInput.files);
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-
-  // Process all files in parallel using Promises
-  const readFilePromises = files.map(file => {
+  const files = Array.from(fileInput.files);
+  const postPromises = files.map(file => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         resolve({
           image: event.target.result,
           caption,
@@ -119,25 +117,26 @@ function handleUpload() {
           timestamp: new Date().toLocaleString()
         });
       };
-      reader.onerror = reject;
+      reader.onerror = function () {
+        reject(new Error(`Failed to read file: ${file.name}`));
+      };
       reader.readAsDataURL(file);
     });
   });
 
-  // Wait for all to finish before saving
-  Promise.all(readFilePromises)
+  Promise.all(postPromises)
     .then(newPosts => {
-      const updatedPosts = newPosts.concat(savedPosts);
+      const updatedPosts = [...newPosts, ...savedPosts]; // Newest first
       localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
       renderPhotoPosts();
 
-      // Reset form
+      // Reset form fields
       fileInput.value = "";
       document.getElementById("photoCaption").value = "";
       document.getElementById("photoLocationInput").value = "";
     })
     .catch(error => {
-      console.error("Error reading files:", error);
+      console.error("Error uploading images:", error);
     });
 }
 
