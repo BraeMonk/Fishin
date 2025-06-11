@@ -365,6 +365,32 @@ button:focus {
   background: #888;
 }
 
+    .catch-card {
+  border: 2.5px solid #2a9d8f;
+  border-radius: 10px;
+  box-shadow: 0 3px 7px rgba(0,0,0,0.2);
+  padding: 8px;
+  margin: 12px;
+  max-width: 300px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f8ff;
+}
+
+.catch-photo {
+  width: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 8px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
+}
+
+.catch-info p {
+  margin: 4px 0;
+  color: #1b264f;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
   </style>
 </head>
 <body>
@@ -415,6 +441,15 @@ button:focus {
       <button id="closeInstagramModal">Got it!</button>
     </div>
   </div>
+
+  <div class="catch-card">
+  <img src="..." alt="Catch photo" class="catch-photo" />
+  <div class="catch-info">
+    <p class="caption">Big bass on the fly rod!</p>
+    <p class="location">Location: Lovers Creek</p>
+    <p class="date">Caught: June 11, 2025, 18:00</p>
+  </div>
+</div>
 
   <script src="script.js"></script>
 
