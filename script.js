@@ -201,8 +201,12 @@ async function renderPhotoPosts() {
     img.onclick = () => openModal(post.image);
 
     const meta = document.createElement('div');
-    meta.className = 'photo-meta';
-    meta.textContent = new Date(post.timestamp).toLocaleString();
+meta.className = 'photo-meta';
+meta.innerHTML = `
+  <div><strong>Time:</strong> ${new Date(post.timestamp).toLocaleString()}</div>
+  ${post.caption ? `<div><strong>Caption:</strong> ${post.caption}</div>` : ''}
+  ${post.location ? `<div><strong>Location:</strong> ${post.location}</div>` : ''}
+`;
 
     const btnRow = document.createElement('div');
     btnRow.className = 'photo-buttons';
@@ -224,9 +228,16 @@ async function renderPhotoPosts() {
 async function handleUpload() {
   const input = document.getElementById('photoInput');
   const files = Array.from(input.files);
-  for (let f of files) {
+  for (const f of files) {
     const data = await readFile(f);
-    const photo = { image: data, caption:'', location:'', timestamp: new Date().toISOString() };
+    const caption = prompt(`Enter caption for ${f.name}:`) || '';
+    const location = prompt(`Enter location for ${f.name}:`) || '';
+    const photo = {
+      image: data,
+      caption: caption.trim(),
+      location: location.trim(),
+      timestamp: new Date().toISOString()
+    };
     await saveToIndexedDB(photo);
   }
   input.value = '';
