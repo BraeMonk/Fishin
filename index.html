@@ -12,6 +12,7 @@
   <title>Fishin' Buddy</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
+    /* Your existing styles unchanged */
     body { font-family: Arial, sans-serif; margin: 0 1rem; background: #000; color: #f5f5dc; font-size:1.05rem; line-height:1.6; }
     button { background:#f5f5dc; color:#000; border:none; padding:0.6rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:700; font-size:1rem; box-shadow:0 0 6px #3333; transition:background 0.2s ease, transform 0.1s ease; }
     button:hover, button:focus { background:#e5e5c4; transform:scale(1.02); outline:none; }
@@ -96,75 +97,72 @@
 <body>
 
   <div class="tabs">
-    <button class="tab-button active" data-tab="tally">Tally</button>
-    <button class="tab-button" data-tab="memory">Memories</button>
+    <button class="tab-button active" data-tab="tally" type="button">Tally</button>
+    <button class="tab-button" data-tab="memory" type="button">Memories</button>
   </div>
 
   <section id="tally" class="tab-content active">
     <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
     <div id="fishList"></div>
-    <button onclick="resetSeason()">Reset Season</button>
+    <button type="button" onclick="resetSeason()">Reset Season</button>
   </section>
 
   <section id="memory" class="tab-content">
-  <div id="photoUploader">
-    <input type="file" id="photoInput" multiple>
-    <button onclick="handleUpload()">Upload</button>
-  </div>
+    <div id="photoUploader">
+      <input type="file" id="photoInput" multiple />
+      <button type="button" onclick="handleUpload()">Upload</button>
+    </div>
 
-  <div id="photoGallery" class="gallery-grid"></div>
+    <div id="photoGallery" class="gallery-grid"></div>
   </section>
 
-<div id="instagramModal" style="
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-">
-  <div style="
-    background: #fff;
-    padding: 20px;
-    max-width: 350px;
-    border-radius: 8px;
-    text-align: center;
-    font-family: 'Courier New', monospace;
-    color: #3e2d16;
+  <div id="instagramModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
   ">
-    <h2>Share on Instagram</h2>
-    <p>
-      Your catch card has been downloaded.<br><br>
-      To share it on Instagram:<br>
-      1. Open the Instagram app.<br>
-      2. Tap the '+' icon to create a new post.<br>
-      3. Select the downloaded image from your device.<br>
-      4. Add any captions or tags you like and post it!
-    </p>
-    <button id="closeInstagramModal" style="
-      margin-top: 15px;
-      padding: 8px 20px;
-      background: #5e4322;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    ">Got it!</button>
+    <div style="
+      background: #fff;
+      padding: 20px;
+      max-width: 350px;
+      border-radius: 8px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      color: #3e2d16;
+    ">
+      <h2>Share on Instagram</h2>
+      <p>
+        Your catch card has been downloaded.<br><br>
+        To share it on Instagram:<br>
+        1. Open the Instagram app.<br>
+        2. Tap the '+' icon to create a new post.<br>
+        3. Select the downloaded image from your device.<br>
+        4. Add any captions or tags you like and post it!
+      </p>
+      <button id="closeInstagramModal" style="
+        margin-top: 15px;
+        padding: 8px 20px;
+        background: #5e4322;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Got it!</button>
+    </div>
   </div>
-</div>
-  <!-- Your page content here, including the #imageModal div -->
 
-  <!-- Modal HTML (must be in the DOM before this script runs) -->
   <div id="imageModal" style="display:none; position:fixed; z-index:1000; left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
     <span id="modalClose" style="position:absolute; top:20px; right:30px; font-size:40px; color:white; cursor:pointer; user-select:none;">&times;</span>
     <img id="modalImg" src="" alt="Full size" style="max-width:90%; max-height:90%; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.7);" />
   </div>
 
-  <!-- Your other scripts here -->
   <script src="script.js"></script>
-  <!-- Modal script: place it here at the end of body -->
+
   <script>
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImg');
@@ -196,5 +194,6 @@
       }
     });
   </script>
+
 </body>
 </html>
