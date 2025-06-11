@@ -61,8 +61,8 @@ window.onload = function() {
   });
 
   setupTabs();
-  renderPhotoPosts();
   recalculateTotal();
+  renderPhotoPosts();
 };
 
 function setupTabs() {
