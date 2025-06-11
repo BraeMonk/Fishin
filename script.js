@@ -184,6 +184,34 @@ function deleteIndexedDBPostById(id) {
 }
 
 // ===== Photo Gallery =====
+// Handle photo upload
+function handleUpload() {
+  const input = document.getElementById("photoInput");
+  const files = input.files;
+  if (!files.length) return;
+
+  const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
+
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const photoData = {
+        src: event.target.result,
+        caption: "", // default empty caption
+        timestamp: new Date().toLocaleString()
+      };
+      storedPhotos.unshift(photoData); // newest first
+      localStorage.setItem("photos", JSON.stringify(storedPhotos));
+      renderPhotoPosts();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Clear input so same file can be re-uploaded if needed
+  input.value = "";
+}
+
+// Render all photo cards
 function renderPhotoPosts() {
   const gallery = document.getElementById("photoGallery");
   gallery.innerHTML = "";
@@ -222,11 +250,9 @@ function renderPhotoPosts() {
         link.download = `catch-card-${index + 1}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        openInstagramModal(); // optional
+        openInstagramModal(); // Optional
       });
     });
-
-    // Optional: Add delete or edit buttons here
 
     buttonRow.appendChild(shareButton);
     container.appendChild(img);
@@ -237,45 +263,19 @@ function renderPhotoPosts() {
   });
 }
 
-async function handleUpload() {
-  const input = document.getElementById('photoInput');
-  const files = Array.from(input.files);
-  if (files.length === 0) return;
-
-  const caption = prompt("Enter a caption for these photos:", "");
-  if (caption === null) return; // user cancelled
-
-  const location = prompt("Enter a location for these photos:", "");
-  if (location === null) return; // user cancelled
-
-  // Create a groupId for this batch upload
-  const groupId = Date.now().toString();
-
-  for (let f of files) {
-    const data = await readFile(f);
-    const photo = {
-      image: data,
-      caption,
-      location,
-      timestamp: new Date().toISOString(),
-      groupId
-    };
-    await saveToIndexedDB(photo);
-  }
-  input.value = '';
-  renderPhotoPosts();
-}
-
-// ===== Modal =====
+// Modal viewer for full-screen photo
 function openModal(src) {
-  const modal = document.getElementById('imageModal');
-  document.getElementById('modalImg').src = src;
-  modal.style.display = 'flex';
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImg");
+  modal.style.display = "flex";
+  modalImg.src = src;
 }
-document.getElementById('modalClose').onclick = () => {
-  document.getElementById('imageModal').style.display = 'none';
-};
 
+document.getElementById("modalClose").addEventListener("click", () => {
+  document.getElementById("imageModal").style.display = "none";
+});
+
+// Instagram sharing modal
 function openInstagramModal() {
   document.getElementById("instagramModal").style.display = "flex";
 }
