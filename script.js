@@ -43,10 +43,43 @@ function initFishList() {
 
 function getFishData() {
   return [
-    {name:'Largemouth Bass', rig:'Texas Rig', bait:'Plastic worms'},
-    {name:'Smallmouth Bass', rig:'Drop Shot', bait:'Minnow'},
-    {name:'Northern Pike', rig:'Spinner Rig', bait:'Crankbait'},
-    // ... other fish types ...
+    { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
+    { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
+    { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait' },
+    { name: 'Walleye', rig: 'Jig Head', bait: 'Nightcrawler' },
+    { name: 'Yellow Perch', rig: 'Slip Bobber', bait: 'Minnows' },
+    { name: 'Rainbow Trout', rig: 'Fly Rig', bait: 'Dry Fly' },
+    { name: 'Brook Trout', rig: 'Inline Spinner', bait: 'Salmon Eggs' },
+    { name: 'Lake Trout', rig: 'Downrigger', bait: 'Spoon' },
+    { name: 'Brown Trout', rig: 'Drift Rig', bait: 'Worm' },
+    { name: 'Black Crappie', rig: 'Light Jig', bait: 'Small Minnow' },
+    { name: 'White Crappie', rig: 'Micro Jig', bait: 'Grubs' },
+    { name: 'Pumpkinseed Sunfish', rig: 'Bobber Rig', bait: 'Worms' },
+    { name: 'Bluegill', rig: 'Bobber Rig', bait: 'Crickets, Worms' },
+    { name: 'Rock Bass', rig: 'Light Jig', bait: 'Minnows, Worms' },
+    { name: 'White Bass', rig: 'Spinnerbait', bait: 'Shad Imitation' },
+    { name: 'Channel Catfish', rig: 'Slip Sinker Rig', bait: 'Stinkbait, Chicken Liver' },
+    { name: 'Flathead Catfish', rig: 'Live Bait Rig', bait: 'Live Bluegill' },
+    { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad' },
+    { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms' },
+    { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs' },
+    { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls' },
+    { name: 'Northern Sunfish', rig: 'Bobber Rig', bait: 'Worms, Insects' },
+    { name: 'Muskellunge (Muskie)', rig: 'Large Crankbait Rig, Jig', bait: 'Large Minnows, Topwater Lures' },
+    { name: 'Yellow Bullhead', rig: 'Slip Sinker Rig', bait: 'Worms, Cut Bait' },
+    { name: 'White Perch (White Bass)', rig: 'Spinnerbait, Jig', bait: 'Minnows' },
+    { name: 'Freshwater Drum', rig: 'Bottom Rig', bait: 'Worms, Small Fish' },
+    { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies' },
+    { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' },
+
+    // Additional Ontario species:
+    { name: 'Cisco (Lake Herring)', rig: 'Jigging Spoon', bait: 'Minnows' },
+    { name: 'Mooneye', rig: 'Fly Rig', bait: 'Small Insects, Flies' },
+    { name: 'American Eel', rig: 'Bottom Rig', bait: 'Worms, Cut Bait' },
+    { name: 'Longnose Gar', rig: 'Rope Lure', bait: 'Minnows, Live Bait' },
+    { name: 'Round Goby', rig: 'Bottom Jig', bait: 'Worms, Soft Plastics' },
+    { name: 'Spottail Shiner', rig: 'Micro Jig', bait: 'Bread, Small Insects' },
+    { name: 'Golden Shiner', rig: 'Micro Hook Rig', bait: 'Dough Balls, Worms' }
   ];
 }
 
