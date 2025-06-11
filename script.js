@@ -387,11 +387,13 @@ function createPhotoCard(post, source, originalIndex, displayIndex) {
   `;
 
   const image = document.createElement("img");
-  image.src = post.image;
-  image.alt = post.caption || "Photo";
-  image.className = "thumbnail";
-  image.style = "width: 100%; border-radius: 4px; cursor: pointer;";
-  container.appendChild(image);
+image.src = post.image;
+image.alt = post.caption || "Photo";
+image.className = "thumbnail";
+image.style = "width: 100%; border-radius: 4px; cursor: pointer;";
+container.appendChild(image);
+
+image.addEventListener("click", () => openModal(post.image));
 
   // Caption container
   const captionDiv = document.createElement("div");
