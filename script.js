@@ -101,32 +101,37 @@ function handleUpload() {
 
   if (fileInput.files.length > 0) {
     const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    const newPosts = [];
+
     const files = Array.from(fileInput.files);
-    let loadedCount = 0;
+    let filesProcessed = 0;
 
     files.forEach(file => {
       const reader = new FileReader();
-      reader.onload = function(event) {
-        savedPosts.push({
+      reader.onload = function (event) {
+        newPosts.push({
           image: event.target.result,
           caption,
           location,
-          timestamp: new Date().toLocaleString(),
+          timestamp: new Date().toLocaleString()
         });
 
-        loadedCount++;
-        if (loadedCount === files.length) {
-          localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-          renderPhotoPosts(); // Only render after all are loaded
+        filesProcessed++;
+
+        // Once all files are processed, update localStorage and render
+        if (filesProcessed === files.length) {
+          const updatedPosts = savedPosts.concat(newPosts);
+          localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
+          renderPhotoPosts();
+
+          // Clear inputs
+          fileInput.value = "";
+          document.getElementById("photoCaption").value = "";
+          document.getElementById("photoLocationInput").value = "";
         }
       };
       reader.readAsDataURL(file);
     });
-
-    // Clear inputs immediately
-    fileInput.value = "";
-    document.getElementById("photoCaption").value = "";
-    document.getElementById("photoLocationInput").value = "";
   } else {
     console.error("No files selected.");
   }
@@ -138,29 +143,31 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  // Loop in reverse order to show newest posts first
-  [...savedPosts].reverse().forEach((post, reverseIndex) => {
-    // Calculate the real index in the savedPosts array
-    const realIndex = savedPosts.length - 1 - reverseIndex;
+  savedPosts
+    .slice()                         // clone array to avoid modifying original
+    .reverse()                       // show newest first
+    .forEach((post, displayIndex) => {
+      const realIndex = savedPosts.length - 1 - displayIndex;
 
-    const container = document.createElement("div");
-    container.className = "photo-container";
+      const container = document.createElement("div");
+      container.className = "photo-container";
+      container.style.marginBottom = "20px";  // column-style layout
 
-    container.innerHTML = `
-      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-      <input type="text" id="caption-${realIndex}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
-      <div>${post.location}</div>
-      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-      <button onclick="saveCaption(${realIndex})">Save Caption</button>
-      <button onclick="deletePhoto(${realIndex})" style="margin-top:5px;">Delete</button>
-      <div class="share-buttons">
-        <button onclick="sharePost(${realIndex})" style="margin-top:5px;">Share</button>
-        <button onclick="generateCatchCard(${realIndex})">Create Catch Card</button>
-      </div>
-    `;
+      container.innerHTML = `
+  <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
+  <input type="text" id="caption-${realIndex}" value="${post.caption}" />
+  <div>${post.location}</div>
+  <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+  <div class="button-row">
+    <button title="Save Caption" onclick="saveCaption(${realIndex})">📝</button>
+    <button title="Delete Photo" onclick="deletePhoto(${realIndex})">✖️</button>
+    <button title="Share Photo" onclick="sharePost(${realIndex})">📤</button>
+    <button title="Generate Catch Card" onclick="generateCatchCard(${realIndex})">🎣</button>
+  </div>
+`;
 
-    photoGallery.appendChild(container);
-  });
+      photoGallery.appendChild(container);
+    });
 }
 
 function generateCatchCard(index) {
