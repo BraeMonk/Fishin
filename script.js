@@ -94,7 +94,7 @@ function adjustCount(name, delta) {
   recalculateTotal();
 }
 
-function handleUpload() {
+async function handleUpload() {
   const fileInput = document.getElementById("photoInput");
 
   if (!fileInput.files.length) {
@@ -103,36 +103,41 @@ function handleUpload() {
   }
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  const files = Array.from(fileInput.files);
 
-  const postPromises = files.map(file => {
-    return new Promise((resolve, reject) => {
-      const caption = prompt("Enter caption for this photo:")?.trim() || "";
-      const location = prompt("Enter location for this photo:")?.trim() || "";
+  // Convert each file to DataURL & prompt for caption/location separately
+  for (const file of fileInput.files) {
+    const imageDataUrl = await fileToDataUrl(file);
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        resolve({
-          image: e.target.result,
-          caption,
-          location,
-          timestamp: new Date().toLocaleString()
-        });
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  });
+    // Prompt caption & location for EACH photo separately
+    const caption = prompt("Enter caption for this photo:", "")?.trim() || "";
+    const location = prompt("Enter location for this photo:", "")?.trim() || "";
 
-  Promise.all(postPromises).then(newPosts => {
-    const updatedPosts = [...newPosts, ...existingPosts];
-    localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
-    renderPhotoPosts();
+    const newPost = {
+      image: imageDataUrl,
+      caption,
+      location,
+      timestamp: new Date().toLocaleString()
+    };
 
-    // Reset file input
-    fileInput.value = "";
-  }).catch(err => {
-    console.error("Error uploading photos:", err);
+    // Newest posts on top:
+    existingPosts.unshift(newPost);
+  }
+
+  // Save & render
+  localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
+  renderPhotoPosts();
+
+  // Reset input so same file(s) can be uploaded again
+  fileInput.value = "";
+}
+
+// Helper: converts File to DataURL Promise
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
@@ -145,54 +150,44 @@ function renderPhotoPosts() {
   savedPosts.forEach((post, index) => {
     const container = document.createElement("div");
     container.className = "photo-container";
+    container.style.border = "1px solid #444";
+    container.style.padding = "10px";
     container.style.marginBottom = "20px";
+    container.style.borderRadius = "6px";
+    container.style.backgroundColor = "#111";
+    container.style.color = "#f5f5dc";
+    container.style.maxWidth = "400px";
 
     // Image
     const image = document.createElement("img");
     image.src = post.image;
-    image.className = "gallery-photo";
-    image.onclick = () => openModal(post.image);
+    image.alt = post.caption || "Photo";
+    image.style.width = "100%";
+    image.style.borderRadius = "4px";
     container.appendChild(image);
 
-    // Caption display
-const captionDiv = document.createElement("div");
-captionDiv.textContent = post.caption;
-captionDiv.style.whiteSpace = "pre-wrap";
-captionDiv.style.wordWrap = "break-word";
-captionDiv.style.overflowWrap = "break-word";
-captionDiv.style.maxWidth = "100%";
-captionDiv.style.boxSizing = "border-box";
-captionDiv.style.marginTop = "8px";
-captionDiv.style.background = "#000";
-captionDiv.style.color = "#f5f5dc";
-captionDiv.style.border = "1px solid #444";
-captionDiv.style.borderRadius = "4px";
-captionDiv.style.padding = "0.5rem";
-container.appendChild(captionDiv);
+    // Caption
+    const captionDiv = document.createElement("div");
+    captionDiv.textContent = `Caption: ${post.caption || "(none)"}`;
+    captionDiv.style.marginTop = "8px";
+    container.appendChild(captionDiv);
 
-// Location display
-const locationDiv = document.createElement("div");
-locationDiv.textContent = post.location;
-locationDiv.style.whiteSpace = "pre-wrap";
-locationDiv.style.wordWrap = "break-word";
-locationDiv.style.overflowWrap = "break-word";
-locationDiv.style.maxWidth = "100%";
-locationDiv.style.boxSizing = "border-box";
-locationDiv.style.marginTop = "4px";
-locationDiv.style.background = "#000";
-locationDiv.style.color = "#f5f5dc";
-locationDiv.style.border = "1px solid #444";
-locationDiv.style.borderRadius = "4px";
-locationDiv.style.padding = "0.5rem";
-container.appendChild(locationDiv);
+    // Location
+    const locationDiv = document.createElement("div");
+    locationDiv.textContent = `Location: ${post.location || "(none)"}`;
+    container.appendChild(locationDiv);
 
     // Timestamp
     const timestampDiv = document.createElement("div");
     timestampDiv.style.fontSize = "0.8rem";
     timestampDiv.style.color = "#aaa";
-    timestampDiv.style.marginTop = "4px";
+    timestampDiv.style.marginTop = "6px";
     timestampDiv.textContent = post.timestamp || "";
     container.appendChild(timestampDiv);
+
+    photoGallery.appendChild(container);
+  });
+}
 
     // Button row (icon-only)
     const buttonRow = document.createElement("div");
