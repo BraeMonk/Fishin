@@ -58,23 +58,19 @@
   </section>
 
   <section id="memory" class="tab-content">
-    <div id="photoUploader">
-      <input type="file" id="photoInput" multiple>
-<input type="text" id="photoCaption" placeholder="Enter caption">
-<input type="text" id="photoLocationInput" placeholder="Enter location">
-<button onclick="handleUpload()">Upload</button>
+  <div id="photoUploader">
+    <input type="file" id="photoInput" multiple>
+    <input type="text" id="photoCaption" placeholder="Enter caption">
+    <input type="text" id="photoLocationInput" placeholder="Enter location">
+    <button onclick="handleUpload()">Upload</button>
+  </div>
 
-<div id="photoGallery"></div>
-    </div>
+  <div id="photoGallery" class="gallery-grid"></div>
+</section>
 
   <div id="imageModal" class="modal" onclick="closeModal()">
   <img id="modalImage" class="modal-content" />
 </div>
-
-<style>
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
-.modal-content { max-width: 90%; max-height: 80vh; border: 2px solid white; }
-</style>
 
 <div id="instagramModal" style="
   display: none;
