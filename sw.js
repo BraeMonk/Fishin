@@ -1,4 +1,5 @@
-const CACHE_NAME = 'fish-tally-v3';
+const CACHE_NAME = 'fish-tally-v4'; // Increment this when deploying new versions
+
 const urlsToCache = [
   './',
   './index.html',
@@ -9,42 +10,56 @@ const urlsToCache = [
   './icon_512x512.png'
 ];
 
-self.addEventListener('install', e => {
-  e.waitUntil(
+// Install and cache static assets
+self.addEventListener('install', event => {
+  self.skipWaiting(); // Activate new service worker immediately
+  event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-self.addEventListener('fetch', e => {
-  if (e.request.method === 'POST') {
-    return; // Prevent caching of uploaded photos and posts
-  }
+// Activate and clean up old caches
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      }))
+    )
+  );
+  self.clients.claim(); // Claim control immediately
+});
 
-  e.respondWith(
-    caches.match(e.request).then(cachedResponse => {
-      if (cachedResponse) return cachedResponse;
+// Fetch handling
+self.addEventListener('fetch', event => {
+  const { request } = event;
 
-      return fetch(e.request).then(networkResponse => {
-        return caches.open(CACHE_NAME).then(cache => {
-          if (e.request.method === 'GET' && networkResponse.status === 200) {
-            cache.put(e.request, networkResponse.clone());
-          }
-          return networkResponse;
-        });
+  // Bypass service worker for POST requests (like saving images or posts)
+  if (request.method !== 'GET') return;
+
+  // Try cache first, fall back to network
+  event.respondWith(
+    caches.match(request).then(cachedResponse => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return fetch(request).then(networkResponse => {
+        // Cache the response only if it's a valid GET request
+        if (networkResponse.status === 200 && request.method === 'GET') {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
       }).catch(() => {
-        if (e.request.mode === 'navigate') {
+        // Offline fallback: if navigating, serve cached index.html
+        if (request.mode === 'navigate') {
           return caches.match('./index.html');
         }
       });
     })
-  );
-});
-
-// Cleans up old caches
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(key => (key !== CACHE_NAME ? caches.delete(key) : null)))
-    )
   );
 });
