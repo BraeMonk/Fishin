@@ -82,41 +82,70 @@ function handleUpload() {
   const location = document.getElementById("photoLocationInput").value.trim();
 
   if (fileInput.files.length > 0) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-      savedPosts.push({
-        image: event.target.result, // Converts image to Base64
-        caption,
-        location,
-        timestamp: new Date().toLocaleString(),
-      });
+    const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-      localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-      renderPhotoPosts();  // Refresh gallery display
-    };
-    reader.readAsDataURL(fileInput.files[0]); // Converts image file to Base64
+    Array.from(fileInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        savedPosts.push({
+          image: event.target.result,
+          caption,
+          location,
+          timestamp: new Date().toLocaleString(),
+        });
+        localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+        renderPhotoPosts();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Clear inputs after upload
+    fileInput.value = "";
+    document.getElementById("photoCaption").value = "";
+    document.getElementById("photoLocationInput").value = "";
   } else {
-    console.error("No file selected.");
+    console.error("No files selected.");
   }
 }
 
   function renderPhotoPosts() {
   const photoGallery = document.getElementById("photoGallery");
-  photoGallery.innerHTML = "";  // Clears previous entries
+  photoGallery.innerHTML = "";
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  savedPosts.forEach(post => {
+
+  savedPosts.forEach((post, index) => {
     const container = document.createElement("div");
     container.className = "photo-container";
+
     container.innerHTML = `
       <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-      <div><strong>${post.caption}</strong></div>
+      <input type="text" id="caption-${index}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
       <div>${post.location}</div>
       <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+      <button onclick="saveCaption(${index})">Save Caption</button>
+      <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
     `;
+
     photoGallery.appendChild(container);
   });
+}
+
+function saveCaption(index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  const newCaption = document.getElementById(`caption-${index}`).value.trim();
+  savedPosts[index].caption = newCaption;
+  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+  renderPhotoPosts();
+}
+
+function deletePhoto(index) {
+  if (!confirm("Are you sure you want to delete this photo?")) return;
+
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  savedPosts.splice(index, 1);
+  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+  renderPhotoPosts();
 }
 
 function openModal(imageSrc) {
