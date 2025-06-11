@@ -122,24 +122,51 @@ function recalculateTotal() {
 
 // ====== Photo Gallery ======
 function handleUpload() {
-  const fileInput = document.getElementById("photoInput");
-  const files = Array.from(fileInput.files);
+  const input = document.getElementById('photoInput');
+  const files = Array.from(input.files);
+  const gallery = document.getElementById('photoGallery');
 
-  if (!files.length) {
-    alert("Please select a photo to upload.");
-    return;
-  }
+  if (files.length === 0) return;
 
-  const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  files.forEach(file => {
+    const reader = new FileReader();
 
-  function readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+    reader.onload = function(e) {
+      const container = document.createElement('div');
+      container.classList.add('photo-container');
+
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.alt = 'Uploaded photo';
+      img.onclick = () => openModal(e.target.result);
+
+      const meta = document.createElement('div');
+      meta.classList.add('photo-meta');
+      meta.textContent = `Uploaded: ${new Date().toLocaleString()}`;
+
+      container.appendChild(img);
+      container.appendChild(meta);
+
+      // Prepend newest images at the top
+      gallery.prepend(container);
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  input.value = ''; // Clear the input after upload
+}
+
+function openModal(src) {
+  const modal = document.getElementById('imageModal');
+  const modalImg = document.getElementById('modalImg');
+  modalImg.src = src;
+  modal.style.display = 'flex';
+}
+
+document.getElementById('modalClose').onclick = function () {
+  document.getElementById('imageModal').style.display = 'none';
+};
 
   function resizeImage(base64, maxWidth = 800, quality = 0.7) {
     return new Promise((resolve) => {
