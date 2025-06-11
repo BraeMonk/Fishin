@@ -13,34 +13,69 @@
   <title>Fishin' Buddy</title>
   <style>
     body { 
-      font-family: Arial, sans-serif; 
-      margin: 0 1rem; 
-      background: #000; 
-      color: #f5f5dc; 
-      font-size: 1.05rem; 
-      line-height: 1.6; 
-    }
-
-```
-button { 
-  background: #f5f5dc; 
-  color: #000; 
-  border: none; 
-  padding: 0.6rem 1.2rem; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  font-weight: 700; 
-  font-size: 1rem; 
-  box-shadow: 0 0 6px #333; 
-  transition: background 0.2s ease, transform 0.1s ease; 
+  font-family: Arial, sans-serif; 
+  margin: 0 1rem; 
+  background: #000; 
+  color: #f5f5dc; 
+  font-size: 1.05rem; 
+  line-height: 1.6; 
 }
 
-button:hover, button:focus { 
-  background: #e5e5c4; 
-  transform: scale(1.02); 
-  outline: none; 
+/* Universal button styling: slick beige with black text */
+button {
+  background-color: #f5f5dc;   /* beige */
+  color: #000;                 /* black text */
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none;
 }
 
+button:hover,
+button:focus {
+  background-color: #e5e5c4;  /* slightly darker beige */
+  transform: scale(1.03);
+  outline: none;
+}
+
+/* Override all button variants to match the universal style */
+.info-button,
+.reset-button,
+.photo-buttons button,
+.edit-button,
+.caption-save,
+.caption-cancel,
+#closeInstagramModal {
+  background-color: #f5f5dc !important;
+  color: #000 !important;
+  border: none !important;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: 6px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4) !important;
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+  cursor: pointer !important;
+}
+
+.info-button:hover,
+.reset-button:hover,
+.photo-buttons button:hover,
+.edit-button:hover,
+.caption-save:hover,
+.caption-cancel:hover,
+#closeInstagramModal:hover {
+  background-color: #e5e5c4 !important;
+  transform: scale(1.03) !important;
+  outline: none !important;
+}
+
+/* Tabs container */
 .tabs { 
   display: flex; 
   margin-top: 1rem; 
@@ -113,16 +148,9 @@ button:hover, button:focus {
 }
 
 .tally-controls button {
-  padding: 4px 12px;
-  font-size: 1.2rem;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
   min-width: 36px;
-}
-
-.info-button {
-  background: #444 !important;
-  color: #f5f5dc !important;
-  font-size: 0.9rem !important;
-  padding: 4px 8px !important;
 }
 
 .fish-info {
@@ -132,12 +160,6 @@ button:hover, button:focus {
   border-radius: 4px;
   font-size: 0.9rem;
   line-height: 1.4;
-}
-
-.reset-button {
-  background: #cc3300 !important;
-  color: white !important;
-  margin-top: 1rem;
 }
 
 #photoUploader { 
@@ -217,9 +239,9 @@ button:hover, button:focus {
 }
 
 .photo-buttons button {
-  background: none !important;
-  border: none !important;
-  color: #f5f5dc !important;
+  background: none !important;  /* overridden by universal style */
+  border: none !important;      /* overridden */
+  color: #f5f5dc !important;    /* overridden */
   font-size: 1.4rem !important;
   cursor: pointer !important;
   padding: 8px !important;
@@ -232,9 +254,9 @@ button:hover, button:focus {
 }
 
 .edit-button {
-  background: none !important;
-  border: none !important;
-  color: #f5f5dc !important;
+  background: none !important; /* overridden */
+  border: none !important;     /* overridden */
+  color: #f5f5dc !important;   /* overridden */
   font-size: 1.2rem !important;
   cursor: pointer !important;
   padding: 4px !important;
@@ -251,8 +273,8 @@ button:hover, button:focus {
 }
 
 .caption-save, .caption-cancel {
-  padding: 4px 8px !important;
-  font-size: 0.8rem !important;
+  padding: 0.6rem 1.2rem !important;
+  font-size: 1rem !important;
   margin-left: 4px !important;
 }
 
@@ -302,15 +324,26 @@ button:hover, button:focus {
   margin-top: 0;
 }
 
+/* Override Instagram modal button with universal button styles */
 .instagram-modal button {
-  margin-top: 15px;
-  padding: 8px 20px;
-  background: #5e4322;
-  color: #fff;
+  background-color: #f5f5dc;
+  color: #000;
   border: none;
-  border-radius: 5px;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none;
+  margin-top: 15px;
+}
+
+.instagram-modal button:hover {
+  background-color: #e5e5c4;
+  transform: scale(1.03);
+  outline: none;
 }
 
 /* Scrollbar styling for photo gallery */
@@ -331,7 +364,6 @@ button:hover, button:focus {
 #photoGallery::-webkit-scrollbar-thumb:hover {
   background: #888;
 }
-```
 
   </style>
 </head>
@@ -354,9 +386,9 @@ button:hover, button:focus {
       <button type="button" onclick="handleUpload()">Upload Photos</button>
     </div>
 
-```
+
 <div id="photoGallery"></div>
-```
+
 
   </section>
 
