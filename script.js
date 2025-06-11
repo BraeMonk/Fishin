@@ -279,33 +279,49 @@ function createPhotoCard(post, index, fromIndexedDB) {
   image.style = "width: 100%; border-radius: 4px; cursor: pointer;";
   container.appendChild(image);
 
+  // Caption container
   const captionDiv = document.createElement("div");
-  captionDiv.innerHTML = `Caption: <input id="caption-${index}" value="${post.caption}" />`;
-  captionDiv.style.marginTop = "8px";
+  captionDiv.style = "margin-top: 8px; display: flex; align-items: center; gap: 6px;";
+  
+  const captionText = document.createElement("span");
+  captionText.id = `caption-text-${index}`;
+  captionText.textContent = post.caption || "(no caption)";
+  captionDiv.appendChild(captionText);
+
+  // Pencil edit icon
+  const editBtn = document.createElement("button");
+  editBtn.title = "Edit caption";
+  editBtn.innerHTML = "✏️"; // pencil emoji or use "&#9998;"
+  editBtn.style = "background:none; border:none; cursor:pointer; color:#f5f5dc; font-size:1.1rem;";
+  captionDiv.appendChild(editBtn);
+
   container.appendChild(captionDiv);
 
+  // Location div
   const locationDiv = document.createElement("div");
   locationDiv.textContent = `Location: ${post.location || "(none)"}`;
   container.appendChild(locationDiv);
 
+  // Timestamp div
   const timestampDiv = document.createElement("div");
   timestampDiv.textContent = post.timestamp;
   timestampDiv.style = "font-size: 0.8rem; color: #aaa; margin-top: 6px;";
   container.appendChild(timestampDiv);
 
+  // Buttons row
   const buttonRow = document.createElement("div");
   buttonRow.style = "display:flex; justify-content:center; gap:0.75rem; margin-top:0.5rem;";
 
   const buttons = [
     {
-      icon: '💾', title: "Save", action: () => {
-        saveCaption(index, fromIndexedDB);
-        showSavedStatus(document.getElementById(`caption-${index}`));
-      }
+      icon: '🗑️', title: "Delete", action: () => deletePhoto(index, fromIndexedDB)
     },
-    { icon: '🗑️', title: "Delete", action: () => deletePhoto(index, fromIndexedDB) },
-    { icon: '📤', title: "Share", action: () => sharePost(index, fromIndexedDB) },
-    { icon: '🎣', title: "Catch Card", action: () => generateCatchCard(index) }
+    {
+      icon: '📤', title: "Share", action: () => sharePost(index, fromIndexedDB)
+    },
+    {
+      icon: '🎣', title: "Catch Card", action: () => generateCatchCard(index)
+    }
   ];
 
   buttons.forEach(btn => {
@@ -319,6 +335,42 @@ function createPhotoCard(post, index, fromIndexedDB) {
 
   container.appendChild(buttonRow);
   photoGallery.appendChild(container);
+
+  // ====== Caption editing logic ======
+  editBtn.addEventListener("click", () => {
+    // Replace caption text with input + save/cancel buttons
+    captionDiv.innerHTML = "";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = post.caption || "";
+    input.style = "flex-grow:1; padding: 4px; border-radius: 4px; border: 1px solid #ccc;";
+    captionDiv.appendChild(input);
+
+    const saveBtn = document.createElement("button");
+    saveBtn.textContent = "Save";
+    saveBtn.style = "margin-left: 6px; cursor:pointer;";
+    captionDiv.appendChild(saveBtn);
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style = "margin-left: 4px; cursor:pointer;";
+    captionDiv.appendChild(cancelBtn);
+
+    saveBtn.addEventListener("click", () => {
+      const newCaption = input.value.trim();
+      // Save caption to localStorage
+      const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+      savedPosts[index].caption = newCaption;
+      localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+      renderPhotoPosts();
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      // Restore original caption display
+      renderPhotoPosts();
+    });
+  });
 }
 
 // ====== Caption Editing ======
