@@ -127,6 +127,7 @@ function handleUpload() {
   <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
   <div class="share-buttons">
   <button onclick="sharePost(${index})" style="margin-top:5px;">Share</button>
+  <button onclick="generateCatchCard(${index})">Create Catch Card</button>
   <button onclick="shareToPlatform('facebook', ${index})">Facebook</button>
   <button onclick="shareToPlatform('twitter', ${index})">X</button>
   <button onclick="shareToPlatform('whatsapp', ${index})">WhatsApp</button>
@@ -134,6 +135,44 @@ function handleUpload() {
 `;
 
     photoGallery.appendChild(container);
+  });
+}
+
+function generateCatchCard(index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  const post = savedPosts[index];
+
+  const card = document.createElement("div");
+  card.style.width = "400px";
+  card.style.padding = "20px";
+  card.style.margin = "20px auto";
+  card.style.border = "2px solid #5e4322";
+  card.style.borderRadius = "10px";
+  card.style.background = "url('https://www.transparenttextures.com/patterns/paper-fibers.png') #fdf5e6";
+  card.style.fontFamily = "'Courier New', Courier, monospace";
+  card.style.boxShadow = "4px 4px 10px rgba(0,0,0,0.3)";
+  card.style.color = "#3e2d16";
+  card.innerHTML = `
+    <div style="text-align:center; margin-bottom:10px;">
+      <h2 style="margin:0; font-size:1.5rem; text-decoration:underline;">Catch Log</h2>
+      <div style="font-size:0.9rem;">${post.timestamp}</div>
+    </div>
+    <img src="${post.image}" style="width:100%; border-radius:6px; border:1px solid #5e4322; margin-bottom:10px;" />
+    <div style="margin-bottom:5px;"><strong>Caption:</strong> <em>${post.caption}</em></div>
+    <div style="margin-bottom:5px;"><strong>Location:</strong> <em>${post.location}</em></div>
+    <img src="icon_192x192.png" alt="Fishin’ Buddy Icon"
+         style="width:50px; margin-top:10px; float:right; opacity:0.85;" />
+    <div style="clear:both;"></div>
+  `;
+
+  document.body.appendChild(card);
+
+  html2canvas(card).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "catch-card.png";
+    link.href = canvas.toDataURL();
+    link.click();
+    document.body.removeChild(card); // Clean up the card after saving
   });
 }
 
