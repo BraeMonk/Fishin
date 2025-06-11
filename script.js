@@ -134,7 +134,7 @@ actions.innerHTML = `
   <i class="fas fa-download" title="Download Catch Card" onclick="generateCatchCard(${index})" style="cursor:pointer; margin-right:10px;"></i>
   <i class="fab fa-facebook" title="Share on Facebook" onclick="shareToFacebook(${index})" style="cursor:pointer; margin-right:10px;"></i>
   <i class="fab fa-x-twitter" title="Share on X" onclick="shareToTwitter(${index})" style="cursor:pointer; margin-right:10px;"></i>
-  <i class="fab fa-instagram" title="Download to share on Instagram" onclick="generateCatchCard(${index})" style="cursor:pointer;"></i>
+  <i class="fab fa-instagram" title="Download to share on Instagram" onclick="shareToInstagram(${index})" style="cursor:pointer;"></i>
 `;
 container.appendChild(actions);
 </div>
@@ -194,6 +194,23 @@ function shareToTwitter(index) {
   const text = encodeURIComponent(`${post.caption} via Fishin’ Buddy 🎣`);
   const url = encodeURIComponent("https://yourapp.com");
   window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+}
+
+function showInstagramModal() {
+  const modal = document.getElementById("instagramModal");
+  modal.style.display = "flex";
+}
+
+document.getElementById("closeInstagramModal").addEventListener("click", () => {
+  document.getElementById("instagramModal").style.display = "none";
+});
+
+function shareToInstagram(index) {
+  // Generate and download the catch card image
+  generateCatchCard(index);
+
+  // Show instructions modal
+  showInstagramModal();
 }
 
 function saveCaption(index) {
