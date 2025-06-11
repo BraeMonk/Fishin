@@ -107,8 +107,6 @@ function handleUpload() {
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const files = Array.from(fileInput.files);
 
-  const timestamp = new Date().toLocaleString(); // Same timestamp for all in batch if you prefer
-
   const postPromises = files.map(file => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -117,10 +115,12 @@ function handleUpload() {
           image: event.target.result,
           caption,
           location,
-          timestamp
+          timestamp: new Date().toLocaleString()
         });
       };
-      reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
+      reader.onerror = function () {
+        reject(new Error(`Failed to read file: ${file.name}`));
+      };
       reader.readAsDataURL(file);
     });
   });
@@ -131,8 +131,9 @@ function handleUpload() {
       localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
       renderPhotoPosts();
 
-      // Reset form
-      fileInput.value = "";
+      // Reset input fields
+      fileInput.type = ''; // force clear
+      fileInput.type = 'file';
       document.getElementById("photoCaption").value = "";
       document.getElementById("photoLocationInput").value = "";
     })
