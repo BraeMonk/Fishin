@@ -25,7 +25,13 @@
     .fish-item { margin:8px 0; background:#111; padding:12px; border-radius:6px; }
     .tally-controls { margin-top:8px; }
     #photoUploader { background:#121212; padding:1rem; border-radius:6px; color:#f5f5dc; margin-bottom:1rem; }
-    #photoGallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; }
+    #photoGallery {
+  display: flex;
+  flex-direction: column-reverse;
+  max-height: 75vh;
+  overflow-y: auto;
+  gap: 1rem;
+}
     .photo-container { background:#111; padding:0.75rem; border-radius:6px; text-align:center; }
     .gallery-photo { width:100%; height:120px; object-fit:cover; border-radius:6px; cursor:pointer; }
     .expanded-photo { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); max-width:90%; max-height:80vh; border:3px solid #f5f5dc; box-shadow:0 0 20px rgba(0,0,0,0.8); z-index:9999; }
