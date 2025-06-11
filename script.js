@@ -183,7 +183,7 @@ function deleteIndexedDBPostById(id) {
   });
 }
 
-// ===== Photo Gallery =====
+/// ===== Photo Gallery =====
 
 // Handle photo upload
 function handleUpload() {
@@ -193,22 +193,38 @@ function handleUpload() {
 
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = function (event) {
+  // We'll process each file one by one and prompt for location and caption
+  (async function processFiles() {
+    for (const file of files) {
+      const photoSrc = await readFileAsDataURL(file);
+      // Prompt for location and caption
+      const location = prompt("Enter location for this photo:", "") || "";
+      const caption = prompt("Enter caption for this photo:", "") || "";
+
       const photoData = {
-        src: event.target.result,
-        caption: "",
+        src: photoSrc,
+        caption: caption,
+        location: location,
         timestamp: new Date().toLocaleString()
       };
-      storedPhotos.unshift(photoData);
-      localStorage.setItem("photos", JSON.stringify(storedPhotos));
-      renderPhotoPosts();
-    };
-    reader.readAsDataURL(file);
-  });
+
+      storedPhotos.unshift(photoData); // newest on top
+    }
+    localStorage.setItem("photos", JSON.stringify(storedPhotos));
+    renderPhotoPosts();
+  })();
 
   input.value = "";
+}
+
+// Helper: reads file as Data URL and returns a Promise
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = e => reject(e);
+    reader.readAsDataURL(file);
+  });
 }
 
 // Render all photo cards
@@ -223,19 +239,41 @@ function renderPhotoPosts() {
     container.className = "photo-container";
     container.id = `photo-card-${index}`;
 
+    // Image
     const img = document.createElement("img");
     img.src = photo.src;
     img.alt = "Uploaded photo";
     img.addEventListener("click", () => openModal(photo.src));
+    container.appendChild(img);
 
-    const captionDiv = document.createElement("div");
-    captionDiv.className = "photo-caption";
-    captionDiv.innerText = photo.caption || "";
+    // Stamps container for caption and location (position these as overlays)
+    const stamps = document.createElement("div");
+    stamps.className = "photo-stamps";
 
+    // Location stamp
+    if(photo.location) {
+      const locationStamp = document.createElement("div");
+      locationStamp.className = "photo-location-stamp";
+      locationStamp.innerText = photo.location;
+      stamps.appendChild(locationStamp);
+    }
+
+    // Caption stamp
+    if(photo.caption) {
+      const captionStamp = document.createElement("div");
+      captionStamp.className = "photo-caption-stamp";
+      captionStamp.innerText = photo.caption;
+      stamps.appendChild(captionStamp);
+    }
+    container.appendChild(stamps);
+
+    // Timestamp
     const timestampDiv = document.createElement("div");
     timestampDiv.className = "photo-timestamp";
     timestampDiv.innerText = photo.timestamp || new Date().toLocaleString();
+    container.appendChild(timestampDiv);
 
+    // Buttons container
     const buttonRow = document.createElement("div");
     buttonRow.className = "photo-buttons";
 
@@ -281,11 +319,8 @@ function renderPhotoPosts() {
 
     buttonRow.appendChild(shareButton);
     buttonRow.appendChild(deleteButton);
-
-    container.appendChild(img);
-    container.appendChild(captionDiv);
-    container.appendChild(timestampDiv);
     container.appendChild(buttonRow);
+
     gallery.appendChild(container);
   });
 }
