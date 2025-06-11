@@ -119,13 +119,19 @@ function handleUpload() {
     container.className = "photo-container";
 
     container.innerHTML = `
-      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-      <input type="text" id="caption-${index}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
-      <div>${post.location}</div>
-      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-      <button onclick="saveCaption(${index})">Save Caption</button>
-      <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
-    `;
+  <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
+  <input type="text" id="caption-${index}" value="${post.caption}" style="width: 100%; margin-top: 5px;" />
+  <div>${post.location}</div>
+  <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
+  <button onclick="saveCaption(${index})">Save Caption</button>
+  <button onclick="deletePhoto(${index})" style="margin-top:5px;">Delete</button>
+  <div class="share-buttons">
+  <button onclick="sharePost(${index})" style="margin-top:5px;">Share</button>
+  <button onclick="shareToPlatform('facebook', ${index})">Facebook</button>
+  <button onclick="shareToPlatform('twitter', ${index})">X</button>
+  <button onclick="shareToPlatform('whatsapp', ${index})">WhatsApp</button>
+</div>
+`;
 
     photoGallery.appendChild(container);
   });
@@ -137,6 +143,49 @@ function saveCaption(index) {
   savedPosts[index].caption = newCaption;
   localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
   renderPhotoPosts();
+}
+
+function sharePost(index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  const post = savedPosts[index];
+
+  if (navigator.share) {
+    navigator.share({
+      title: "Fishin' Buddy Catch!",
+      text: `${post.caption} - ${post.location}`,
+      url: window.location.href
+    }).then(() => {
+      console.log('Post shared successfully');
+    }).catch((error) => {
+      console.error('Error sharing:', error);
+    });
+  } else {
+    alert("Sharing not supported on this device.");
+  }
+}
+
+function shareToPlatform(platform, index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  const post = savedPosts[index];
+  const text = encodeURIComponent(`${post.caption} - ${post.location}`);
+  const url = encodeURIComponent(window.location.href);
+  let shareURL = "";
+
+  switch (platform) {
+    case "facebook":
+      shareURL = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+      break;
+    case "twitter":
+      shareURL = `https://twitter.com/intent/tweet?text=${text}%20${url}`;
+      break;
+    case "whatsapp":
+      shareURL = `https://wa.me/?text=${text}%20${url}`;
+      break;
+    default:
+      return alert("Unsupported platform");
+  }
+
+  window.open(shareURL, "_blank");
 }
 
 function deletePhoto(index) {
