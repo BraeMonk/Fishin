@@ -138,12 +138,13 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  // Reverse the order so newest appear first
-  savedPosts.slice().reverse().forEach((post, indexReversed) => {
-    const actualIndex = savedPosts.length - 1 - indexReversed; // Real index for edit/delete
-
+savedPosts
+  .slice()               // make a shallow copy to avoid modifying original
+  .reverse()             // newest first
+  .forEach((post, index) => {
     const container = document.createElement("div");
     container.className = "photo-container";
+    // ... rest of your rendering code ...
 
     container.innerHTML = `
       <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
