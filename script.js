@@ -106,6 +106,9 @@ function handleUpload() {
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const files = Array.from(fileInput.files);
+
+  const timestamp = new Date().toLocaleString(); // Same timestamp for all in batch if you prefer
+
   const postPromises = files.map(file => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -114,12 +117,10 @@ function handleUpload() {
           image: event.target.result,
           caption,
           location,
-          timestamp: new Date().toLocaleString()
+          timestamp
         });
       };
-      reader.onerror = function () {
-        reject(new Error(`Failed to read file: ${file.name}`));
-      };
+      reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`));
       reader.readAsDataURL(file);
     });
   });
@@ -130,7 +131,7 @@ function handleUpload() {
       localStorage.setItem("photoGallery", JSON.stringify(updatedPosts));
       renderPhotoPosts();
 
-      // Reset form fields
+      // Reset form
       fileInput.value = "";
       document.getElementById("photoCaption").value = "";
       document.getElementById("photoLocationInput").value = "";
@@ -151,19 +152,52 @@ function handleUpload() {
     container.className = "photo-container";
     container.style.marginBottom = "20px";
 
-    container.innerHTML = `
-      <img src="${post.image}" class="gallery-photo" onclick="openModal('${post.image}')" />
-      <input type="text" id="caption-${index}" value="${post.caption}" />
-      <div>${post.location}</div>
-      <div style="font-size:0.8rem; color:#aaa;">${post.timestamp}</div>
-      <div class="button-row">
-        <button title="Save Caption" onclick="saveCaption(${index})">📝</button>
-        <button title="Delete Photo" onclick="deletePhoto(${index})">✖️</button>
-        <button title="Share Photo" onclick="sharePost(${index})">📤</button>
-        <button title="Generate Catch Card" onclick="generateCatchCard(${index})">🎣</button>
-      </div>
-    `;
+    // Image
+    const image = document.createElement("img");
+    image.src = post.image;
+    image.className = "gallery-photo";
+    image.onclick = () => openModal(post.image);
+    container.appendChild(image);
 
+    // Caption input
+    const captionInput = document.createElement("input");
+    captionInput.type = "text";
+    captionInput.id = `caption-${index}`;
+    captionInput.value = post.caption || "";
+    container.appendChild(captionInput);
+
+    // Location
+    const locationDiv = document.createElement("div");
+    locationDiv.textContent = post.location || "Unknown location";
+    container.appendChild(locationDiv);
+
+    // Timestamp
+    const timestampDiv = document.createElement("div");
+    timestampDiv.style.fontSize = "0.8rem";
+    timestampDiv.style.color = "#aaa";
+    timestampDiv.textContent = post.timestamp || "";
+    container.appendChild(timestampDiv);
+
+    // Button row
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "button-row";
+
+    const buttons = [
+      { icon: "📝", title: "Save Caption", action: () => saveCaption(index) },
+      { icon: "✖️", title: "Delete Photo", action: () => deletePhoto(index) },
+      { icon: "📤", title: "Share Photo", action: () => sharePost(index) },
+      { icon: "🎣", title: "Generate Catch Card", action: () => generateCatchCard(index) }
+    ];
+
+    buttons.forEach(btn => {
+      const b = document.createElement("button");
+      b.title = btn.title;
+      b.textContent = btn.icon;
+      b.onclick = btn.action;
+      buttonRow.appendChild(b);
+    });
+
+    container.appendChild(buttonRow);
     photoGallery.appendChild(container);
   });
 }
