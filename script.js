@@ -168,19 +168,17 @@ function saveToIndexedDB(photo) {
   });
 }
 
-function deleteIndexedDBPost(index) {
+function deleteIndexedDBPostById(id) {
   return new Promise((res, rej) => {
-    const req = indexedDB.open('FishinBuddyDB',1);
+    const req = indexedDB.open('FishinBuddyDB', 1);
     req.onerror = () => rej('DB open error');
     req.onsuccess = e => {
       const db = e.target.result;
-      const tx = db.transaction('photos','readwrite');
+      const tx = db.transaction('photos', 'readwrite');
       const store = tx.objectStore('photos');
-      store.getAll().onsuccess = ev => {
-        const posts = ev.target.result;
-        if (index >= posts.length) return rej('Index out of range');
-        store.delete(posts[index].id).onsuccess = () => res();
-      };
+      const deleteReq = store.delete(id);
+      deleteReq.onsuccess = () => res();
+      deleteReq.onerror = () => rej('DB delete error');
     };
   });
 }
@@ -190,53 +188,88 @@ async function renderPhotoPosts() {
   const gal = document.getElementById('photoGallery');
   gal.innerHTML = '';
   const posts = await getIndexedDBPosts().catch(() => []);
-  posts.sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp));
-  posts.forEach((post, idx) => {
-    const container = document.createElement('div');
-    container.className = 'photo-container';
+  posts.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
 
-    const img = document.createElement('img');
-    img.src = post.image;
-    img.alt = post.caption || 'Photo';
-    img.onclick = () => openModal(post.image);
+  // Group posts by groupId
+  const grouped = posts.reduce((acc, post) => {
+    (acc[post.groupId] = acc[post.groupId] || []).push(post);
+    return acc;
+  }, {});
 
-    const meta = document.createElement('div');
-meta.className = 'photo-meta';
-meta.innerHTML = `
-  <div><strong>Time:</strong> ${new Date(post.timestamp).toLocaleString()}</div>
-  ${post.caption ? `<div><strong>Caption:</strong> ${post.caption}</div>` : ''}
-  ${post.location ? `<div><strong>Location:</strong> ${post.location}</div>` : ''}
-`;
+  // For each group, create a container
+  Object.values(grouped).forEach(group => {
+    const groupContainer = document.createElement('div');
+    groupContainer.className = 'photo-group';
 
-    const btnRow = document.createElement('div');
-    btnRow.className = 'photo-buttons';
-    ['🗑️','📤','🎣'].forEach((icon,i)=>{
-      const b = document.createElement('button');
-      b.innerHTML = icon;
-      b.onclick = () => {
-        if (icon === '🗑️') deleteIndexedDBPost(idx).then(renderPhotoPosts);
-        // share/catch not yet implemented
-      };
-      btnRow.appendChild(b);
+    // Show caption & location from first photo in group
+    const caption = group[0].caption || '';
+    const location = group[0].location || '';
+
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'group-meta';
+    metaDiv.textContent = `${caption} ${location ? '- ' + location : ''}`;
+    groupContainer.appendChild(metaDiv);
+
+    // Create photo containers inside group
+    group.forEach((post, idx) => {
+      const container = document.createElement('div');
+      container.className = 'photo-container';
+
+      const img = document.createElement('img');
+      img.src = post.image;
+      img.alt = post.caption || 'Photo';
+      img.onclick = () => openModal(post.image);
+
+      const meta = document.createElement('div');
+      meta.className = 'photo-meta';
+      meta.textContent = new Date(post.timestamp).toLocaleString();
+
+      const btnRow = document.createElement('div');
+      btnRow.className = 'photo-buttons';
+
+      // Buttons for delete, share, etc.
+      ['🗑️','📤','🎣'].forEach(icon => {
+        const b = document.createElement('button');
+        b.innerHTML = icon;
+        b.onclick = () => {
+          if (icon === '🗑️') {
+            deleteIndexedDBPostById(post.id).then(renderPhotoPosts);
+          }
+          // TODO: Add share/catch functionality here
+        };
+        btnRow.appendChild(b);
+      });
+
+      container.append(img, meta, btnRow);
+      groupContainer.appendChild(container);
     });
 
-    container.append(img, meta, btnRow);
-    gal.appendChild(container);
+    gal.appendChild(groupContainer);
   });
 }
 
 async function handleUpload() {
   const input = document.getElementById('photoInput');
   const files = Array.from(input.files);
-  for (const f of files) {
+  if (files.length === 0) return;
+
+  const caption = prompt("Enter a caption for these photos:", "");
+  if (caption === null) return; // user cancelled
+
+  const location = prompt("Enter a location for these photos:", "");
+  if (location === null) return; // user cancelled
+
+  // Create a groupId for this batch upload
+  const groupId = Date.now().toString();
+
+  for (let f of files) {
     const data = await readFile(f);
-    const caption = prompt(`Enter caption for ${f.name}:`) || '';
-    const location = prompt(`Enter location for ${f.name}:`) || '';
     const photo = {
       image: data,
-      caption: caption.trim(),
-      location: location.trim(),
-      timestamp: new Date().toISOString()
+      caption,
+      location,
+      timestamp: new Date().toISOString(),
+      groupId
     };
     await saveToIndexedDB(photo);
   }
