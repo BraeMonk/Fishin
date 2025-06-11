@@ -60,25 +60,25 @@ window.onload = function() {
     fishList.appendChild(item);
   });
 
+  setupTabs();
   renderPhotoPosts();
   recalculateTotal();
-  setupTabs();
 };
 
 function setupTabs() {
-  const tabButtons = document.querySelectorAll(".tab-button");
-  const tabContents = document.querySelectorAll(".tab-content");
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
 
   tabButtons.forEach(button => {
-    button.addEventListener("click", () => {
-      // Remove active class from all buttons and tabs
-      tabButtons.forEach(b => b.classList.remove("active"));
-      tabContents.forEach(tc => tc.classList.remove("active"));
+    button.addEventListener('click', () => {
+      // Remove active classes
+      tabButtons.forEach(b => b.classList.remove('active'));
+      tabContents.forEach(tc => tc.classList.remove('active'));
 
-      // Activate the clicked button and corresponding tab
-      button.classList.add("active");
-      const selectedTab = button.getAttribute("data-tab");
-      document.getElementById(selectedTab).classList.add("active");
+      // Activate the selected tab
+      const tab = button.getAttribute('data-tab');
+      button.classList.add('active');
+      document.getElementById(tab).classList.add('active');
     });
   });
 }
