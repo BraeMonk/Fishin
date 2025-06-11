@@ -227,37 +227,124 @@ function handleUpload() {
   })();
 }
 
-function renderPhotoPosts() {
-  const photoGallery = document.getElementById("photoGallery");
-  if (!photoGallery) return;
+// Get all posts from IndexedDB (async)
+async function getIndexedDBPosts() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("FishinBuddyDB", 1);
 
-  photoGallery.innerHTML = "";
+    request.onerror = () => reject("Failed to open IndexedDB");
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction("photos", "readonly");
+      const store = tx.objectStore("photos");
+      const getAll = store.getAll();
 
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-
-  // Display posts from localStorage
-  savedPosts.forEach((post, index) => {
-    createPhotoCard(post, index, false); // false = not IndexedDB
-  });
-
-  // Display posts from IndexedDB
-  const request = indexedDB.open("FishinBuddyDB", 1);
-
-  request.onsuccess = (e) => {
-    const db = e.target.result;
-    const tx = db.transaction("photos", "readonly");
-    const store = tx.objectStore("photos");
-
-    const getAll = store.getAll();
-    getAll.onsuccess = () => {
-      getAll.result.forEach((post, index) => {
-        createPhotoCard(post, index, true); // true = from IndexedDB
-      });
+      getAll.onerror = () => reject("Failed to get photos from IndexedDB");
+      getAll.onsuccess = () => resolve(getAll.result);
     };
-  };
+  });
 }
 
-function createPhotoCard(post, index, fromIndexedDB) {
+// Update caption of a photo in IndexedDB by index
+function updateIndexedDBPostCaption(index, newCaption) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("FishinBuddyDB", 1);
+
+    request.onerror = () => reject("Failed to open IndexedDB");
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction("photos", "readwrite");
+      const store = tx.objectStore("photos");
+
+      const getAll = store.getAll();
+
+      getAll.onerror = () => reject("Failed to get photos for update");
+      getAll.onsuccess = () => {
+        const posts = getAll.result;
+        if (index < 0 || index >= posts.length) {
+          reject("Index out of range");
+          return;
+        }
+        const post = posts[index];
+        post.caption = newCaption;
+
+        const updateRequest = store.put(post);
+
+        updateRequest.onerror = () => reject("Failed to update caption");
+        updateRequest.onsuccess = () => resolve();
+      };
+    };
+  });
+}
+
+// Delete a photo in IndexedDB by index
+function deleteIndexedDBPost(index) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("FishinBuddyDB", 1);
+
+    request.onerror = () => reject("Failed to open IndexedDB");
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction("photos", "readwrite");
+      const store = tx.objectStore("photos");
+
+      const getAll = store.getAll();
+
+      getAll.onerror = () => reject("Failed to get photos for deletion");
+      getAll.onsuccess = () => {
+        const posts = getAll.result;
+        if (index < 0 || index >= posts.length) {
+          reject("Index out of range");
+          return;
+        }
+        const postToDelete = posts[index];
+        const deleteRequest = store.delete(postToDelete.id); // assuming `id` is the keyPath
+
+        deleteRequest.onerror = () => reject("Failed to delete photo");
+        deleteRequest.onsuccess = () => resolve();
+      };
+    };
+  });
+}
+
+// Main render function
+async function renderPhotoPosts() {
+  const photoGallery = document.getElementById("photoGallery");
+  if (!photoGallery) return;
+  photoGallery.innerHTML = "";
+
+  // Load posts
+  const localPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  let indexedDBPosts = [];
+  try {
+    indexedDBPosts = await getIndexedDBPosts();
+  } catch (err) {
+    console.warn(err);
+  }
+
+  // Combine posts with source and original index
+  const combinedPostsWithSource = [];
+
+  localPosts.forEach((post, idx) => {
+    combinedPostsWithSource.push({ post, source: "localStorage", originalIndex: idx });
+  });
+  indexedDBPosts.forEach((post, idx) => {
+    combinedPostsWithSource.push({ post, source: "indexedDB", originalIndex: idx });
+  });
+
+  // Sort by timestamp descending (newest first)
+  combinedPostsWithSource.sort((a, b) => {
+    return new Date(b.post.timestamp) - new Date(a.post.timestamp);
+  });
+
+  // Render all
+  combinedPostsWithSource.forEach(({ post, source, originalIndex }, displayIndex) => {
+    createPhotoCard(post, source, originalIndex, displayIndex);
+  });
+}
+
+// Updated createPhotoCard with proper indexing & source handling
+function createPhotoCard(post, source, originalIndex, displayIndex) {
   const photoGallery = document.getElementById("photoGallery");
 
   const container = document.createElement("div");
@@ -282,16 +369,16 @@ function createPhotoCard(post, index, fromIndexedDB) {
   // Caption container
   const captionDiv = document.createElement("div");
   captionDiv.style = "margin-top: 8px; display: flex; align-items: center; gap: 6px;";
-  
+
   const captionText = document.createElement("span");
-  captionText.id = `caption-text-${index}`;
+  captionText.id = `caption-text-${displayIndex}`;
   captionText.textContent = post.caption || "(no caption)";
   captionDiv.appendChild(captionText);
 
   // Pencil edit icon
   const editBtn = document.createElement("button");
   editBtn.title = "Edit caption";
-  editBtn.innerHTML = "✏️"; // pencil emoji or use "&#9998;"
+  editBtn.innerHTML = "✏️";
   editBtn.style = "background:none; border:none; cursor:pointer; color:#f5f5dc; font-size:1.1rem;";
   captionDiv.appendChild(editBtn);
 
@@ -314,13 +401,13 @@ function createPhotoCard(post, index, fromIndexedDB) {
 
   const buttons = [
     {
-      icon: '🗑️', title: "Delete", action: () => deletePhoto(index, fromIndexedDB)
+      icon: '🗑️', title: "Delete", action: () => deletePhoto(source, originalIndex)
     },
     {
-      icon: '📤', title: "Share", action: () => sharePost(index, fromIndexedDB)
+      icon: '📤', title: "Share", action: () => sharePost(source, originalIndex)
     },
     {
-      icon: '🎣', title: "Catch Card", action: () => generateCatchCard(index)
+      icon: '🎣', title: "Catch Card", action: () => generateCatchCard(source, originalIndex)
     }
   ];
 
@@ -336,9 +423,8 @@ function createPhotoCard(post, index, fromIndexedDB) {
   container.appendChild(buttonRow);
   photoGallery.appendChild(container);
 
-  // ====== Caption editing logic ======
+  // Caption editing logic
   editBtn.addEventListener("click", () => {
-    // Replace caption text with input + save/cancel buttons
     captionDiv.innerHTML = "";
 
     const input = document.createElement("input");
@@ -357,20 +443,47 @@ function createPhotoCard(post, index, fromIndexedDB) {
     cancelBtn.style = "margin-left: 4px; cursor:pointer;";
     captionDiv.appendChild(cancelBtn);
 
-    saveBtn.addEventListener("click", () => {
+    saveBtn.addEventListener("click", async () => {
       const newCaption = input.value.trim();
-      // Save caption to localStorage
-      const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-      savedPosts[index].caption = newCaption;
-      localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-      renderPhotoPosts();
+
+      if (source === "localStorage") {
+        const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+        savedPosts[originalIndex].caption = newCaption;
+        localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+        renderPhotoPosts();
+      } else if (source === "indexedDB") {
+        try {
+          await updateIndexedDBPostCaption(originalIndex, newCaption);
+          renderPhotoPosts();
+        } catch (err) {
+          console.error(err);
+          alert("Failed to update caption in IndexedDB");
+        }
+      }
     });
 
     cancelBtn.addEventListener("click", () => {
-      // Restore original caption display
       renderPhotoPosts();
     });
   });
+}
+
+// Delete function
+async function deletePhoto(source, originalIndex) {
+  if (source === "localStorage") {
+    const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    savedPosts.splice(originalIndex, 1);
+    localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+    renderPhotoPosts();
+  } else if (source === "indexedDB") {
+    try {
+      await deleteIndexedDBPost(originalIndex);
+      renderPhotoPosts();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete photo from IndexedDB");
+    }
+  }
 }
 
 // ====== Caption Editing ======
