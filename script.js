@@ -1,13 +1,51 @@
-window.onload = function() {
-  const fishList = document.getElementById("fishList");
-  const grandTotalEl = document.getElementById("grandTotal");
+// Register service worker early
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () =>
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registered:', r.scope))
+      .catch(console.error));
+}
 
+// Called when the DOM is fully loaded
+window.onload = function() {
+  initFishList();
+  setupTabs();
+  recalculateTotal();
+  renderPhotoPosts();
+};
+
+// ====== Initialization Functions ======
+function initFishList() {
+  const fishList = document.getElementById("fishList");
   if (!fishList) {
     console.error("Error: fishList element not found!");
     return;
   }
 
-  const fishData = [
+  const fishData = getFishData();
+
+  fishData.forEach(({ name, rig, bait }) => {
+    const savedCount = localStorage.getItem(name) || 0;
+    const item = document.createElement("div");
+    item.className = "fish-item";
+    item.innerHTML = `
+      <div style="font-weight:bold;">${name}: <span id="${name}-count">${savedCount}</span></div>
+      <div class="tally-controls">
+        <button onclick="adjustCount('${name}', -1)">-</button>
+        <button onclick="adjustCount('${name}', 1)">+</button>
+        <button onclick="toggleInfo('${name}')">Info</button>
+        <div id="${name}-info" style="display:none;">
+          <strong>Rig:</strong> ${rig}<br>
+          <strong>Bait:</strong> ${bait}
+        </div>
+      </div>
+    `;
+    fishList.appendChild(item);
+  });
+}
+
+function getFishData() {
+  return [
     { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits' },
     { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow' },
     { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait' },
@@ -37,45 +75,18 @@ window.onload = function() {
     { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies' },
     { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs' },
   ];
+}
 
-  let grandTotal = 0;
-
-  // Render fish tally list with saved counts
-  fishData.forEach(({ name, rig, bait }) => {
-    const savedCount = localStorage.getItem(name) || 0;
-    const item = document.createElement("div");
-    item.className = "fish-item";
-    item.innerHTML = `
-      <div style="font-weight:bold;">${name}: <span id="${name}-count">${savedCount}</span></div>
-      <div class="tally-controls">
-        <button onclick="adjustCount('${name}', -1)">-</button>
-        <button onclick="adjustCount('${name}', 1)">+</button>
-        <button onclick="toggleInfo('${name}')">Info</button>
-        <div id="${name}-info" style="display:none;">
-          <strong>Rig:</strong> ${rig}<br>
-          <strong>Bait:</strong> ${bait}
-        </div>
-      </div>
-    `;
-    fishList.appendChild(item);
-  });
-
-  setupTabs();
-  recalculateTotal();
-  renderPhotoPosts();
-};
-
+// ====== UI & Event Handlers ======
 function setupTabs() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const tabContents = document.querySelectorAll('.tab-content');
 
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
-      // Remove active classes
       tabButtons.forEach(b => b.classList.remove('active'));
       tabContents.forEach(tc => tc.classList.remove('active'));
 
-      // Activate the selected tab
       const tab = button.getAttribute('data-tab');
       button.classList.add('active');
       document.getElementById(tab).classList.add('active');
@@ -83,7 +94,6 @@ function setupTabs() {
   });
 }
 
-// Move these functions **outside** window.onload to fix button issues
 function adjustCount(name, delta) {
   const countEl = document.getElementById(`${name}-count`);
   if (!countEl) return;
@@ -94,6 +104,22 @@ function adjustCount(name, delta) {
   recalculateTotal();
 }
 
+function toggleInfo(name) {
+  const infoEl = document.getElementById(`${name}-info`);
+  if (!infoEl) return;
+  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
+}
+
+function recalculateTotal() {
+  let total = 0;
+  document.querySelectorAll(".fish-item [id$='-count']").forEach(span => {
+    total += parseInt(span.textContent, 10);
+  });
+  const grandTotalEl = document.getElementById("grandTotal");
+  if (grandTotalEl) grandTotalEl.textContent = total;
+}
+
+// ====== Photo Gallery ======
 function handleUpload() {
   const fileInput = document.getElementById("photoInput");
   const files = Array.from(fileInput.files);
@@ -105,7 +131,6 @@ function handleUpload() {
 
   const existingPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
 
-  // Process each image separately
   const processNext = (index = 0) => {
     if (index >= files.length) {
       fileInput.value = ""; // Reset file input
@@ -115,7 +140,6 @@ function handleUpload() {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Prompt user for caption and location per photo
       const caption = prompt("Enter a caption for this photo:") || "";
       const location = prompt("Enter a location for this photo:") || "";
 
@@ -126,31 +150,21 @@ function handleUpload() {
         timestamp: new Date().toLocaleString()
       };
 
-      // Save to top of the list
       existingPosts.unshift(newPost);
       localStorage.setItem("photoGallery", JSON.stringify(existingPosts));
 
-      // Continue to next photo
       processNext(index + 1);
     };
     reader.readAsDataURL(files[index]);
   };
 
-  processNext(); // Start processing first photo
-}
-
-// Helper: converts File to DataURL Promise
-function fileToDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+  processNext();
 }
 
 function renderPhotoPosts() {
   const photoGallery = document.getElementById("photoGallery");
+  if (!photoGallery) return;
+
   photoGallery.innerHTML = "";
 
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
@@ -193,11 +207,7 @@ function renderPhotoPosts() {
     timestampDiv.textContent = post.timestamp || "";
     container.appendChild(timestampDiv);
 
-    photoGallery.appendChild(container);
-  });
-}
-
-    // Button row (icon-only)
+    // Buttons row
     const buttonRow = document.createElement("div");
     buttonRow.style.display = "flex";
     buttonRow.style.justifyContent = "center";
@@ -210,7 +220,7 @@ function renderPhotoPosts() {
         title: "Save",
         action: () => {
           saveCaption(index);
-          showSavedStatus(captionInput);
+          showSavedStatus(document.getElementById(`caption-${index}`));
         }
       },
       {
@@ -248,7 +258,20 @@ function renderPhotoPosts() {
   });
 }
 
+// ====== Caption Editing & Feedback ======
+function saveCaption(index) {
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  const captionInput = document.getElementById(`caption-${index}`);
+  if (!captionInput) return;
+  const newCaption = captionInput.value.trim();
+  savedPosts[index].caption = newCaption;
+  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+  renderPhotoPosts();
+}
+
 function showSavedStatus(element) {
+  if (!element) return;
+
   const originalBorder = element.style.border;
   const originalBG = element.style.background;
 
@@ -261,9 +284,11 @@ function showSavedStatus(element) {
   }, 1500);
 }
 
+// ====== Sharing and Catch Card ======
 function generateCatchCard(index) {
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const post = savedPosts[index];
+  if (!post) return;
 
   const card = document.createElement("div");
   card.style.width = "400px";
@@ -295,52 +320,14 @@ function generateCatchCard(index) {
     link.download = "catch-card.png";
     link.href = canvas.toDataURL();
     link.click();
-    document.body.removeChild(card); // Clean up the card after saving
+    document.body.removeChild(card);
   });
-}
-
-function shareToFacebook(index) {
-  const post = JSON.parse(localStorage.getItem("photoGallery"))[index];
-  const url = encodeURIComponent("https://yourapp.com"); // Replace with your app URL
-  const caption = encodeURIComponent(post.caption);
-  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${caption}`, '_blank');
-}
-
-function shareToTwitter(index) {
-  const post = JSON.parse(localStorage.getItem("photoGallery"))[index];
-  const text = encodeURIComponent(`${post.caption} via Fishin’ Buddy 🎣`);
-  const url = encodeURIComponent("https://yourapp.com");
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-}
-
-function showInstagramModal() {
-  const modal = document.getElementById("instagramModal");
-  modal.style.display = "flex";
-}
-
-document.getElementById("closeInstagramModal").addEventListener("click", () => {
-  document.getElementById("instagramModal").style.display = "none";
-});
-
-function shareToInstagram(index) {
-  // Generate and download the catch card image
-  generateCatchCard(index);
-
-  // Show instructions modal
-  showInstagramModal();
-}
-
-function saveCaption(index) {
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  const newCaption = document.getElementById(`caption-${index}`).value.trim();
-  savedPosts[index].caption = newCaption;
-  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-  renderPhotoPosts();
 }
 
 function sharePost(index) {
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const post = savedPosts[index];
+  if (!post) return;
 
   if (navigator.share) {
     navigator.share({
@@ -357,9 +344,55 @@ function sharePost(index) {
   }
 }
 
+function deletePhoto(index) {
+  if (!confirm("Are you sure you want to delete this photo?")) return;
+
+  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+  savedPosts.splice(index, 1);
+  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+  renderPhotoPosts();
+}
+
+// ====== Modal Functions ======
+function openModal(imageSrc) {
+  const modal = document.getElementById("imageModal");
+  const modalImage = document.getElementById("modalImage");
+  if (!modal || !modalImage) return;
+
+  modalImage.src = imageSrc;
+  modal.style.display = "flex";
+}
+
+function closeModal() {
+  const modal = document.getElementById("imageModal");
+  if (!modal) return;
+  modal.style.display = "none";
+}
+
+// Optional: Add event listener for close button if modal exists
+const closeBtn = document.getElementById("closeInstagramModal");
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    const modal = document.getElementById("instagramModal");
+    if (modal) modal.style.display = "none";
+  });
+}
+
+function showInstagramModal() {
+  const modal = document.getElementById("instagramModal");
+  if (modal) modal.style.display = "flex";
+}
+
+function shareToInstagram(index) {
+  generateCatchCard(index);
+  showInstagramModal();
+}
+
 function shareToPlatform(platform, index) {
   const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
   const post = savedPosts[index];
+  if (!post) return;
+
   const text = encodeURIComponent(`${post.caption} - ${post.location}`);
   const url = encodeURIComponent(window.location.href);
   let shareURL = "";
@@ -375,53 +408,9 @@ function shareToPlatform(platform, index) {
       shareURL = `https://wa.me/?text=${text}%20${url}`;
       break;
     default:
-      return alert("Unsupported platform");
+      alert("Unsupported platform");
+      return;
   }
 
   window.open(shareURL, "_blank");
 }
-
-function deletePhoto(index) {
-  if (!confirm("Are you sure you want to delete this photo?")) return;
-
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  savedPosts.splice(index, 1);
-  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-  renderPhotoPosts();
-}
-
-function openModal(imageSrc) {
-  const modal = document.getElementById("imageModal");
-  const modalImage = document.getElementById("modalImage");
-
-  modalImage.src = imageSrc;
-  modal.style.display = "flex";  // Show modal
-}
-
-function closeModal() {
-  document.getElementById("imageModal").style.display = "none"; // Hide modal
-}
-
-function toggleInfo(name) {
-  const infoEl = document.getElementById(`${name}-info`);
-  if (!infoEl) return;
-  infoEl.style.display = infoEl.style.display === "none" ? "block" : "none";
-}
-
-function recalculateTotal() {
-  let total = 0;
-  document.querySelectorAll(".fish-item [id$='-count']").forEach(span => {
-  total += parseInt(span.textContent, 10);
-});
-  document.getElementById("grandTotal").textContent = total;
-}
-
-// Now your buttons should work properly! 🚀🐟
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () =>
-    navigator.serviceWorker.register('/sw.js')
-      .then(r => console.log('SW regd:', r.scope))
-      .catch(console.error));
-}
-
