@@ -205,7 +205,7 @@ function handleUpload() {
           image: resizedData,
           caption: caption.trim(),
           location: location.trim(),
-          timestamp: new Date().toLocaleString()
+          timestamp: new Date().toISOString() // Use ISO for consistent sorting
         };
 
         if (estimatedSize > maxLocalStorageSize) {
@@ -391,7 +391,7 @@ function createPhotoCard(post, source, originalIndex, displayIndex) {
 
   // Timestamp div
   const timestampDiv = document.createElement("div");
-  timestampDiv.textContent = post.timestamp;
+  timestampDiv.textContent = new Date(post.timestamp).toLocaleString();
   timestampDiv.style = "font-size: 0.8rem; color: #aaa; margin-top: 6px;";
   container.appendChild(timestampDiv);
 
@@ -468,8 +468,10 @@ function createPhotoCard(post, source, originalIndex, displayIndex) {
   });
 }
 
-// Delete function
+// Unified delete function
 async function deletePhoto(source, originalIndex) {
+  if (!confirm("Are you sure you want to delete this photo?")) return;
+
   if (source === "localStorage") {
     const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
     savedPosts.splice(originalIndex, 1);
@@ -484,6 +486,92 @@ async function deletePhoto(source, originalIndex) {
       alert("Failed to delete photo from IndexedDB");
     }
   }
+}
+
+// Share function supporting both sources
+async function sharePost(source, originalIndex) {
+  let post;
+  if (source === "localStorage") {
+    const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    post = savedPosts[originalIndex];
+  } else if (source === "indexedDB") {
+    try {
+      const posts = await getIndexedDBPosts();
+      post = posts[originalIndex];
+    } catch (err) {
+      alert("Failed to load photo for sharing.");
+      return;
+    }
+  }
+
+  if (!post) return;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "Fishin' Buddy Catch!",
+      text: `${post.caption || "(no caption)"} - ${post.location || "(no location)"}`,
+      url: window.location.href
+    }).then(() => {
+      console.log('Post shared successfully');
+    }).catch((error) => {
+      console.error('Error sharing:', error);
+      alert("Error sharing post.");
+    });
+  } else {
+    alert("Sharing not supported on this device.");
+  }
+}
+
+// Generate catch card supporting both sources
+async function generateCatchCard(source, originalIndex) {
+  let post;
+  if (source === "localStorage") {
+    const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    post = savedPosts[originalIndex];
+  } else if (source === "indexedDB") {
+    try {
+      const posts = await getIndexedDBPosts();
+      post = posts[originalIndex];
+    } catch (err) {
+      alert("Failed to load photo for catch card.");
+      return;
+    }
+  }
+
+  if (!post) return;
+
+  const card = document.createElement("div");
+  card.style = `
+    width: 400px;
+    padding: 20px;
+    margin: 20px auto;
+    border: 2px solid #5e4322;
+    border-radius: 10px;
+    background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') #fdf5e6;
+    font-family: 'Courier New', Courier, monospace;
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
+    color: #3e2d16;
+  `;
+  card.innerHTML = `
+    <div style="text-align:center; margin-bottom:10px;">
+      <h2 style="margin:0; font-size:1.5rem; text-decoration:underline;">Catch Log</h2>
+      <div style="font-size:0.9rem;">${new Date(post.timestamp).toLocaleString()}</div>
+    </div>
+    <img src="${post.image}" style="width:100%; border-radius:6px; border:1px solid #5e4322; margin-bottom:10px;" />
+    <div><strong>Caption:</strong> <em>${post.caption || "(no caption)"}</em></div>
+    <div><strong>Location:</strong> <em>${post.location || "(no location)"}</em></div>
+    <img src="icon_192x192.png" alt="Fishin’ Buddy Icon" style="width:50px; margin-top:10px; float:right; opacity:0.85;" />
+    <div style="clear:both;"></div>
+  `;
+
+  document.body.appendChild(card);
+  html2canvas(card).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "catch-card.png";
+    link.href = canvas.toDataURL();
+    link.click();
+    document.body.removeChild(card);
+  });
 }
 
 // ====== Caption Editing ======
@@ -506,72 +594,4 @@ function showSavedStatus(element) {
     element.style.border = originalBorder;
     element.style.background = originalBG;
   }, 1500);
-}
-
-// ====== Sharing & Export ======
-function generateCatchCard(index) {
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  const post = savedPosts[index];
-  if (!post) return;
-
-  const card = document.createElement("div");
-  card.style = `
-    width: 400px;
-    padding: 20px;
-    margin: 20px auto;
-    border: 2px solid #5e4322;
-    border-radius: 10px;
-    background: url('https://www.transparenttextures.com/patterns/paper-fibers.png') #fdf5e6;
-    font-family: 'Courier New', Courier, monospace;
-    box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
-    color: #3e2d16;
-  `;
-  card.innerHTML = `
-    <div style="text-align:center; margin-bottom:10px;">
-      <h2 style="margin:0; font-size:1.5rem; text-decoration:underline;">Catch Log</h2>
-      <div style="font-size:0.9rem;">${post.timestamp}</div>
-    </div>
-    <img src="${post.image}" style="width:100%; border-radius:6px; border:1px solid #5e4322; margin-bottom:10px;" />
-    <div><strong>Caption:</strong> <em>${post.caption}</em></div>
-    <div><strong>Location:</strong> <em>${post.location}</em></div>
-    <img src="icon_192x192.png" alt="Fishin’ Buddy Icon" style="width:50px; margin-top:10px; float:right; opacity:0.85;" />
-    <div style="clear:both;"></div>
-  `;
-
-  document.body.appendChild(card);
-  html2canvas(card).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "catch-card.png";
-    link.href = canvas.toDataURL();
-    link.click();
-    document.body.removeChild(card);
-  });
-}
-
-function sharePost(index) {
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  const post = savedPosts[index];
-  if (!post) return;
-
-  if (navigator.share) {
-    navigator.share({
-      title: "Fishin' Buddy Catch!",
-      text: `${post.caption} - ${post.location}`,
-      url: window.location.href
-    }).then(() => {
-      console.log('Post shared successfully');
-    }).catch((error) => {
-      console.error('Error sharing:', error);
-    });
-  } else {
-    alert("Sharing not supported on this device.");
-  }
-}
-
-function deletePhoto(index) {
-  if (!confirm("Are you sure you want to delete this photo?")) return;
-  const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
-  savedPosts.splice(index, 1);
-  localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-  renderPhotoPosts();
 }
