@@ -101,8 +101,10 @@ function handleUpload() {
 
   if (fileInput.files.length > 0) {
     const savedPosts = JSON.parse(localStorage.getItem("photoGallery")) || [];
+    const files = Array.from(fileInput.files);
+    let loadedCount = 0;
 
-    Array.from(fileInput.files).forEach(file => {
+    files.forEach(file => {
       const reader = new FileReader();
       reader.onload = function(event) {
         savedPosts.push({
@@ -111,13 +113,17 @@ function handleUpload() {
           location,
           timestamp: new Date().toLocaleString(),
         });
-        localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
-        renderPhotoPosts();
+
+        loadedCount++;
+        if (loadedCount === files.length) {
+          localStorage.setItem("photoGallery", JSON.stringify(savedPosts));
+          renderPhotoPosts(); // Only render after all are loaded
+        }
       };
       reader.readAsDataURL(file);
     });
 
-    // Clear inputs after upload
+    // Clear inputs immediately
     fileInput.value = "";
     document.getElementById("photoCaption").value = "";
     document.getElementById("photoLocationInput").value = "";
