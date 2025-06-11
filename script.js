@@ -434,8 +434,6 @@ function recalculateTotal() {
   document.getElementById("grandTotal").textContent = total;
 }
 
-document.getElementById("savePostBtn").addEventListener("click", handleUpload);
-
 // Now your buttons should work properly! 🚀🐟
 
 if ('serviceWorker' in navigator) {
