@@ -410,154 +410,141 @@
     localStorage.setItem("photos", JSON.stringify(photos));
   }
 
-  // Render memories feed: newest at bottom using flex-direction: column-reverse
   function renderPhotoPosts() {
-    const gallery = document.getElementById("photoGallery");
-    gallery.innerHTML = "";
+  const gallery = document.getElementById("photoGallery");
+  gallery.innerHTML = "";
 
-    const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
+  const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
-    storedPhotos.forEach((photo, index) => {
-      const card = document.createElement("div");
-      card.className = "catch-card";
+  storedPhotos.forEach((photo, index) => {
+    const card = document.createElement("div");
+    card.className = "catch-card";
 
-      // Photo element
-      const img = document.createElement("img");
-      img.src = photo.src;
-      img.alt = photo.caption || "Catch photo";
-      img.className = "catch-photo";
-      img.addEventListener("click", () => openModal(photo.src));
-      card.appendChild(img);
+    const img = document.createElement("img");
+    img.src = photo.src;
+    img.alt = photo.caption || "Catch photo";
+    img.className = "catch-photo";
+    img.addEventListener("click", () => openModal(photo.src));
+    card.appendChild(img);
 
-      // Info container
-      const info = document.createElement("div");
-      info.className = "catch-info";
+    const info = document.createElement("div");
+    info.className = "catch-info";
 
-      if (photo.caption) {
-        const caption = document.createElement("p");
-        caption.className = "catch-caption";
-        caption.textContent = photo.caption;
-        info.appendChild(caption);
-      }
-      if (photo.location) {
-        const location = document.createElement("p");
-        location.className = "catch-location";
-        location.textContent = "Location: " + photo.location;
-        info.appendChild(location);
-      }
-      if (photo.timestamp) {
-        const date = document.createElement("p");
-        date.className = "catch-date";
-        const d = new Date(photo.timestamp);
-        date.textContent = "Caught: " + d.toLocaleString();
-        info.appendChild(date);
-      }
-      card.appendChild(info);
-
-      // Buttons container
-      const buttonRow = document.createElement("div");
-      buttonRow.className = "catch-buttons";
-
-      // Share (download) button
-      const shareButton = document.createElement("button");
-      shareButton.textContent = "Download";
-      shareButton.title = "Download Catch Card";
-
-      shareButton.addEventListener("click", () => {
-        // Clone card and add watermark before downloading
-        const clone = card.cloneNode(true);
-        clone.style.position = 'fixed';
-        clone.style.top = '-10000px';
-        clone.style.left = '0';
-        clone.style.background = '#fff'; // Ensure background white for canvas
-        document.body.appendChild(clone);
-        const buttons = clone.querySelector(".catch-buttons");
-        if (buttons) buttons.remove();
-
-        // Use html2canvas to capture clone element
-        // Use html2canvas to capture clone element
-html2canvas(clone).then(canvas => {
-  const ctx = canvas.getContext("2d");
-
-  const watermarkImg = new Image();
-  watermarkImg.src = "icon_192x192.png"; // Make sure this path is correct and accessible
-
-  watermarkImg.onload = () => {
-    ctx.globalAlpha = 0.3; // Semi-transparent watermark
-    const size = 64;
-
-    // Try to locate the .catch-info block inside the clone
-    const infoBlock = clone.querySelector(".catch-info");
-    if (infoBlock) {
-      const infoRect = infoBlock.getBoundingClientRect();
-      const cloneRect = clone.getBoundingClientRect();
-
-      // Calculate offset relative to canvas
-      const offsetX = infoRect.right - cloneRect.left + 10;
-      const offsetY = infoRect.top - cloneRect.top;
-
-      ctx.drawImage(watermarkImg, offsetX, offsetY, size, size);
-    } else {
-      // Fallback: bottom-right if info not found
-      ctx.drawImage(
-        watermarkImg,
-        canvas.width - size - 10,
-        canvas.height - size - 10,
-        size,
-        size
-      );
+    if (photo.caption) {
+      const caption = document.createElement("p");
+      caption.className = "catch-caption";
+      caption.textContent = photo.caption;
+      info.appendChild(caption);
     }
+    if (photo.location) {
+      const location = document.createElement("p");
+      location.className = "catch-location";
+      location.textContent = "Location: " + photo.location;
+      info.appendChild(location);
+    }
+    if (photo.timestamp) {
+      const date = document.createElement("p");
+      date.className = "catch-date";
+      const d = new Date(photo.timestamp);
+      date.textContent = "Caught: " + d.toLocaleString();
+      info.appendChild(date);
+    }
+    card.appendChild(info);
 
-    // After watermark is drawn, download image
-    const link = document.createElement("a");
-    link.download = `catch-card-${index + 1}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "catch-buttons";
 
-    openInstagramModal();
-    clone.remove();
-  };
-});
-      buttonRow.appendChild(shareButton);
+    const shareButton = document.createElement("button");
+    shareButton.textContent = "Download";
+    shareButton.title = "Download Catch Card";
 
-      deleteButton.addEventListener("click", () => {
-  if (!confirm("Delete this photo?")) return;
+    shareButton.addEventListener("click", () => {
+      const clone = card.cloneNode(true);
+      clone.style.position = 'fixed';
+      clone.style.top = '-10000px';
+      clone.style.left = '0';
+      clone.style.background = '#fff';
+      document.body.appendChild(clone);
+      const buttons = clone.querySelector(".catch-buttons");
+      if (buttons) buttons.remove();
 
-  const photos = JSON.parse(localStorage.getItem("photos")) || [];
-  const updatedPhotos = photos.filter(p => p.timestamp !== photo.timestamp); // or compare src if timestamp isn't reliable
-  localStorage.setItem("photos", JSON.stringify(updatedPhotos));
-  renderPhotoPosts();
-});
+      html2canvas(clone).then(canvas => {
+        const ctx = canvas.getContext("2d");
+        const watermarkImg = new Image();
+        watermarkImg.src = "icon_192x192.png";
+        watermarkImg.onload = () => {
+          ctx.globalAlpha = 0.3;
+          const size = 64;
+          const infoBlock = clone.querySelector(".catch-info");
+          if (infoBlock) {
+            const infoRect = infoBlock.getBoundingClientRect();
+            const cloneRect = clone.getBoundingClientRect();
+            const offsetX = infoRect.right - cloneRect.left + 10;
+            const offsetY = infoRect.top - cloneRect.top;
+            ctx.drawImage(watermarkImg, offsetX, offsetY, size, size);
+          } else {
+            ctx.drawImage(watermarkImg, canvas.width - size - 10, canvas.height - size - 10, size, size);
+          }
 
-  // Modal controls
+          const link = document.createElement("a");
+          link.download = `catch-card-${index + 1}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+
+          openInstagramModal();
+          clone.remove();
+        };
+      });
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.title = "Delete This Photo";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm("Delete this photo?")) return;
+      const photos = JSON.parse(localStorage.getItem("photos")) || [];
+      const updatedPhotos = photos.filter(p => p.timestamp !== photo.timestamp);
+      localStorage.setItem("photos", JSON.stringify(updatedPhotos));
+      renderPhotoPosts();
+    });
+
+    buttonRow.appendChild(shareButton);
+    buttonRow.appendChild(deleteButton);
+    card.appendChild(buttonRow);
+    gallery.appendChild(card);
+  });
+} // ✅ CLOSE renderPhotoPosts here
+
   function openModal(src) {
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImg");
-    modalImg.src = src;
-    modal.style.display = "flex";
-  }
-  function closeModal() {
-    const modal = document.getElementById("imageModal");
-    modal.style.display = "none";
-    const modalImg = document.getElementById("modalImg");
-    modalImg.src = "";
-  }
-  document.getElementById("modalClose").addEventListener("click", closeModal);
-  window.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeModal();
-  });
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImg");
+  modalImg.src = src;
+  modal.style.display = "flex";
+}
 
-  // Instagram sharing modal controls
-  function openInstagramModal() {
-    const modal = document.getElementById("instagramModal");
-    modal.style.display = "flex";
-    setTimeout(() => {
-      modal.style.display = "none";
-    }, 3000);
-  }
-  document.getElementById("closeInstagramModal").addEventListener("click", () => {
-    document.getElementById("instagramModal").style.display = "none";
-  });
+function closeModal() {
+  const modal = document.getElementById("imageModal");
+  modal.style.display = "none";
+  const modalImg = document.getElementById("modalImg");
+  modalImg.src = "";
+}
+
+document.getElementById("modalClose").addEventListener("click", closeModal);
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
+
+function openInstagramModal() {
+  const modal = document.getElementById("instagramModal");
+  modal.style.display = "flex";
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 3000);
+}
+
+document.getElementById("closeInstagramModal").addEventListener("click", () => {
+  document.getElementById("instagramModal").style.display = "none";
+});
 
   // ===== Fish Data and Tally =====
   const fishData = [
