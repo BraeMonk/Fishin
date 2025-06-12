@@ -424,12 +424,30 @@ header.dark-mode {
   color: #e0f7fa;
   border: 1px solid #4a6464;
 }
+
+  #darkModeContainer {
+  width: 100%;
+  background: #e6dbcf; /* cork-like tone */
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.dark-mode #darkModeContainer {
+  background: #0f2f2f; /* dark mode tone */
+}
 </style>
 </head>
 <body>
 
+  <div id="darkModeContainer">
+  <button id="darkModeToggle" class="button">🌙 Toggle Night Mode</button>
+</div>
+
 <header>Fishin' Buddy</header>
-  <button id="darkModeToggle" class="button" style="margin: 1rem;">🌙 Dark Mode</button>
+
+<header>Fishin' Buddy</header>
 
 <div id="tabs">
   <button id="memoriesTabBtn" class="active">Memories</button>
