@@ -299,6 +299,13 @@
   align-self: center;
 }
 
+  #mapContainer {
+  height: 100%;
+  min-height: 400px;
+  width: 100%;
+  border-radius: 8px;
+}
+
   /* === Night at the Lake: Dark Mode === */
 body.dark-mode, html.dark-mode {
   background: #0d1b1e; /* deep night lake blue */
@@ -976,11 +983,6 @@ if (darkToggle) {
 
     // ===== Map Initialization =====
     if (typeof L !== "undefined") { // Make sure Leaflet is loaded
-      // Create a global map variable so it can be invalidated on tab switch
-      window.myMap = L.map("mapContainer").setView([0, 0], 2);
-lightTiles.addTo(window.myMap);
-
-      // Add OpenStreetMap tiles
       const lightTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: '© OpenStreetMap contributors'
@@ -990,6 +992,9 @@ const darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   maxZoom: 19,
   attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
 });
+      // Create a global map variable so it can be invalidated on tab switch
+      window.myMap = L.map("mapContainer").setView([0, 0], 2);
+lightTiles.addTo(window.myMap);
 
       // Try to get user location and update map view
       window.myMap.locate({ setView: true, maxZoom: 15 });
