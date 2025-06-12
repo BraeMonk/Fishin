@@ -582,6 +582,8 @@ function renderFishList() {
     item.appendChild(tips);
     list.appendChild(item);
   });
+
+  updateTotalFishCount();
 }
 
 // Update and save
@@ -644,7 +646,6 @@ function initFishList() {
     await cachePhotosLocally();
     renderPhotoPosts();
     initFishList();
-    updateTotalFishCount();
   })();
 
   if ('serviceWorker' in navigator) {
