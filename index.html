@@ -416,7 +416,7 @@
 
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  storedPhotos.slice().reverse().forEach((photo, index) => {
+  storedPhotos.forEach((photo, index) => {
     const card = document.createElement("div");
     card.className = "catch-card";
 
@@ -508,7 +508,7 @@
           deleteButton.addEventListener("click", () => {
             if (confirm("Are you sure you want to delete this photo?")) {
     // Remove from storedPhotos array
-              storedPhotos.splice(storedPhotos.length - 1 - index, 1); 
+              storedPhotos.splice(index, 1); 
     // Explanation: Because you unshift photos and render reverses, index corresponds to reversed array
               localStorage.setItem("photos", JSON.stringify(storedPhotos));
               renderPhotoPosts();
