@@ -1,457 +1,487 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#000000" />
-  <link rel="icon" type="image/png" href="icon_192x192.png" />
-  <link rel="apple-touch-icon" href="icon_192x192.png" />
-  <link rel="manifest" href="manifest.json"/>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <title>Fishin' Buddy</title>
-  <style>
-    body { 
-  font-family: Arial, sans-serif; 
-  margin: 0 1rem; 
-  background: #000; 
-  color: #f5f5dc; 
-  font-size: 1.05rem; 
-  line-height: 1.6; 
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catch Cards Memories & Tallies</title>
+
+<style>
+  /* Basic reset */
+  body,html {
+    margin:0; padding:0; height:100%;
+    font-family: Arial, sans-serif;
+    background:#f7f9fa;
+    display:flex; flex-direction: column;
+  }
+  header {
+    background:#1e3a8a; color:white;
+    padding: 1rem;
+    font-weight:bold;
+    text-align:center;
+    font-size: 1.4rem;
+  }
+  #tabs {
+    display:flex;
+    background:#2563eb;
+  }
+  #tabs button {
+    flex: 1;
+    padding: 1rem;
+    border:none;
+    background:#93c5fd;
+    color:#1e40af;
+    font-weight:bold;
+    cursor:pointer;
+    transition: background-color 0.25s ease;
+  }
+  #tabs button.active {
+    background:#1e40af;
+    color:#f3f4f6;
+  }
+  section {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background: white;
+  }
+  /* Memories feed container */
+  #photoGallery {
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column-reverse; /* newest at bottom */
+    gap: 1rem;
+  }
+  /* Catch card */
+  .catch-card {
+    background:#e0e7ff;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-width: 420px;
+  }
+  .catch-photo {
+    width: 100%;
+    display: block;
+    cursor: pointer;
+  }
+  .catch-info {
+    padding: 0.5rem 1rem 1rem;
+  }
+  .catch-caption {
+    font-weight: 600;
+    margin: 0.2rem 0;
+  }
+  .catch-location, .catch-date {
+    font-size: 0.9rem;
+    color: #444;
+    margin: 0.1rem 0;
+  }
+  .catch-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+  .catch-buttons button {
+    background:#2563eb;
+    border:none;
+    color: white;
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  .catch-buttons button:hover {
+    background:#1e40af;
+  }
+  /* Input file */
+  #photoInput {
+    display: block;
+    margin: 0 auto 1rem;
+  }
+  /* Modal */
+  #imageModal, #instagramModal {
+    display:none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  }
+  #imageModal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #000;
+  }
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+  }
+  /* Tallies placeholder */
+  #talliesTab h3 {
+    text-align: center;
+    color: #1e3a8a;
+  }
+
+  .fish-list {
+  padding: 1rem;
 }
 
-/* Universal button styling: slick beige with black text */
-button {
-  background-color: #f5f5dc;   /* beige */
-  color: #000;                 /* black text */
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 1rem;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  user-select: none;
+.fish-item {
+  background: #fff8f0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-button:hover,
-button:focus {
-  background-color: #e5e5c4;  /* slightly darker beige */
-  transform: scale(1.03);
-  outline: none;
-}
-
-/* Override all button variants to match the universal style */
-.info-button,
-.reset-button,
-.photo-buttons button,
-.edit-button,
-.caption-save,
-.caption-cancel,
-#closeInstagramModal {
-  background-color: #f5f5dc !important;
-  color: #000 !important;
-  border: none !important;
-  padding: 0.6rem 1.2rem !important;
-  border-radius: 6px !important;
-  font-weight: 700 !important;
-  font-size: 1rem !important;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4) !important;
-  transition: background-color 0.2s ease, transform 0.1s ease !important;
-  cursor: pointer !important;
-}
-
-.info-button:hover,
-.reset-button:hover,
-.photo-buttons button:hover,
-.edit-button:hover,
-.caption-save:hover,
-.caption-cancel:hover,
-#closeInstagramModal:hover {
-  background-color: #e5e5c4 !important;
-  transform: scale(1.03) !important;
-  outline: none !important;
-}
-
-/* Tabs container */
-.tabs { 
-  display: flex; 
-  margin-top: 1rem; 
-  border-bottom: 2px solid #444; 
-}
-
-.tab-button { 
-  flex: 1; 
-  padding: 0.75rem; 
-  background: #111; 
-  color: #f5f5dc; 
-  border: none; 
-  cursor: pointer; 
-  font-weight: bold; 
-  transition: background 0.3s; 
-}
-
-.tab-button.active { 
-  background: #cc3300; 
-  color: white; 
-  border-bottom: 3px solid #aa2200; 
-}
-
-.tab-content { 
-  display: none; 
-  padding: 1rem 0 2rem 0; 
-}
-
-.tab-content.active { 
-  display: block; 
-}
-
-.season-total { 
-  font-weight: bold; 
-  color: #cc3300; 
-  margin-bottom: 1rem; 
-  font-size: 1.2rem;
-}
-
-.fish-item { 
-  margin: 8px 0; 
-  background: #111; 
-  padding: 12px; 
-  border-radius: 6px; 
-  border: 1px solid #333;
-}
-
-.fish-header {
+.fish-name {
   font-weight: bold;
-  cursor: pointer;
   font-size: 1.1rem;
-  margin-bottom: 8px;
-  color: #f5f5dc;
-}
-
-.fish-header:hover {
-  color: #cc3300;
-}
-
-.fish-count {
-  color: #cc3300;
-  font-weight: bold;
-}
-
-.tally-controls { 
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.tally-controls button {
-  padding: 0.4rem 1rem;
-  font-size: 1rem;
-  min-width: 36px;
-}
-
-.fish-info {
-  margin-top: 8px;
-  padding: 8px;
-  background: #222;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-#photoUploader { 
-  background: #121212; 
-  padding: 1rem; 
-  border-radius: 6px; 
-  color: #f5f5dc; 
-  margin-bottom: 1rem; 
-  border: 1px solid #333;
-}
-
-#photoInput {
-  background: #333;
-  color: #f5f5dc;
-  border: 1px solid #555;
-  padding: 8px;
-  border-radius: 4px;
-  margin-right: 8px;
-  width: 200px;
-}
-
-#photoGallery {
-  display: flex;
-  flex-direction: column;
-  max-height: 75vh;
-  overflow-y: auto;
-  gap: 1rem;
-  padding: 0 4px;
-}
-
-.photo-container { 
-  background: #111; 
-  padding: 12px; 
-  border-radius: 8px; 
-  border: 1px solid #333;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.photo-container img {
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-  border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 6px;
 }
 
-.photo-container img:hover {
-  transform: scale(1.02);
-}
-
-.photo-caption {
-  margin-top: 8px;
+.fish-counter {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  margin: 6px 0;
 }
 
-.photo-meta {
-  font-size: 0.9rem;
-  color: #bbb;
-  margin-top: 4px;
-}
-
-.photo-timestamp {
-  font-size: 0.8rem;
-  color: #888;
-  margin-top: 6px;
-}
-
-.photo-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.photo-buttons button {
-  background: none !important;  /* overridden by universal style */
-  border: none !important;      /* overridden */
-  color: #f5f5dc !important;    /* overridden */
-  font-size: 1.4rem !important;
-  cursor: pointer !important;
-  padding: 8px !important;
-  border-radius: 4px !important;
-  transition: background 0.2s ease !important;
-}
-
-.photo-buttons button:hover {
-  background: #333 !important;
-}
-
-.edit-button {
-  background: none !important; /* overridden */
-  border: none !important;     /* overridden */
-  color: #f5f5dc !important;   /* overridden */
-  font-size: 1.2rem !important;
-  cursor: pointer !important;
-  padding: 4px !important;
-}
-
-.caption-input {
-  flex-grow: 1;
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background: #333;
-  color: #f5f5dc;
-  font-size: 0.9rem;
-}
-
-.caption-save, .caption-cancel {
-  padding: 0.6rem 1.2rem !important;
-  font-size: 1rem !important;
-  margin-left: 4px !important;
-}
-
-/* Modal Styles */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.modal img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
-}
-
-.modal-close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  font-size: 40px;
+.fish-counter button {
+  background: #2563eb;
   color: white;
-  cursor: pointer;
-  user-select: none;
-  z-index: 10000;
-}
-
-.instagram-modal {
-  background: #fff;
-  padding: 20px;
-  max-width: 350px;
-  border-radius: 8px;
-  text-align: center;
-  font-family: 'Courier New', monospace;
-  color: #3e2d16;
-}
-
-.instagram-modal h2 {
-  margin-top: 0;
-}
-
-/* Override Instagram modal button with universal button styles */
-.instagram-modal button {
-  background-color: #f5f5dc;
-  color: #000;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 6px 12px;
+  font-size: 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.fish-counter button:hover {
+  background: #1d4ed8;
+}
+
+.fish-counter span {
+  font-size: 1.3rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.fish-tips {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #333;
+  display: none;
+}
+
+.clear-btn {
+  display: block;
+  margin: 10px auto;
+  padding: 8px 18px;
+  background: #dc2626;
+  color: white;
+  font-size: 1rem;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 1rem;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  user-select: none;
-  margin-top: 15px;
 }
-
-.instagram-modal button:hover {
-  background-color: #e5e5c4;
-  transform: scale(1.03);
-  outline: none;
-}
-
-/* Scrollbar styling for photo gallery */
-#photoGallery::-webkit-scrollbar {
-  width: 8px;
-}
-
-#photoGallery::-webkit-scrollbar-track {
-  background: #333;
-  border-radius: 4px;
-}
-
-#photoGallery::-webkit-scrollbar-thumb {
-  background: #666;
-  border-radius: 4px;
-}
-
-#photoGallery::-webkit-scrollbar-thumb:hover {
-  background: #888;
-}
-
-    .catch-card {
-  border: 2.5px solid #2a9d8f;
-  border-radius: 10px;
-  box-shadow: 0 3px 7px rgba(0,0,0,0.2);
-  padding: 8px;
-  margin: 12px;
-  max-width: 300px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f0f8ff;
-}
-
-.catch-photo {
-  width: 100%;
-  border-radius: 8px;
-  object-fit: cover;
-  margin-bottom: 8px;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.1);
-}
-
-.catch-info p {
-  margin: 4px 0;
-  color: #1b264f;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-  </style>
+</style>
 </head>
 <body>
 
-  <div class="tabs">
-    <button class="tab-button active" data-tab="tally" type="button">Tally</button>
-    <button class="tab-button" data-tab="memory" type="button">Memories</button>
-  </div>
+<header>Catch Cards App</header>
 
-  <section id="tally" class="tab-content active">
-    <div class="season-total">Season Total: <span id="grandTotal">0</span> Fish</div>
-    <div id="fishList"></div>
-    <button type="button" class="reset-button" onclick="resetSeason()">Reset Season</button>
-  </section>
+<div id="tabs">
+  <button id="memoriesTabBtn" class="active">Memories</button>
+  <button id="talliesTabBtn">Tallies</button>
+</div>
 
-  <section id="memory" class="tab-content">
-    <div id="photoUploader">
-      <input type="file" id="photoInput" accept="image/*" multiple />
-      <button type="button" onclick="handleUpload()">Upload Photos</button>
-    </div>
+<section id="memoriesTab">
+  <input type="file" id="photoInput" accept="image/*" multiple />
+  <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed"></div>
+</section>
 
+<section id="talliesTab" style="display:none;">
+  <h3>Fish List </h3>
+  <div id="fishList" class="fish-list"></div>
+<button id="clearTallies" class="clear-btn">Clear</button>
+</section>
 
-<div id="photoGallery"></div>
+<!-- Fullscreen photo modal -->
+<div id="imageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <span id="modalClose" class="modal-close" aria-label="Close modal">&times;</span>
+  <img id="modalImg" alt="Full size catch photo" />
+</div>
 
-
-  </section>
-
-  <!-- Image Modal -->
-
-  <div id="imageModal" class="modal">
-    <span class="modal-close" id="modalClose">&times;</span>
-    <img id="modalImg" src="" alt="Full size" />
-  </div>
-
-  <!-- Instagram Modal -->
-
-  <div id="instagramModal" class="modal">
-    <div class="instagram-modal">
-      <h2>Share on Instagram</h2>
-      <p>
-        Your catch card has been downloaded.<br><br>
-        To share it on Instagram:<br>
-        1. Open the Instagram app.<br>
-        2. Tap the '+' icon to create a new post.<br>
-        3. Select the downloaded image from your device.<br>
-        4. Add any captions or tags you like and post it!
-      </p>
-      <button id="closeInstagramModal">Got it!</button>
-    </div>
-  </div>
-
-  <div class="catch-card">
-  <img src="..." alt="Catch photo" class="catch-photo" />
-  <div class="catch-info">
-    <p class="caption">Big bass on the fly rod!</p>
-    <p class="location">Location: Lovers Creek</p>
-    <p class="date">Caught: June 11, 2025, 18:00</p>
+<!-- Instagram sharing modal (simple confirmation) -->
+<div id="instagramModal" role="alertdialog" aria-modal="true">
+  <span id="closeInstagramModal" class="modal-close" aria-label="Close message">&times;</span>
+  <div style="color:white; font-size:1.5em; background:#2563eb; padding:20px; border-radius:10px; max-width:300px; margin:auto;">
+    Catch card downloaded! Share it on Instagram! 📸
   </div>
 </div>
 
-  <script src="script.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // === IndexedDB Setup ===
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('MemoriesDB', 1);
+      request.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('photos')) {
+          db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      request.onsuccess = e => resolve(e.target.result);
+      request.onerror = e => reject(e.target.error);
+    });
+  }
+
+  async function addPhotoToDB(photo) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('photos', 'readwrite');
+      const store = tx.objectStore('photos');
+      const req = store.add(photo);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function getAllPhotosFromDB() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('photos', 'readonly');
+      const store = tx.objectStore('photos');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function deletePhotoFromDB(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('photos', 'readwrite');
+      const store = tx.objectStore('photos');
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // Read file as data URL helper
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = e => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Upload handler
+  async function handleUpload() {
+    const input = document.getElementById("photoInput");
+    const files = input.files;
+    if (!files.length) return;
+
+    for (const file of files) {
+      const photoSrc = await readFileAsDataURL(file);
+      const location = prompt("Enter location for this photo:", "") || "";
+      const caption = prompt("Enter caption for this photo:", "") || "";
+      const timestamp = new Date().toISOString();
+
+      const photoData = { src: photoSrc, caption, location, timestamp };
+      await addPhotoToDB(photoData);
+    }
+
+    await cachePhotosLocally();
+    input.value = "";
+    renderPhotoPosts();
+  }
+
+  // Sync IndexedDB to localStorage for faster reads
+  async function cachePhotosLocally() {
+    const photos = await getAllPhotosFromDB();
+    // Sort by timestamp ascending for consistent order (newest last)
+    photos.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    localStorage.setItem('photos', JSON.stringify(photos));
+  }
+
+  // Render memories feed: newest at bottom using flex-direction: column-reverse
+  function renderPhotoPosts() {
+    const gallery = document.getElementById("photoGallery");
+    gallery.innerHTML = "";
+
+    const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
+
+    storedPhotos.forEach((photo, index) => {
+      const card = document.createElement("div");
+      card.className = "catch-card";
+
+      // Photo element
+      const img = document.createElement("img");
+      img.src = photo.src;
+      img.alt = photo.caption || "Catch photo";
+      img.className = "catch-photo";
+      img.addEventListener("click", () => openModal(photo.src));
+      card.appendChild(img);
+
+      // Info container
+      const info = document.createElement("div");
+      info.className = "catch-info";
+
+      if (photo.caption) {
+        const caption = document.createElement("p");
+        caption.className = "catch-caption";
+        caption.textContent = photo.caption;
+        info.appendChild(caption);
+      }
+      if (photo.location) {
+        const location = document.createElement("p");
+        location.className = "catch-location";
+        location.textContent = "Location: " + photo.location;
+        info.appendChild(location);
+      }
+      if (photo.timestamp) {
+        const date = document.createElement("p");
+        date.className = "catch-date";
+        const d = new Date(photo.timestamp);
+        date.textContent = "Caught: " + d.toLocaleString();
+        info.appendChild(date);
+      }
+      card.appendChild(info);
+
+      // Buttons container
+      const buttonRow = document.createElement("div");
+      buttonRow.className = "catch-buttons";
+
+      // Share (download) button
+      const shareButton = document.createElement("button");
+      shareButton.textContent = "Download";
+      shareButton.title = "Download Catch Card";
+
+      shareButton.addEventListener("click", () => {
+        // Clone card and add watermark before downloading
+        const clone = card.cloneNode(true);
+
+        // Use html2canvas to capture clone element
+        html2canvas(clone).then(canvas => {
+          const ctx = canvas.getContext("2d");
+          // Add watermark (simple text here)
+          const text = "Catch Cards App";
+          ctx.font = "18px Arial";
+          ctx.fillStyle = "rgba(0,0,0,0.3)";
+          ctx.textAlign = "right";
+          ctx.fillText(text, canvas.width - 10, canvas.height - 10);
+
+          // Download image
+          const link = document.createElement("a");
+          link.download = `catch-card-${index + 1}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+
+          // Show Instagram modal confirmation
+          openInstagramModal();
+        });
+      });
+      buttonRow.appendChild(shareButton);
+
+      // Delete button
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.title = "Delete this photo";
+      deleteButton.style.backgroundColor = "#dc2626";
+
+      deleteButton.addEventListener("click", async () => {
+        // Find photo ID from IndexedDB by matching timestamp & src (simple match)
+        const photos = JSON.parse(localStorage.getItem("photos")) || [];
+        const photoToDelete = photos.find(p => p.timestamp === photo.timestamp && p.src === photo.src);
+        if (!photoToDelete) return;
+
+        await deletePhotoFromDB(photoToDelete.id);
+        await cachePhotosLocally();
+        renderPhotoPosts();
+      });
+      buttonRow.appendChild(deleteButton);
+
+      card.appendChild(buttonRow);
+      gallery.appendChild(card);
+    });
+  }
+
+  // Modal controls
+  function openModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImg");
+    modalImg.src = src;
+    modal.style.display = "flex";
+  }
+  function closeModal() {
+    document.getElementById("imageModal").style.display = "none";
+    document.getElementById("modalImg").src = "";
+  }
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  window.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  // Instagram sharing modal controls
+  function openInstagramModal() {
+    const modal = document.getElementById("instagramModal");
+    modal.style.display = "flex";
+    setTimeout(() => {
+      modal.style.display = "none";
+    }, 3000);
+  }
+  document.getElementById("closeInstagramModal").addEventListener("click", () => {
+    document.getElementById("instagramModal").style.display = "none";
+  });
+
+  // Tabs switching
+  const memoriesTabBtn = document.getElementById("memoriesTabBtn");
+  const talliesTabBtn = document.getElementById("talliesTabBtn");
+  const memoriesTab = document.getElementById("memoriesTab");
+  const talliesTab = document.getElementById("talliesTab");
+
+  memoriesTabBtn.addEventListener("click", () => {
+    memoriesTabBtn.classList.add("active");
+    talliesTabBtn.classList.remove("active");
+    memoriesTab.style.display = "";
+    talliesTab.style.display = "none";
+  });
+  talliesTabBtn.addEventListener("click", () => {
+    talliesTabBtn.classList.add("active");
+    memoriesTabBtn.classList.remove("active");
+    talliesTab.style.display = "";
+    memoriesTab.style.display = "none";
+  });
+
+  // Init
+  document.getElementById("photoInput").addEventListener("change", handleUpload);
+
+  // On load, cache from DB -> localStorage, then render
+  (async () => {
+    await cachePhotosLocally();
+    renderPhotoPosts();
+    initFishList();
+  })();
+</script>
 
 </body>
 </html>
