@@ -516,41 +516,33 @@
       if (buttons) buttons.remove();
 
       html2canvas(clone).then(canvas => {
-        const ctx = canvas.getContext("2d");
-        const watermarkImg = new Image();
-        watermarkImg.src = "icon_192x192.png";
+  const ctx = canvas.getContext("2d");
+  const watermarkImg = new Image();
+  watermarkImg.src = "icon_192x192.png";
 
-        watermarkImg.onload = () => {
-          ctx.globalAlpha = 0.3;
-          const size = 64;
+  watermarkImg.onload = () => {
+    ctx.globalAlpha = 0.3;
+    const size = 64;
+    const padding = 10;
 
-          const infoBlock = clone.querySelector(".catch-info");
-          if (infoBlock) {
-            const infoRect = infoBlock.getBoundingClientRect();
-            const cloneRect = clone.getBoundingClientRect();
-            const offsetX = infoRect.right - cloneRect.left + 10;
-            const offsetY = infoRect.top - cloneRect.top;
-            ctx.drawImage(watermarkImg, offsetX, offsetY, size, size);
-          } else {
-            ctx.drawImage(
-              watermarkImg,
-              canvas.width - size - 10,
-              canvas.height - size - 10,
-              size,
-              size
-            );
-          }
+    // Always bottom-right corner of the canvas
+    ctx.drawImage(
+      watermarkImg,
+      canvas.width - size - padding,
+      canvas.height - size - padding,
+      size,
+      size
+    );
 
-          const link = document.createElement("a");
-          link.download = `catch-card-${photo.id}.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
+    const link = document.createElement("a");
+    link.download = `catch-card-${photo.id}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
 
-          openInstagramModal();
-          clone.remove();
-        };
-      });
-    });
+    openInstagramModal();
+    clone.remove();
+  };
+});
 
     buttonRow.appendChild(shareButton);
     card.appendChild(buttonRow);
