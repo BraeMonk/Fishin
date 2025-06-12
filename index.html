@@ -1030,7 +1030,7 @@ window.onload = async function () {
 
     // ===== Map Initialization =====
     if (typeof L !== "undefined") {
-      window.myMap = L.map("mapContainer").setView([0, 0], 2);
+      window.myMap = L.map("map").setView([0, 0], 2);
       lightTiles.addTo(window.myMap); // default on load
 
       window.myMap.locate({ setView: true, maxZoom: 15 });
