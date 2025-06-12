@@ -111,6 +111,11 @@
     margin: 0.2rem 0;
   }
 
+  .catch-weight {
+  font-weight: bold;
+  color: #333;
+}
+
   .catch-location, .catch-date {
     font-size: 0.9rem;
     color: #3a3a3a;
@@ -285,6 +290,10 @@
         Location:
         <input type="text" id="locationInput" placeholder="Enter location here" />
       </label>
+      <label style="margin-left: 20px;">
+        Weight (lbs):
+        <input type="text" id="weightInput" placeholder="e.g. 2.5" />
+      </label>
       <button id="uploadButton" class="button" style="margin-left: 20px;">Upload Photos</button>
     </div>
 
@@ -414,6 +423,7 @@
 
   const caption = document.getElementById("captionInput").value.trim();
   const location = document.getElementById("locationInput").value.trim();
+  const weight = document.getElementById("weightInput").value.trim();
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -423,7 +433,7 @@
       const dataURL = await readFileAsDataURL(file);
       const timestamp = new Date().toISOString();
 
-      await addPhotoToDB({ src: dataURL, caption, location, timestamp });
+      await addPhotoToDB({ src: dataURL, caption, location, weight, timestamp });
     } catch (error) {
       console.error("Failed to process file:", error);
     }
@@ -435,6 +445,7 @@
   input.value = '';
   document.getElementById("captionInput").value = '';
   document.getElementById("locationInput").value = '';
+  document.getElementById("weightInput").value = '';
 }
 
   async function renderPhotoPosts() {
@@ -481,6 +492,13 @@
       info.appendChild(date);
     }
 
+    if (photo.weight) {
+      const weight = document.createElement("p");
+      weight.className = "catch-weight";
+      weight.textContent = "Weight: " + photo.weight + " lbs";
+      info.appendChild(weight);
+    }
+
     card.appendChild(info);
 
     const buttonRow = document.createElement("div");
@@ -517,7 +535,7 @@
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
         const watermarkImg = new Image();
-        watermarkImg.src = "icon_192x192.png";
+        watermarkImg.src = "/icon_192x192.png";
 
         watermarkImg.onload = () => {
           ctx.globalAlpha = 0.3;
