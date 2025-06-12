@@ -9,104 +9,122 @@
 <title>Catch Cards Memories & Tallies</title>
 
 <style>
-  /* Basic reset */
-  body,html {
-    margin:0; padding:0; height:100%;
-    font-family: Arial, sans-serif;
-    background:#f7f9fa;
-    display:flex; flex-direction: column;
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f2eee3; /* cork-like background */
+    display: flex;
+    flex-direction: column;
+    color: #1b3c1a; /* dark green text */
   }
+
   header {
-    background:#1e3a8a; color:white;
+    background: #1b3c1a; /* forest green */
+    color: #f7f2e3;
     padding: 1rem;
-    font-weight:bold;
-    text-align:center;
+    font-weight: bold;
+    text-align: center;
     font-size: 1.4rem;
+    border-bottom: 4px solid #926c46; /* dark wood trim */
   }
+
   #tabs {
-    display:flex;
-    background:#2563eb;
+    display: flex;
+    background: #2c4b1b; /* deeper forest green */
   }
+
   #tabs button {
     flex: 1;
     padding: 1rem;
-    border:none;
-    background:#93c5fd;
-    color:#1e40af;
-    font-weight:bold;
-    cursor:pointer;
-    transition: background-color 0.25s ease;
+    border: none;
+    background: #d7c7a3; /* corky tab background */
+    color: #1b3c1a;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
   }
+
   #tabs button.active {
-    background:#1e40af;
-    color:#f3f4f6;
+    background: #1b3c1a; /* forest green */
+    color: #fefae0;
   }
+
   section {
     flex: 1;
     padding: 1rem;
     overflow-y: auto;
-    background: white;
+    background: #f2eee3;
   }
+
   /* Memories feed container */
   #photoGallery {
     max-width: 420px;
     margin: 0 auto;
     display: flex;
-    flex-direction: column-reverse; /* newest at bottom */
+    flex-direction: column-reverse;
     gap: 1rem;
   }
-  /* Catch card */
+
   .catch-card {
-    background:#e0e7ff;
-    border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    background: #fff8f0;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     overflow: hidden;
     max-width: 420px;
   }
+
   .catch-photo {
     width: 100%;
     display: block;
     cursor: pointer;
   }
+
   .catch-info {
     padding: 0.5rem 1rem 1rem;
   }
+
   .catch-caption {
     font-weight: 600;
     margin: 0.2rem 0;
   }
+
   .catch-location, .catch-date {
     font-size: 0.9rem;
-    color: #444;
+    color: #3a3a3a;
     margin: 0.1rem 0;
   }
+
   .catch-buttons {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
   }
+
   .catch-buttons button {
-    background:#2563eb;
-    border:none;
-    color: white;
+    background: #4b2e1a; /* dark wood brown */
+    border: none;
+    color: #fdf7ee;
     padding: 0.35rem 0.8rem;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 0.9rem;
     cursor: pointer;
-    transition: background-color 0.25s ease;
+    transition: background 0.2s ease;
   }
+
   .catch-buttons button:hover {
-    background:#1e40af;
+    background: #60391f;
   }
-  /* Input file */
+
   #photoInput {
     display: block;
     margin: 0 auto 1rem;
   }
-  /* Modal */
+
   #imageModal, #instagramModal {
-    display:none;
+    display: none;
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.8);
@@ -114,12 +132,14 @@
     align-items: center;
     z-index: 10000;
   }
+
   #imageModal img {
     max-width: 90vw;
     max-height: 90vh;
     border-radius: 8px;
     box-shadow: 0 0 10px #000;
   }
+
   .modal-close {
     position: absolute;
     top: 1rem;
@@ -129,78 +149,87 @@
     cursor: pointer;
     user-select: none;
   }
-  /* Tallies placeholder */
+
   #talliesTab h3 {
     text-align: center;
-    color: #1e3a8a;
+    color: #1b3c1a;
   }
 
   .fish-list {
-  padding: 1rem;
-}
+    padding: 1rem;
+  }
 
-.fish-item {
-  background: #fff8f0;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
+  .fish-item {
+    background: #fff3dd;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: transform 0.15s ease;
+  }
 
-.fish-name {
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #ccc;
-  margin-bottom: 6px;
-}
+  .fish-item:hover {
+    transform: scale(1.01);
+  }
 
-.fish-counter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 6px 0;
-}
+  .fish-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #aaa;
+    margin-bottom: 6px;
+  }
 
-.fish-counter button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
+  .fish-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 6px 0;
+  }
 
-.fish-counter button:hover {
-  background: #1d4ed8;
-}
+  .fish-counter button {
+    background: #4b2e1a;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 
-.fish-counter span {
-  font-size: 1.3rem;
-  min-width: 30px;
-  text-align: center;
-}
+  .fish-counter button:hover {
+    background: #60391f;
+  }
 
-.fish-tips {
-  margin-top: 6px;
-  font-size: 0.95rem;
-  color: #333;
-  display: none;
-}
+  .fish-counter span {
+    font-size: 1.3rem;
+    min-width: 30px;
+    text-align: center;
+  }
 
-.clear-btn {
-  display: block;
-  margin: 10px auto;
-  padding: 8px 18px;
-  background: #dc2626;
-  color: white;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
+  .fish-tips {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    display: none;
+  }
+
+  .clear-btn {
+    display: block;
+    margin: 10px auto;
+    padding: 8px 18px;
+    background: #dc2626;
+    color: white;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .clear-btn:hover {
+    background: #b91c1c;
+  }
 </style>
 </head>
 <body>
