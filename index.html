@@ -513,14 +513,14 @@
 }
 
   function openModal(src) {
-  const modal = document.getElementById("photoModal");
+  const modal = document.getElementById("imageModal"); // use correct ID here
   const modalImg = document.getElementById("modalImg");
   modalImg.src = src;
   modal.style.display = "flex";
 }
 
 function closeModal() {
-  const modal = document.getElementById("photoModal");
+  const modal = document.getElementById("imageModal"); // also fix here
   modal.style.display = "none";
 }
 
@@ -657,7 +657,7 @@ function closeModal() {
         
   window.onload = async function () {
   await cachePhotosLocally();
-  renderPhotoPosts();
+  await renderPhotoPosts();
   initFishList();
 
   setupTabs(); // 🧠 This is important!
