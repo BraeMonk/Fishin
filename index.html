@@ -230,6 +230,14 @@
   .clear-btn:hover {
     background: #b91c1c;
   }
+
+  .tab {
+  display: none;
+}
+
+.tab.active {
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -241,12 +249,12 @@
   <button id="talliesTabBtn">Tallies</button>
 </div>
 
-<section id="memoriesTab" style="display: block;">
+<section id="memoriesTab">
   <input type="file" id="photoInput" accept="image/*" multiple />
   <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed"></div>
 </section>
 
-<section id="talliesTab" style="display: none;">
+<section id="talliesTab">
   <h3>Fish List </h3>
   <h3>Total Fish Caught: <span id="totalFishCount">0</span></h3>
   <div id="fishList" class="fish-list"></div>
@@ -271,33 +279,36 @@
 <script>
 
   function setupTabs() {
-    // Tab switching
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
   const memoriesTab = document.getElementById("memoriesTab");
   const talliesTab = document.getElementById("talliesTab");
 
-  if (memoriesTabBtn && talliesTabBtn && memoriesTab && talliesTab) {
-    // Show memories by default
-    memoriesTab.style.display = "block";
-    talliesTab.style.display = "none";
-    memoriesTabBtn.classList.add("active");
-
-    memoriesTabBtn.addEventListener("click", () => {
-      memoriesTabBtn.classList.add("active");
-      talliesTabBtn.classList.remove("active");
-      memoriesTab.style.display = "block";
-      talliesTab.style.display = "none";
-    });
-
-    talliesTabBtn.addEventListener("click", () => {
-      talliesTabBtn.classList.add("active");
-      memoriesTabBtn.classList.remove("active");
-      talliesTab.style.display = "block";
-      memoriesTab.style.display = "none";
-    });
-   }
+  if (!memoriesTabBtn || !talliesTabBtn || !memoriesTab || !talliesTab) {
+    console.warn("Tab elements missing.");
+    return;
   }
+
+  // Initial state
+  memoriesTabBtn.classList.add("active");
+  memoriesTab.classList.add("active");
+  talliesTabBtn.classList.remove("active");
+  talliesTab.classList.remove("active");
+
+  memoriesTabBtn.addEventListener("click", () => {
+    memoriesTabBtn.classList.add("active");
+    talliesTabBtn.classList.remove("active");
+    memoriesTab.classList.add("active");
+    talliesTab.classList.remove("active");
+  });
+
+  talliesTabBtn.addEventListener("click", () => {
+    talliesTabBtn.classList.add("active");
+    memoriesTabBtn.classList.remove("active");
+    talliesTab.classList.add("active");
+    memoriesTab.classList.remove("active");
+  });
+}
   // === IndexedDB Setup ===
   function openDB() {
     return new Promise((resolve, reject) => {
