@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="manifest" href="manifest.json" />
-<link rel="manifest" href="manifest.json" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <meta name="theme-color" content="#000000" />
 <title>Fishin' Buddy</title>
 
@@ -383,6 +383,7 @@ header.dark-mode {
 <div id="tabs">
   <button id="memoriesTabBtn" class="active">Memories</button>
   <button id="talliesTabBtn">Tallies</button>
+  <button id="mapTabBtn">Map</button>
 </div>
 
 <!-- Memories Tab -->
@@ -422,6 +423,10 @@ header.dark-mode {
   <button id="clearTallies" class="clear-btn">Clear</button>
 </section>
 
+  <section id="mapTab" class="tab">
+  <div id="map" style="height: 100%; width: 100%; min-height: 500px;"></div>
+</section>
+
 <!-- Fullscreen photo modal -->
 <div id="imageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <span id="modalClose" class="modal-close" aria-label="Close modal">&times;</span>
@@ -437,31 +442,58 @@ header.dark-mode {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 
   function setupTabs() {
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
+  const mapTabBtn = document.getElementById("mapTabBtn"); // new
+
   const memoriesTab = document.getElementById("memoriesTab");
   const talliesTab = document.getElementById("talliesTab");
+  const mapTab = document.getElementById("mapTab"); // new
 
-  if (!memoriesTabBtn || !talliesTabBtn || !memoriesTab || !talliesTab) {
+  if (!memoriesTabBtn || !talliesTabBtn || !mapTabBtn || !memoriesTab || !talliesTab || !mapTab) {
     console.warn("One or more tab elements are missing.");
     return;
   }
 
-    memoriesTabBtn.addEventListener("click", () => {
+  memoriesTabBtn.addEventListener("click", () => {
     memoriesTabBtn.classList.add("active");
     talliesTabBtn.classList.remove("active");
+    mapTabBtn.classList.remove("active");
+
     memoriesTab.classList.add("active");
     talliesTab.classList.remove("active");
+    mapTab.classList.remove("active");
   });
 
-    talliesTabBtn.addEventListener("click", () => {
+  talliesTabBtn.addEventListener("click", () => {
     talliesTabBtn.classList.add("active");
     memoriesTabBtn.classList.remove("active");
+    mapTabBtn.classList.remove("active");
+
     talliesTab.classList.add("active");
     memoriesTab.classList.remove("active");
+    mapTab.classList.remove("active");
+  });
+
+  mapTabBtn.addEventListener("click", () => {
+    mapTabBtn.classList.add("active");
+    memoriesTabBtn.classList.remove("active");
+    talliesTabBtn.classList.remove("active");
+
+    mapTab.classList.add("active");
+    memoriesTab.classList.remove("active");
+    talliesTab.classList.remove("active");
+
+    // Fix Leaflet map rendering after tab is shown
+    setTimeout(() => {
+      if (window.myMap) {
+        window.myMap.invalidateSize();
+      }
+    }, 200);
   });
 }
   
@@ -822,6 +854,26 @@ function closeModal() {
       clearBtn.addEventListener("click", clearFishTallies);
     }
   }
+
+  function updateMapTiles(isDarkMode) {
+  if (!window.myMap) return;
+
+  if (isDarkMode) {
+    if (window.myMap.hasLayer(lightTiles)) {
+      window.myMap.removeLayer(lightTiles);
+    }
+    if (!window.myMap.hasLayer(darkTiles)) {
+      darkTiles.addTo(window.myMap);
+    }
+  } else {
+    if (window.myMap.hasLayer(darkTiles)) {
+      window.myMap.removeLayer(darkTiles);
+    }
+    if (!window.myMap.hasLayer(lightTiles)) {
+      lightTiles.addTo(window.myMap);
+    }
+  }
+}
         
   window.onload = async function () {
   try {
@@ -835,24 +887,27 @@ function closeModal() {
     await renderPhotoPosts();
 
     // === Dark Mode Initialization ===
-const darkToggle = document.getElementById("darkModeToggle");
+    const darkToggle = document.getElementById("darkModeToggle");
 if (darkToggle) {
-  // Apply stored preference
   const prefersDark = localStorage.getItem("darkMode") === "true";
   if (prefersDark) {
     document.body.classList.add("dark-mode");
     document.documentElement.classList.add("dark-mode");
   }
+  
+  // Update map tiles on load
+  updateMapTiles(prefersDark);
 
-  // Toggle listener
   darkToggle.addEventListener("click", () => {
     const isDark = document.body.classList.toggle("dark-mode");
     document.documentElement.classList.toggle("dark-mode", isDark);
     localStorage.setItem("darkMode", isDark);
     darkToggle.textContent = isDark ? "☀️ Day Mode" : "🌙 Night Mode";
+
+    // Update map tiles on toggle
+    updateMapTiles(isDark);
   });
 
-  // Set correct initial text
   darkToggle.textContent = prefersDark ? "☀️ Day Mode" : "🌙 Night Mode";
 }
 
@@ -880,6 +935,43 @@ if (darkToggle) {
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeModal();
     });
+
+    // ===== Map Initialization =====
+    if (typeof L !== "undefined") { // Make sure Leaflet is loaded
+      // Create a global map variable so it can be invalidated on tab switch
+      window.myMap = L.map("mapContainer").setView([0, 0], 2);
+lightTiles.addTo(window.myMap);
+
+      // Add OpenStreetMap tiles
+      const lightTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap contributors'
+});
+
+const darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+});
+
+      // Try to get user location and update map view
+      window.myMap.locate({ setView: true, maxZoom: 15 });
+
+      // When location is found, add marker and circle
+      window.myMap.on("locationfound", e => {
+        const radius = e.accuracy;
+        L.marker(e.latlng).addTo(window.myMap)
+          .bindPopup("You are within " + radius.toFixed(0) + " meters from this point").openPopup();
+        L.circle(e.latlng, radius).addTo(window.myMap);
+      });
+
+      // Handle location errors
+      window.myMap.on("locationerror", e => {
+        console.warn("Location error:", e.message);
+      });
+    } else {
+      console.warn("Leaflet library is not loaded. Map will not initialize.");
+    }
+
   } catch (err) {
     console.error("Initialization failed:", err);
   }
