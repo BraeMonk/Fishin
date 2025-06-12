@@ -656,40 +656,9 @@ html2canvas(clone).then(canvas => {
       clearBtn.addEventListener("click", clearFishTallies);
     }
   }
-        
-  window.onload = async function () {
-  // Sync IndexedDB photos to localStorage
-  await cachePhotosLocally();
 
-  // Render photo feed
-  renderPhotoPosts();
-
-  // Init fish tally list
-  initFishList();
-
-  // Set up file upload input
-  const photoInput = document.getElementById("photoInput");
-  if (photoInput) {
-    photoInput.addEventListener("change", handleUpload);
-  }
-
-  // Setup modals
-  const modalClose = document.getElementById("modalClose");
-  if (modalClose) {
-    modalClose.addEventListener("click", closeModal);
-  }
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
-  });
-
-  const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
-  if (closeInstagramModalBtn) {
-    closeInstagramModalBtn.addEventListener("click", () => {
-      document.getElementById("instagramModal").style.display = "none";
-    });
-  }
-
-  // Tab switching
+  function setupTabs() {
+    // Tab switching
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
   const memoriesTab = document.getElementById("memoriesTab");
@@ -713,6 +682,41 @@ html2canvas(clone).then(canvas => {
       memoriesTabBtn.classList.remove("active");
       talliesTab.style.display = "block";
       memoriesTab.style.display = "none";
+    });
+  }
+  }
+        
+  window.onload = async function () {
+  // Sync IndexedDB photos to localStorage
+  await cachePhotosLocally();
+
+  // Render photo feed
+  renderPhotoPosts();
+
+  // Init fish tally list
+  initFishList();
+
+  setupTabs();
+
+  // Set up file upload input
+  const photoInput = document.getElementById("photoInput");
+  if (photoInput) {
+    photoInput.addEventListener("change", handleUpload);
+  }
+
+  // Setup modals
+  const modalClose = document.getElementById("modalClose");
+  if (modalClose) {
+    modalClose.addEventListener("click", closeModal);
+  }
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
+  if (closeInstagramModalBtn) {
+    closeInstagramModalBtn.addEventListener("click", () => {
+      document.getElementById("instagramModal").style.display = "none";
     });
   }
 };
