@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fish-tally-v18'; // Increment this when deploying new versions
+const CACHE_NAME = 'fish-tally-v18'; // Update this version when deploying new releases
 
 const urlsToCache = [
   './',
@@ -10,56 +10,53 @@ const urlsToCache = [
   './icon_512x512.png'
 ];
 
-// Install and cache static assets
+// Install: Cache app shell and immediately activate new service worker
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Activate new service worker immediately
+  self.skipWaiting(); // Activate immediately without waiting
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// Activate and clean up old caches
+// Activate: Clean old caches and take control of clients immediately
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) {
-          return caches.delete(key);
-        }
-      }))
+      Promise.all(
+        keys.map(key => (key !== CACHE_NAME ? caches.delete(key) : null))
+      )
     )
   );
-  self.clients.claim(); // Claim control immediately
+  self.clients.claim();
 });
 
-// Fetch handling
+// Fetch: Cache-first strategy, fallback to network, cache new GET responses
 self.addEventListener('fetch', event => {
   const { request } = event;
 
-  // Bypass service worker for POST requests (like saving images or posts)
+  // Only handle GET requests
   if (request.method !== 'GET') return;
 
-  // Try cache first, fall back to network
   event.respondWith(
     caches.match(request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
 
-      return fetch(request).then(networkResponse => {
-        // Cache the response only if it's a valid GET request
-        if (networkResponse.status === 200 && request.method === 'GET') {
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(request, networkResponse.clone());
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Offline fallback: if navigating, serve cached index.html
-        if (request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
+      return fetch(request)
+        .then(networkResponse => {
+          // Cache only successful GET responses
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(request, networkResponse.clone());
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Offline fallback for navigation requests
+          if (request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+        });
     })
   );
 });
