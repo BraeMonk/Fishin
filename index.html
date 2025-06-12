@@ -241,12 +241,12 @@
   <button id="talliesTabBtn">Tallies</button>
 </div>
 
-<section id="memoriesTab">
+<section id="memoriesTab" style="display: block;">
   <input type="file" id="photoInput" accept="image/*" multiple />
   <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed"></div>
 </section>
 
-<section id="talliesTab" hidden>
+<section id="talliesTab" style="display: none;">
   <h3>Fish List </h3>
   <h3>Total Fish Caught: <span id="totalFishCount">0</span></h3>
   <div id="fishList" class="fish-list"></div>
@@ -657,25 +657,34 @@ html2canvas(clone).then(canvas => {
     }
   }
 
-  // Tab elements
+  // Tab buttons
 const memoriesTabBtn = document.getElementById("memoriesTabBtn");
 const talliesTabBtn = document.getElementById("talliesTabBtn");
+
+// Tab sections
 const memoriesTab = document.getElementById("memoriesTab");
 const talliesTab = document.getElementById("talliesTab");
 
-// Tab switching (using hidden attribute for better reliability)
+// Show memories by default, hide tallies
+memoriesTab.style.display = "block";
+talliesTab.style.display = "none";
+
+// Switch to Memories
 memoriesTabBtn.addEventListener("click", () => {
   memoriesTabBtn.classList.add("active");
   talliesTabBtn.classList.remove("active");
-  memoriesTab.hidden = false;
-  talliesTab.hidden = true;
+
+  memoriesTab.style.display = "block";
+  talliesTab.style.display = "none";
 });
 
+// Switch to Tallies
 talliesTabBtn.addEventListener("click", () => {
   talliesTabBtn.classList.add("active");
   memoriesTabBtn.classList.remove("active");
-  talliesTab.hidden = false;
-  memoriesTab.hidden = true;
+
+  talliesTab.style.display = "block";
+  memoriesTab.style.display = "none";
 });
 
   // Init
