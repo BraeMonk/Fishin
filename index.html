@@ -362,66 +362,52 @@
   }
 
   // Upload handler
-  function handleUpload() {
+  async function handleUpload() {
   const input = document.getElementById("photoInput");
   const files = input.files;
   if (!files.length) return;
 
-  const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
-
-  // We'll process files sequentially to keep prompts orderly
-  const processFile = (file, index) => {
+  const processFile = async (file, index) => {
     if (!file.type.startsWith("image/jpeg")) {
-      if (index + 1 < files.length) processFile(files[index + 1], index + 1);
+      if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      // Prompt user for caption and location
-      const caption = prompt("Enter a caption for this photo:", "") || "";
-      const location = prompt("Enter a location for this photo:", "") || "";
+    const dataURL = await readFileAsDataURL(file);
 
-      const timestamp = new Date().toISOString();
+    const caption = prompt("Enter a caption for this photo:", "") || "";
+    const location = prompt("Enter a location for this photo:", "") || "";
+    const timestamp = new Date().toISOString();
 
-      storedPhotos.unshift({
-        src: event.target.result,
-        caption,
-        location,
-        timestamp
-      });
+    await addPhotoToDB({
+      src: dataURL,
+      caption,
+      location,
+      timestamp
+    });
 
-      localStorage.setItem("photos", JSON.stringify(storedPhotos));
-      renderPhotoPosts();
+    await renderPhotoPosts();
 
-      // Process next file if exists
-      if (index + 1 < files.length) processFile(files[index + 1], index + 1);
-    };
-    reader.readAsDataURL(file);
+    if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
   };
 
-  processFile(files[0], 0);
-  input.value = ''; // Clear input
+  await processFile(files[0], 0);
+  input.value = '';
 }
 
-  // Sync IndexedDB photos to localStorage
-  async function cachePhotosLocally() {
-    const photos = await getAllPhotosFromDB();
-    localStorage.setItem("photos", JSON.stringify(photos));
-  }
-
-  function renderPhotoPosts() {
+  async function renderPhotoPosts() {
   const gallery = document.getElementById("photoGallery");
   gallery.innerHTML = "";
 
-  const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
+  const photos = await getAllPhotosFromDB();
 
-  // Render photos in the order stored — newest first (unshift used on upload)
-  storedPhotos.forEach((photo, index) => {
+  // Newest first
+  photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+  photos.forEach((photo) => {
     const card = document.createElement("div");
     card.className = "catch-card";
 
-    // Photo element
     const img = document.createElement("img");
     img.src = photo.src;
     img.alt = photo.caption || "Catch photo";
@@ -429,7 +415,6 @@
     img.addEventListener("click", () => openModal(photo.src));
     card.appendChild(img);
 
-    // Info container
     const info = document.createElement("div");
     info.className = "catch-info";
 
@@ -439,40 +424,39 @@
       caption.textContent = photo.caption;
       info.appendChild(caption);
     }
+
     if (photo.location) {
       const location = document.createElement("p");
       location.className = "catch-location";
       location.textContent = "Location: " + photo.location;
       info.appendChild(location);
     }
+
     if (photo.timestamp) {
       const date = document.createElement("p");
       date.className = "catch-date";
-      const d = new Date(photo.timestamp);
-      date.textContent = "Caught: " + d.toLocaleString();
+      date.textContent = "Caught: " + new Date(photo.timestamp).toLocaleString();
       info.appendChild(date);
     }
 
     card.appendChild(info);
 
-    // Buttons container
     const buttonRow = document.createElement("div");
     buttonRow.className = "catch-buttons";
 
-    // DELETE BUTTON — always visible (moved out of download click)
+    // Delete button — updated for IndexedDB
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.title = "Delete this photo";
-    deleteButton.addEventListener("click", () => {
+    deleteButton.addEventListener("click", async () => {
       if (confirm("Are you sure you want to delete this photo?")) {
-        storedPhotos.splice(index, 1);
-        localStorage.setItem("photos", JSON.stringify(storedPhotos));
-        renderPhotoPosts();
+        await deletePhotoFromDB(photo.id);
+        await renderPhotoPosts();
       }
     });
     buttonRow.appendChild(deleteButton);
 
-    // SHARE (DOWNLOAD) BUTTON — unchanged
+    // Download/share button — unchanged
     const shareButton = document.createElement("button");
     shareButton.textContent = "Download";
     shareButton.title = "Download Catch Card";
@@ -485,13 +469,11 @@
       clone.style.background = '#fff';
       document.body.appendChild(clone);
 
-      // Remove buttons so they don't appear on canvas
       const buttons = clone.querySelector(".catch-buttons");
       if (buttons) buttons.remove();
 
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
-
         const watermarkImg = new Image();
         watermarkImg.src = "icon_192x192.png";
 
@@ -517,7 +499,7 @@
           }
 
           const link = document.createElement("a");
-          link.download = `catch-card-${index + 1}.png`;
+          link.download = `catch-card-${photo.id}.png`;
           link.href = canvas.toDataURL("image/png");
           link.click();
 
@@ -528,7 +510,6 @@
     });
 
     buttonRow.appendChild(shareButton);
-
     card.appendChild(buttonRow);
 
     gallery.appendChild(card);
