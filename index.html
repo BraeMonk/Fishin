@@ -336,50 +336,35 @@
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
   Array.from(files).forEach(file => {
-    if (!file.type.match("image/jpeg")) {
-      alert("Only JPEG images are supported.");
-      return;
-    }
+    if (!file.type.startsWith("image/")) return;
 
     const reader = new FileReader();
     reader.onload = function (event) {
       const img = new Image();
-      img.onload = async function () {
-        // === Compress image ===
+      img.onload = function () {
         const canvas = document.createElement("canvas");
-        const maxWidth = 800;
-        const scaleSize = maxWidth / img.width;
-        canvas.width = maxWidth;
+        const MAX_WIDTH = 1024;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
         canvas.height = img.height * scaleSize;
 
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); // 0.7 = 70% quality
 
-        // === Metadata prompts ===
-        const caption = prompt("Enter a caption for your photo:", "");
-        const location = prompt("Enter the location of this memory:", "");
-        const timestamp = new Date().toLocaleString();
+        // Compress to JPEG with 0.7 quality
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
 
-        const photo = {
-          id: Date.now() + Math.random(),
-          dataUrl: compressedDataUrl,
-          caption,
-          location,
-          timestamp
-        };
-
-        storedPhotos.push(photo);
+        storedPhotos.push({ src: compressedDataUrl, uploadedAt: Date.now() });
         localStorage.setItem("photos", JSON.stringify(storedPhotos));
-        await savePhotoToDB(photo); // Ensure this is async-compatible
-        renderPhotoPosts();
+        renderPhotoPosts(); // Refresh UI
       };
       img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   });
 
-  input.value = ""; // Reset the input
+  // Clear input so same file can be uploaded again
+  input.value = "";
 }
 
   // Sync IndexedDB photos to localStorage
