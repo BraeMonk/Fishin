@@ -656,40 +656,65 @@ html2canvas(clone).then(canvas => {
       clearBtn.addEventListener("click", clearFishTallies);
     }
   }
-
+        
   window.onload = async function () {
-  // DOM-dependent setup
+  // Sync IndexedDB photos to localStorage
+  await cachePhotosLocally();
+
+  // Render photo feed
+  renderPhotoPosts();
+
+  // Init fish tally list
+  initFishList();
+
+  // Set up file upload input
+  const photoInput = document.getElementById("photoInput");
+  if (photoInput) {
+    photoInput.addEventListener("change", handleUpload);
+  }
+
+  // Setup modals
+  const modalClose = document.getElementById("modalClose");
+  if (modalClose) {
+    modalClose.addEventListener("click", closeModal);
+  }
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
+  if (closeInstagramModalBtn) {
+    closeInstagramModalBtn.addEventListener("click", () => {
+      document.getElementById("instagramModal").style.display = "none";
+    });
+  }
+
+  // Tab switching
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
   const memoriesTab = document.getElementById("memoriesTab");
   const talliesTab = document.getElementById("talliesTab");
 
-  // Show memories by default
-  memoriesTab.style.display = "block";
-  talliesTab.style.display = "none";
-
-  // Event listeners for tab switching
-  memoriesTabBtn.addEventListener("click", () => {
-    memoriesTabBtn.classList.add("active");
-    talliesTabBtn.classList.remove("active");
+  if (memoriesTabBtn && talliesTabBtn && memoriesTab && talliesTab) {
+    // Show memories by default
     memoriesTab.style.display = "block";
     talliesTab.style.display = "none";
-  });
+    memoriesTabBtn.classList.add("active");
 
-  talliesTabBtn.addEventListener("click", () => {
-    talliesTabBtn.classList.add("active");
-    memoriesTabBtn.classList.remove("active");
-    talliesTab.style.display = "block";
-    memoriesTab.style.display = "none";
-  });
+    memoriesTabBtn.addEventListener("click", () => {
+      memoriesTabBtn.classList.add("active");
+      talliesTabBtn.classList.remove("active");
+      memoriesTab.style.display = "block";
+      talliesTab.style.display = "none";
+    });
 
-  // App init
-  await cachePhotosLocally();
-  renderPhotoPosts();
-  initFishList();
-
-  // File input listener
-  document.getElementById("photoInput").addEventListener("change", handleUpload);
+    talliesTabBtn.addEventListener("click", () => {
+      talliesTabBtn.classList.add("active");
+      memoriesTabBtn.classList.remove("active");
+      talliesTab.style.display = "block";
+      memoriesTab.style.display = "none";
+    });
+  }
 };
 
   // Service worker registration
