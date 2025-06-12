@@ -1,19 +1,19 @@
 {
   "name": "Fishin' Buddy",
   "short_name": "FishnBuddy",
-  "start_url": "https://braemonk.github.io/Fishin/index.html",
-  "scope": "https://braemonk.github.io/Fishin/",
+  "start_url": "/Fishin/index.html",
+  "scope": "/Fishin/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src":"https://braemonk.github.io/Fishin/icon_192x192.png",
+      "src": "/Fishin/icon_192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://braemonk.github.io/Fishin/icon_512x512.png",
+      "src": "/Fishin/icon_512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
