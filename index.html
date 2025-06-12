@@ -647,17 +647,18 @@
   const talliesTab = document.getElementById("talliesTab");
 
   memoriesTabBtn.addEventListener("click", () => {
-    memoriesTabBtn.classList.add("active");
-    talliesTabBtn.classList.remove("active");
-    memoriesTab.style.display = "";
-    talliesTab.style.display = "none";
-  });
-  talliesTabBtn.addEventListener("click", () => {
-    talliesTabBtn.classList.add("active");
-    memoriesTabBtn.classList.remove("active");
-    talliesTab.style.display = "none";
-    memoriesTab.style.display = "";
-  });
+  memoriesTabBtn.classList.add("active");
+  talliesTabBtn.classList.remove("active");
+  memoriesTab.style.display = "";    // Show memories tab
+  talliesTab.style.display = "none"; // Hide tallies tab
+});
+
+talliesTabBtn.addEventListener("click", () => {
+  talliesTabBtn.classList.add("active");
+  memoriesTabBtn.classList.remove("active");
+  talliesTab.style.display = "";    // Show tallies tab
+  memoriesTab.style.display = "none"; // Hide memories tab
+});
 
   // Init
   document.getElementById("photoInput").addEventListener("change", handleUpload);
