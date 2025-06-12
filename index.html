@@ -338,9 +338,9 @@
       const location = prompt("Enter location for this photo:", "") || "";
       const caption = prompt("Enter caption for this photo:", "") || "";
       const timestamp = new Date().toISOString();
-
       const photoData = { src: photoSrc, caption, location, timestamp };
-      await addPhotoToDB(photoData);
+      const id = await addPhotoToDB(photoData);
+      photoData.id = id;
     }
 
     await cachePhotosLocally();
@@ -412,6 +412,9 @@
       shareButton.addEventListener("click", () => {
         // Clone card and add watermark before downloading
         const clone = card.cloneNode(true);
+clone.style.position = 'fixed';
+clone.style.top = '-10000px';
+document.body.appendChild(clone);
 
         // Use html2canvas to capture clone element
         html2canvas(clone).then(canvas => {
@@ -655,6 +658,12 @@ function initFishList() {
       .catch(err => console.error('SW failed:', err));
   });
 }
+
+  window.onload = async function() {
+  await cachePhotosLocally(); // Sync localStorage with IndexedDB
+  renderPhotoPosts();         // Populate the gallery
+  document.getElementById("photoInput").addEventListener("change", handleUpload);
+};
 </script>
 
 </body>
