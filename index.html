@@ -534,11 +534,11 @@
     card.appendChild(buttonRow);
 
     gallery.appendChild(card);
-  });
-}
+   }); // closes forEach
+  } // closes renderPhotoPosts ✅
 
 function openModal(src) {
-  const modal = document.getElementById("imageModal"); // use correct ID here
+  const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImg");
   modalImg.src = src;
   modal.style.display = "flex";
