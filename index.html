@@ -670,13 +670,17 @@ function closeModal() {
   }
         
   window.onload = async function () {
-  await cachePhotosLocally();
+
   await renderPhotoPosts();
   initFishList();
-
   setupTabs();
 
-  document.getElementById("uploadButton").addEventListener("click", handleUpload);
+  const uploadBtn = document.getElementById("uploadButton");
+  if (uploadBtn) {
+    uploadBtn.addEventListener("click", handleUpload);
+  } else {
+    console.warn("Upload button not found");
+  }
 
   const modalClose = document.getElementById("modalClose");
   if (modalClose) {
