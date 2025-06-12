@@ -456,6 +456,119 @@
     document.getElementById("instagramModal").style.display = "none";
   });
 
+  // ===== Fish Data and Tally =====
+const fishData = [
+  {
+    species: "Largemouth Bass",
+    tips: "Try using plastic worms on a Texas rig near weeds or docks.",
+    count: 0
+  },
+  {
+    species: "Smallmouth Bass",
+    tips: "Use tube jigs or crankbaits over rocky bottoms.",
+    count: 0
+  },
+  {
+    species: "Northern Pike",
+    tips: "Try spinnerbaits or large spoons near weed beds.",
+    count: 0
+  },
+  {
+    species: "Perch",
+    tips: "Use worms or small jigs on light tackle.",
+    count: 0
+  },
+  {
+    species: "Walleye",
+    tips: "Jigging with minnows or trolling crankbaits near drop-offs works great.",
+    count: 0
+  }
+];
+
+// Load from localStorage if exists
+const savedFishCounts = JSON.parse(localStorage.getItem("fishTallies"));
+if (savedFishCounts) {
+  fishData.forEach((fish, i) => {
+    fish.count = savedFishCounts[i]?.count || 0;
+  });
+}
+
+// Render the fish list
+function renderFishList() {
+  const list = document.getElementById("fishList");
+  list.innerHTML = "";
+
+  fishData.forEach((fish, index) => {
+    const item = document.createElement("div");
+    item.className = "fish-item";
+
+    // Expandable species name
+    const nameRow = document.createElement("div");
+    nameRow.className = "fish-name";
+    nameRow.textContent = fish.species;
+    nameRow.addEventListener("click", () => {
+      const tips = document.getElementById(`tips-${index}`);
+      tips.style.display = tips.style.display === "block" ? "none" : "block";
+    });
+
+    // Tips (initially hidden)
+    const tips = document.createElement("div");
+    tips.className = "fish-tips";
+    tips.id = `tips-${index}`;
+    tips.textContent = fish.tips;
+    tips.style.display = "none";
+
+    // Count controls
+    const countRow = document.createElement("div");
+    countRow.className = "fish-counter";
+
+    const minusBtn = document.createElement("button");
+    minusBtn.textContent = "−";
+    minusBtn.addEventListener("click", () => updateCount(index, -1));
+
+    const countDisplay = document.createElement("span");
+    countDisplay.id = `count-${index}`;
+    countDisplay.textContent = fish.count;
+
+    const plusBtn = document.createElement("button");
+    plusBtn.textContent = "+";
+    plusBtn.addEventListener("click", () => updateCount(index, 1));
+
+    countRow.appendChild(minusBtn);
+    countRow.appendChild(countDisplay);
+    countRow.appendChild(plusBtn);
+
+    item.appendChild(nameRow);
+    item.appendChild(countRow);
+    item.appendChild(tips);
+    list.appendChild(item);
+  });
+}
+
+// Tally update
+function updateCount(index, delta) {
+  fishData[index].count = Math.max(0, fishData[index].count + delta);
+  document.getElementById(`count-${index}`).textContent = fishData[index].count;
+  localStorage.setItem("fishTallies", JSON.stringify(fishData));
+}
+
+// Clear button
+function clearFishTallies() {
+  if (!confirm("Clear all tallies?")) return;
+  fishData.forEach(fish => fish.count = 0);
+  localStorage.setItem("fishTallies", JSON.stringify(fishData));
+  renderFishList();
+}
+
+// Init on load
+function initFishList() {
+  renderFishList();
+  const clearButton = document.getElementById("clearTallies");
+  if (clearButton) {
+    clearButton.addEventListener("click", clearFishTallies);
+  }
+}
+
   // Tabs switching
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
