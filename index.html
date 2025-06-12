@@ -269,6 +269,35 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+
+  function setupTabs() {
+    // Tab switching
+  const memoriesTabBtn = document.getElementById("memoriesTabBtn");
+  const talliesTabBtn = document.getElementById("talliesTabBtn");
+  const memoriesTab = document.getElementById("memoriesTab");
+  const talliesTab = document.getElementById("talliesTab");
+
+  if (memoriesTabBtn && talliesTabBtn && memoriesTab && talliesTab) {
+    // Show memories by default
+    memoriesTab.style.display = "block";
+    talliesTab.style.display = "none";
+    memoriesTabBtn.classList.add("active");
+
+    memoriesTabBtn.addEventListener("click", () => {
+      memoriesTabBtn.classList.add("active");
+      talliesTabBtn.classList.remove("active");
+      memoriesTab.style.display = "block";
+      talliesTab.style.display = "none";
+    });
+
+    talliesTabBtn.addEventListener("click", () => {
+      talliesTabBtn.classList.add("active");
+      memoriesTabBtn.classList.remove("active");
+      talliesTab.style.display = "block";
+      memoriesTab.style.display = "none";
+    });
+   }
+  }
   // === IndexedDB Setup ===
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -655,35 +684,6 @@ html2canvas(clone).then(canvas => {
     if (clearBtn) {
       clearBtn.addEventListener("click", clearFishTallies);
     }
-  }
-
-  function setupTabs() {
-    // Tab switching
-  const memoriesTabBtn = document.getElementById("memoriesTabBtn");
-  const talliesTabBtn = document.getElementById("talliesTabBtn");
-  const memoriesTab = document.getElementById("memoriesTab");
-  const talliesTab = document.getElementById("talliesTab");
-
-  if (memoriesTabBtn && talliesTabBtn && memoriesTab && talliesTab) {
-    // Show memories by default
-    memoriesTab.style.display = "block";
-    talliesTab.style.display = "none";
-    memoriesTabBtn.classList.add("active");
-
-    memoriesTabBtn.addEventListener("click", () => {
-      memoriesTabBtn.classList.add("active");
-      talliesTabBtn.classList.remove("active");
-      memoriesTab.style.display = "block";
-      talliesTab.style.display = "none";
-    });
-
-    talliesTabBtn.addEventListener("click", () => {
-      talliesTabBtn.classList.add("active");
-      memoriesTabBtn.classList.remove("active");
-      talliesTab.style.display = "block";
-      memoriesTab.style.display = "none";
-    });
-  }
   }
         
   window.onload = async function () {
