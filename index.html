@@ -9,6 +9,7 @@
 <title>Fishin' Buddy</title>
 
 <style>
+  /* Base Reset & Layout */
   body, html {
     margin: 0;
     padding: 0;
@@ -18,33 +19,38 @@
     display: flex;
     flex-direction: column;
     color: #1b3c1a; /* dark green text */
+    font-size: 1rem; /* base font size */
   }
 
+  /* Header */
   header {
     background: #1b3c1a; /* forest green */
     color: #f7f2e3;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     font-weight: bold;
     text-align: center;
     font-size: 1.4rem;
     border-bottom: 4px solid #926c46; /* dark wood trim */
   }
 
+  /* Tabs container */
   #tabs {
     display: flex;
     background: #2c4b1b; /* deeper forest green */
     flex-shrink: 0;
   }
 
+  /* Tabs buttons */
   #tabs button {
     flex: 1;
-    padding: 1rem;
+    padding: 1rem 0.75rem;
     border: none;
     background: #d7c7a3; /* corky tab background */
     color: #1b3c1a;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: 1rem;
   }
 
   #tabs button.active {
@@ -52,55 +58,61 @@
     color: #fefae0;
   }
 
+  /* Main content sections */
   section {
     flex: 1;
-    padding: 1rem;
+    padding: 1rem 1rem 1.5rem;
     overflow-y: auto;
     background: #f2eee3;
+    min-height: 0; /* fixes flex overflow on mobile */
   }
 
+  /* Buttons */
   .button {
-  background-color: #4b2e1e; /* dark wood tone */
-  color: #fff;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-family: 'Verdana', sans-serif;
-  box-shadow: inset 0 0 2px #000, 2px 2px 5px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-.button:hover {
-  background-color: #5a3a29;
-  transform: scale(1.02);
-}
-.button:active {
-  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.6);
-  transform: scale(0.98);
-}
+    background-color: #4b2e1e; /* dark wood tone */
+    color: #fff;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: 'Verdana', sans-serif;
+    box-shadow: inset 0 0 2px #000, 2px 2px 5px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    font-size: 1rem;
+  }
+  .button:hover {
+    background-color: #5a3a29;
+    transform: scale(1.02);
+  }
+  .button:active {
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.6);
+    transform: scale(0.98);
+  }
 
-  /* Memories feed container */
+  /* Memories Feed Container */
   #photoGallery {
-    max-width: 420px;
+    max-width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
+  /* Catch card */
   .catch-card {
     background: #fff8f0;
     border-radius: 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     overflow: hidden;
-    max-width: 420px;
+    max-width: 100%;
   }
 
   .catch-photo {
     width: 100%;
     display: block;
     cursor: pointer;
+    height: auto;
   }
 
   .catch-info {
@@ -110,12 +122,14 @@
   .catch-caption {
     font-weight: 600;
     margin: 0.2rem 0;
+    font-size: 1.1rem;
   }
 
   .catch-weight {
-  font-weight: bold;
-  color: #333;
-}
+    font-weight: bold;
+    color: #333;
+    font-size: 1rem;
+  }
 
   .catch-location, .catch-date {
     font-size: 0.9rem;
@@ -145,11 +159,15 @@
     background: #60391f;
   }
 
+  /* File input */
   #photoInput {
     display: block;
     margin: 0 auto 1rem;
+    max-width: 90vw;
+    width: 100%;
   }
 
+  /* Modals */
   #imageModal, #instagramModal {
     display: none;
     position: fixed;
@@ -165,6 +183,7 @@
     max-height: 90vh;
     border-radius: 8px;
     box-shadow: 0 0 10px #000;
+    height: auto;
   }
 
   .modal-close {
@@ -177,19 +196,21 @@
     user-select: none;
   }
 
+  /* Tallies Tab */
   #talliesTab h3 {
     text-align: center;
     color: #1b3c1a;
+    font-size: 1.4rem;
   }
 
   .fish-list {
-    padding: 1rem;
+    padding: 1rem 0;
   }
 
   .fish-item {
     background: #fff3dd;
     border-radius: 10px;
-    padding: 12px;
+    padding: 0.75rem 1rem;
     margin-bottom: 12px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     transition: transform 0.15s ease;
@@ -223,6 +244,8 @@
     font-size: 1.2rem;
     border-radius: 6px;
     cursor: pointer;
+    min-width: 2.5rem;
+    line-height: 1;
   }
 
   .fish-counter button:hover {
@@ -242,6 +265,7 @@
     display: none;
   }
 
+  /* Clear button */
   .clear-btn {
     display: block;
     margin: 10px auto;
@@ -252,191 +276,258 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    max-width: 90vw;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .clear-btn:hover {
     background: #b91c1c;
   }
 
-  #memoriesTab, #talliesTab, #mapTab{
-  display: none;
-  height: 100%;
-  flex: 1;
-}
+  /* Tab Panels */
+  #memoriesTab, #talliesTab, #mapTab {
+    display: none;
+    height: 100%;
+    flex: 1;
+  }
 
-#memoriesTab.active, #talliesTab.active, #mapTab.active {
-  display: block;
-  height: 100%;
-  flex: 1;
-}
+  #memoriesTab.active, #talliesTab.active, #mapTab.active {
+    display: block;
+    height: 100%;
+    flex: 1;
+  }
 
+  /* Forms */
   .form-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: left;
-  width: 100%;
-}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+  }
 
-.form-fields {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  max-width: 400px;
-  width: 100%;
-}
+  .form-fields {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 400px;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+  }
 
-.form-fields label {
-  width: 100%;
-  font-weight: bold;
-}
+  .form-fields label {
+    width: 100%;
+    font-weight: bold;
+    font-size: 1rem;
+  }
 
-.form-fields input[type="text"] {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
+  .form-fields input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
 
-.form-fields button {
-  align-self: center;
-}
+  .form-fields button {
+    align-self: center;
+  }
 
+  /* Map container */
   #mapContainer {
-  height: 100%;
-  min-height: 400px;
-  width: 100%;
-  border-radius: 8px;
-}
+    height: 100%;
+    min-height: 300px;
+    width: 100%;
+    border-radius: 8px;
+  }
 
-  /* === Night at the Lake: Dark Mode === */
-body.dark-mode, html.dark-mode {
-  background: #0d1b1e; /* deep night lake blue */
-  color: #cce3dc; /* moonlight mist */
-}
+  /* === Dark Mode === */
+  body.dark-mode, html.dark-mode {
+    background: #0d1b1e; /* deep night lake blue */
+    color: #cce3dc; /* moonlight mist */
+  }
 
-header.dark-mode {
-  background: #0f2f2f;
-  color: #cce3dc;
-  border-bottom: 4px solid #5e3c1f; /* warm ember tone */
-}
+  header.dark-mode {
+    background: #0f2f2f;
+    color: #cce3dc;
+    border-bottom: 4px solid #5e3c1f; /* warm ember tone */
+  }
 
-.dark-mode #tabs {
-  background: #1a2c2c; /* deeper midnight green */
-}
+  .dark-mode #tabs {
+    background: #1a2c2c; /* deeper midnight green */
+  }
 
-.dark-mode #tabs button {
-  background: #2c2f2a; /* soft moss */
-  color: #cce3dc;
-}
+  .dark-mode #tabs button {
+    background: #2c2f2a; /* soft moss */
+    color: #cce3dc;
+  }
 
-.dark-mode #tabs button.active {
-  background: #0f2f2f;
-  color: #fefae0;
-}
+  .dark-mode #tabs button.active {
+    background: #0f2f2f;
+    color: #fefae0;
+  }
 
-.dark-mode section {
-  background: #0d1b1e;
-  color: #e0f7fa;
-}
+  .dark-mode section {
+    background: #0d1b1e;
+    color: #e0f7fa;
+  }
 
-.dark-mode .button {
-  background-color: #5e3c1f; /* warm firewood */
-  color: #fff;
-  box-shadow: inset 0 0 2px #000, 2px 2px 5px rgba(255, 140, 0, 0.4);
-}
-.dark-mode .button:hover {
-  background-color: #7a5233;
-}
+  .dark-mode .button {
+    background-color: #5e3c1f; /* warm firewood */
+    color: #fff;
+    box-shadow: inset 0 0 2px #000, 2px 2px 5px rgba(255, 140, 0, 0.4);
+  }
+  .dark-mode .button:hover {
+    background-color: #7a5233;
+  }
 
-.dark-mode .catch-card {
-  background: #1e2b2e; /* soft twilight */
-  border: 1px solid #304f4f;
-  color: #e0f7fa;
-}
+  .dark-mode .catch-card {
+    background: #1e2b2e; /* soft twilight */
+    border: 1px solid #304f4f;
+    color: #e0f7fa;
+  }
 
-.dark-mode .catch-caption,
-.dark-mode .catch-weight {
-  color: #ffddaf; /* soft amber */
-}
+  .dark-mode .catch-caption,
+  .dark-mode .catch-weight {
+    color: #ffddaf; /* soft amber */
+  }
 
-.dark-mode .catch-location,
-.dark-mode .catch-date {
-  color: #d5e4e2;
-}
+  .dark-mode .catch-location,
+  .dark-mode .catch-date {
+    color: #d5e4e2;
+  }
 
-.dark-mode .catch-buttons button {
-  background: #3f2c1f; /* charred wood */
-  color: #fdf7ee;
-}
-.dark-mode .catch-buttons button:hover {
-  background: #553c2a;
-}
+  .dark-mode .catch-buttons button {
+    background: #3f2c1f; /* charred wood */
+    color: #fdf7ee;
+  }
+  .dark-mode .catch-buttons button:hover {
+    background: #553c2a;
+  }
 
-.dark-mode .fish-item {
-  background: #263434; /* pondside moss */
-  color: #e0f7fa;
-  border: 1px solid #3a4c4c;
-}
+  .dark-mode .fish-item {
+    background: #263434; /* pondside moss */
+    color: #e0f7fa;
+    border: 1px solid #3a4c4c;
+  }
 
-.dark-mode .fish-name {
-  border-color: #888;
-}
+  .dark-mode .fish-name {
+    border-color: #888;
+  }
 
-.dark-mode .fish-counter button {
-  background: #5e3c1f;
-}
-.dark-mode .fish-counter button:hover {
-  background: #7a5233;
-}
+  .dark-mode .fish-counter button {
+    background: #5e3c1f;
+  }
+  .dark-mode .fish-counter button:hover {
+    background: #7a5233;
+  }
 
-.dark-mode .fish-tips {
-  color: #c0dcdc;
-}
+  .dark-mode .fish-tips {
+    color: #c0dcdc;
+  }
 
-.dark-mode .clear-btn {
-  background: #8b1e1e;
-}
-.dark-mode .clear-btn:hover {
-  background: #aa2a2a;
-}
+  .dark-mode .clear-btn {
+    background: #8b1e1e;
+  }
+  .dark-mode .clear-btn:hover {
+    background: #aa2a2a;
+  }
 
-.dark-mode #imageModal,
-.dark-mode #instagramModal {
-  background: rgba(0, 0, 0, 0.9);
-}
+  .dark-mode #imageModal,
+  .dark-mode #instagramModal {
+    background: rgba(0, 0, 0, 0.9);
+  }
 
-.dark-mode #talliesTab h3 {
-  color: #cce3dc;
-}
+  .dark-mode #talliesTab h3 {
+    color: #cce3dc;
+  }
 
   #darkModeToggle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 100;
-}
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+  }
 
   .dark-mode .form-fields input[type="text"] {
-  background: #1a2c2c;
-  color: #e0f7fa;
-  border: 1px solid #4a6464;
-}
+    background: #1a2c2c;
+    color: #e0f7fa;
+    border: 1px solid #4a6464;
+  }
 
   #darkModeContainer {
-  width: 100%;
-  background: #e6dbcf; /* cork-like tone */
-  padding: 0.5rem 1rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
+    width: 100%;
+    background: #e6dbcf; /* cork-like tone */
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
 
-.dark-mode #darkModeContainer {
-  background: #0f2f2f; /* dark mode tone */
-}
+  .dark-mode #darkModeContainer {
+    background: #0f2f2f; /* dark mode tone */
+  }
+
+  /* === Responsive: Mobile and Small Screens === */
+  @media (max-width: 480px) {
+    header {
+      font-size: 1.2rem;
+      padding: 0.75rem 1rem;
+    }
+
+    #tabs button {
+      font-size: 0.9rem;
+      padding: 0.75rem 0.5rem;
+    }
+
+    .catch-caption {
+      font-size: 1rem;
+    }
+
+    .catch-weight {
+      font-size: 0.9rem;
+    }
+
+    .catch-location, .catch-date {
+      font-size: 0.85rem;
+    }
+
+    .catch-buttons button {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .fish-name {
+      font-size: 1rem;
+    }
+
+    .fish-counter button {
+      font-size: 1rem;
+      padding: 5px 10px;
+    }
+
+    .fish-counter span {
+      font-size: 1.1rem;
+      min-width: 25px;
+    }
+
+    .clear-btn {
+      font-size: 0.95rem;
+      padding: 7px 14px;
+    }
+
+    .form-fields {
+      max-width: 100%;
+      padding: 0 0.75rem;
+    }
+
+    #mapContainer {
+      min-height: 250px;
+    }
+  }
 </style>
 </head>
 <body>
