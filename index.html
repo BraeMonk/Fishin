@@ -657,24 +657,25 @@ html2canvas(clone).then(canvas => {
     }
   }
 
-  // Tabs switching
-  const memoriesTabBtn = document.getElementById("memoriesTabBtn");
-  const talliesTabBtn = document.getElementById("talliesTabBtn");
-  const memoriesTab = document.getElementById("memoriesTab");
-  const talliesTab = document.getElementById("talliesTab");
+  // Tab elements
+const memoriesTabBtn = document.getElementById("memoriesTabBtn");
+const talliesTabBtn = document.getElementById("talliesTabBtn");
+const memoriesTab = document.getElementById("memoriesTab");
+const talliesTab = document.getElementById("talliesTab");
 
-  memoriesTabBtn.addEventListener("click", () => {
+// Tab switching
+memoriesTabBtn.addEventListener("click", () => {
   memoriesTabBtn.classList.add("active");
   talliesTabBtn.classList.remove("active");
-  memoriesTab.style.display = "";    // Show memories tab
-  talliesTab.style.display = "none"; // Hide tallies tab
+  memoriesTab.style.display = "";         // Show memories tab
+  talliesTab.style.display = "none";      // Hide tallies tab
 });
 
 talliesTabBtn.addEventListener("click", () => {
   talliesTabBtn.classList.add("active");
   memoriesTabBtn.classList.remove("active");
-  talliesTab.style.display = "";    // Show tallies tab
-  memoriesTab.style.display = "none"; // Hide memories tab
+  talliesTab.style.display = "";          // Show tallies tab
+  memoriesTab.style.display = "none";     // Hide memories tab
 });
 
   // Init
