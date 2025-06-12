@@ -657,45 +657,40 @@ html2canvas(clone).then(canvas => {
     }
   }
 
-  // Tab buttons
-const memoriesTabBtn = document.getElementById("memoriesTabBtn");
-const talliesTabBtn = document.getElementById("talliesTabBtn");
+  window.onload = async function () {
+  // DOM-dependent setup
+  const memoriesTabBtn = document.getElementById("memoriesTabBtn");
+  const talliesTabBtn = document.getElementById("talliesTabBtn");
+  const memoriesTab = document.getElementById("memoriesTab");
+  const talliesTab = document.getElementById("talliesTab");
 
-// Tab sections
-const memoriesTab = document.getElementById("memoriesTab");
-const talliesTab = document.getElementById("talliesTab");
-
-// Show memories by default, hide tallies
-memoriesTab.style.display = "block";
-talliesTab.style.display = "none";
-
-// Switch to Memories
-memoriesTabBtn.addEventListener("click", () => {
-  memoriesTabBtn.classList.add("active");
-  talliesTabBtn.classList.remove("active");
-
+  // Show memories by default
   memoriesTab.style.display = "block";
   talliesTab.style.display = "none";
-});
 
-// Switch to Tallies
-talliesTabBtn.addEventListener("click", () => {
-  talliesTabBtn.classList.add("active");
-  memoriesTabBtn.classList.remove("active");
+  // Event listeners for tab switching
+  memoriesTabBtn.addEventListener("click", () => {
+    memoriesTabBtn.classList.add("active");
+    talliesTabBtn.classList.remove("active");
+    memoriesTab.style.display = "block";
+    talliesTab.style.display = "none";
+  });
 
-  talliesTab.style.display = "block";
-  memoriesTab.style.display = "none";
-});
+  talliesTabBtn.addEventListener("click", () => {
+    talliesTabBtn.classList.add("active");
+    memoriesTabBtn.classList.remove("active");
+    talliesTab.style.display = "block";
+    memoriesTab.style.display = "none";
+  });
 
-  // Init
+  // App init
+  await cachePhotosLocally();
+  renderPhotoPosts();
+  initFishList();
+
+  // File input listener
   document.getElementById("photoInput").addEventListener("change", handleUpload);
-
-  // On load, cache from DB -> localStorage, then render
-  (async () => {
-    await cachePhotosLocally();
-    renderPhotoPosts();
-    initFishList();
-  })();
+};
 
   // Service worker registration
   if ('serviceWorker' in navigator) {
@@ -705,14 +700,6 @@ talliesTabBtn.addEventListener("click", () => {
         .catch(err => console.error('SW failed:', err));
     });
   }
-
-  // On window load
-  window.onload = async function() {
-    await cachePhotosLocally(); // Sync localStorage with IndexedDB
-    renderPhotoPosts();         // Populate the gallery
-    initFishList();             // Init fish list
-    document.getElementById("photoInput").addEventListener("change", handleUpload);
-  };
 </script>
 
 </body>
