@@ -457,43 +457,52 @@
   });
 
   // ===== Fish Data and Tally =====
+// ===== Fish Data and Tally =====
 const fishData = [
-  {
-    species: "Largemouth Bass",
-    tips: "Try using plastic worms on a Texas rig near weeds or docks.",
-    count: 0
-  },
-  {
-    species: "Smallmouth Bass",
-    tips: "Use tube jigs or crankbaits over rocky bottoms.",
-    count: 0
-  },
-  {
-    species: "Northern Pike",
-    tips: "Try spinnerbaits or large spoons near weed beds.",
-    count: 0
-  },
-  {
-    species: "Perch",
-    tips: "Use worms or small jigs on light tackle.",
-    count: 0
-  },
-  {
-    species: "Walleye",
-    tips: "Jigging with minnows or trolling crankbaits near drop-offs works great.",
-    count: 0
-  }
+  { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits', count: 0 },
+  { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow', count: 0 },
+  { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait', count: 0 },
+  { name: 'Walleye', rig: 'Jig Head', bait: 'Nightcrawler', count: 0 },
+  { name: 'Yellow Perch', rig: 'Slip Bobber', bait: 'Minnows', count: 0 },
+  { name: 'Rainbow Trout', rig: 'Fly Rig', bait: 'Dry Fly', count: 0 },
+  { name: 'Brook Trout', rig: 'Inline Spinner', bait: 'Salmon Eggs', count: 0 },
+  { name: 'Lake Trout', rig: 'Downrigger', bait: 'Spoon', count: 0 },
+  { name: 'Brown Trout', rig: 'Drift Rig', bait: 'Worm', count: 0 },
+  { name: 'Black Crappie', rig: 'Light Jig', bait: 'Small Minnow', count: 0 },
+  { name: 'White Crappie', rig: 'Micro Jig', bait: 'Grubs', count: 0 },
+  { name: 'Pumpkinseed Sunfish', rig: 'Bobber Rig', bait: 'Worms', count: 0 },
+  { name: 'Bluegill', rig: 'Bobber Rig', bait: 'Crickets, Worms', count: 0 },
+  { name: 'Rock Bass', rig: 'Light Jig', bait: 'Minnows, Worms', count: 0 },
+  { name: 'White Bass', rig: 'Spinnerbait', bait: 'Shad Imitation', count: 0 },
+  { name: 'Channel Catfish', rig: 'Slip Sinker Rig', bait: 'Stinkbait, Chicken Liver', count: 0 },
+  { name: 'Flathead Catfish', rig: 'Live Bait Rig', bait: 'Live Bluegill', count: 0 },
+  { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad', count: 0 },
+  { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms', count: 0 },
+  { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs', count: 0 },
+  { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls', count: 0 },
+  { name: 'Northern Sunfish', rig: 'Bobber Rig', bait: 'Worms, Insects', count: 0 },
+  { name: 'Muskellunge (Muskie)', rig: 'Large Crankbait Rig, Jig', bait: 'Large Minnows, Topwater Lures', count: 0 },
+  { name: 'Yellow Bullhead', rig: 'Slip Sinker Rig', bait: 'Worms, Cut Bait', count: 0 },
+  { name: 'White Perch (White Bass)', rig: 'Spinnerbait, Jig', bait: 'Minnows', count: 0 },
+  { name: 'Freshwater Drum', rig: 'Bottom Rig', bait: 'Worms, Small Fish', count: 0 },
+  { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies', count: 0 },
+  { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs', count: 0 },
+  { name: 'Cisco (Lake Herring)', rig: 'Jigging Spoon', bait: 'Minnows', count: 0 },
+  { name: 'Mooneye', rig: 'Fly Rig', bait: 'Small Insects, Flies', count: 0 },
+  { name: 'American Eel', rig: 'Bottom Rig', bait: 'Worms, Cut Bait', count: 0 },
+  { name: 'Longnose Gar', rig: 'Rope Lure', bait: 'Minnows, Live Bait', count: 0 },
+  { name: 'Round Goby', rig: 'Bottom Jig', bait: 'Worms, Soft Plastics', count: 0 },
+  { name: 'Spottail Shiner', rig: 'Micro Jig', bait: 'Bread, Small Insects', count: 0 },
+  { name: 'Golden Shiner', rig: 'Micro Hook Rig', bait: 'Dough Balls, Worms', count: 0 }
 ];
 
-// Load from localStorage if exists
-const savedFishCounts = JSON.parse(localStorage.getItem("fishTallies"));
-if (savedFishCounts) {
-  fishData.forEach((fish, i) => {
-    fish.count = savedFishCounts[i]?.count || 0;
-  });
+// Load from localStorage
+const savedFish = JSON.parse(localStorage.getItem("fishTallies"));
+if (savedFish) {
+  fishData.forEach((f, i) => f.count = savedFish[i]?.count || 0);
 }
 
-// Render the fish list
+// Render List
 function renderFishList() {
   const list = document.getElementById("fishList");
   list.innerHTML = "";
@@ -502,50 +511,50 @@ function renderFishList() {
     const item = document.createElement("div");
     item.className = "fish-item";
 
-    // Expandable species name
-    const nameRow = document.createElement("div");
-    nameRow.className = "fish-name";
-    nameRow.textContent = fish.species;
-    nameRow.addEventListener("click", () => {
-      const tips = document.getElementById(`tips-${index}`);
+    const name = document.createElement("div");
+    name.className = "fish-name";
+    name.textContent = fish.name;
+    name.addEventListener("click", () => {
+      const tips = document.getElementById(`fish-tips-${index}`);
       tips.style.display = tips.style.display === "block" ? "none" : "block";
     });
 
-    // Tips (initially hidden)
-    const tips = document.createElement("div");
-    tips.className = "fish-tips";
-    tips.id = `tips-${index}`;
-    tips.textContent = fish.tips;
-    tips.style.display = "none";
-
-    // Count controls
     const countRow = document.createElement("div");
     countRow.className = "fish-counter";
 
-    const minusBtn = document.createElement("button");
-    minusBtn.textContent = "−";
-    minusBtn.addEventListener("click", () => updateCount(index, -1));
+    const minus = document.createElement("button");
+    minus.textContent = "−";
+    minus.addEventListener("click", () => updateCount(index, -1));
 
-    const countDisplay = document.createElement("span");
-    countDisplay.id = `count-${index}`;
-    countDisplay.textContent = fish.count;
+    const count = document.createElement("span");
+    count.id = `count-${index}`;
+    count.textContent = fish.count;
 
-    const plusBtn = document.createElement("button");
-    plusBtn.textContent = "+";
-    plusBtn.addEventListener("click", () => updateCount(index, 1));
+    const plus = document.createElement("button");
+    plus.textContent = "+";
+    plus.addEventListener("click", () => updateCount(index, 1));
 
-    countRow.appendChild(minusBtn);
-    countRow.appendChild(countDisplay);
-    countRow.appendChild(plusBtn);
+    countRow.appendChild(minus);
+    countRow.appendChild(count);
+    countRow.appendChild(plus);
 
-    item.appendChild(nameRow);
+    const tips = document.createElement("div");
+    tips.className = "fish-tips";
+    tips.id = `fish-tips-${index}`;
+    tips.innerHTML = `
+      <strong>Rig:</strong> ${fish.rig}<br>
+      <strong>Bait:</strong> ${fish.bait}
+    `;
+    tips.style.display = "none";
+
+    item.appendChild(name);
     item.appendChild(countRow);
     item.appendChild(tips);
     list.appendChild(item);
   });
 }
 
-// Tally update
+// Update and save
 function updateCount(index, delta) {
   fishData[index].count = Math.max(0, fishData[index].count + delta);
   document.getElementById(`count-${index}`).textContent = fishData[index].count;
@@ -555,17 +564,17 @@ function updateCount(index, delta) {
 // Clear button
 function clearFishTallies() {
   if (!confirm("Clear all tallies?")) return;
-  fishData.forEach(fish => fish.count = 0);
+  fishData.forEach(f => f.count = 0);
   localStorage.setItem("fishTallies", JSON.stringify(fishData));
   renderFishList();
 }
 
-// Init on load
+// Init function
 function initFishList() {
   renderFishList();
-  const clearButton = document.getElementById("clearTallies");
-  if (clearButton) {
-    clearButton.addEventListener("click", clearFishTallies);
+  const clearBtn = document.getElementById("clearTallies");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", clearFishTallies);
   }
 }
 
