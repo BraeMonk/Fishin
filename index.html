@@ -441,34 +441,49 @@
         if (buttons) buttons.remove();
 
         // Use html2canvas to capture clone element
-        html2canvas(clone).then(canvas => {
-          const ctx = canvas.getContext("2d");
+        // Use html2canvas to capture clone element
+html2canvas(clone).then(canvas => {
+  const ctx = canvas.getContext("2d");
 
-          const watermarkImg = new Image();
-          watermarkImg.src = "icon_192x192.png"; // Make sure this path is correct and accessible
+  const watermarkImg = new Image();
+  watermarkImg.src = "icon_192x192.png"; // Make sure this path is correct and accessible
 
-          watermarkImg.onload = () => {
-            ctx.globalAlpha = 0.3; // Semi-transparent watermark
-            const size = 64;
-            ctx.drawImage(
-              watermarkImg,
-              canvas.width - size - 10,
-              canvas.height - size - 10,
-              size,
-              size
-            );
+  watermarkImg.onload = () => {
+    ctx.globalAlpha = 0.3; // Semi-transparent watermark
+    const size = 64;
 
-            // After watermark is drawn, download image
-            const link = document.createElement("a");
-            link.download = `catch-card-${index + 1}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+    // Try to locate the .catch-info block inside the clone
+    const infoBlock = clone.querySelector(".catch-info");
+    if (infoBlock) {
+      const infoRect = infoBlock.getBoundingClientRect();
+      const cloneRect = clone.getBoundingClientRect();
 
-            openInstagramModal();
-            clone.remove();
-          };
-        });
-      });
+      // Calculate offset relative to canvas
+      const offsetX = infoRect.right - cloneRect.left + 10;
+      const offsetY = infoRect.top - cloneRect.top;
+
+      ctx.drawImage(watermarkImg, offsetX, offsetY, size, size);
+    } else {
+      // Fallback: bottom-right if info not found
+      ctx.drawImage(
+        watermarkImg,
+        canvas.width - size - 10,
+        canvas.height - size - 10,
+        size,
+        size
+      );
+    }
+
+    // After watermark is drawn, download image
+    const link = document.createElement("a");
+    link.download = `catch-card-${index + 1}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+
+    openInstagramModal();
+    clone.remove();
+  };
+});
       buttonRow.appendChild(shareButton);
 
       deleteButton.addEventListener("click", () => {
