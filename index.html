@@ -252,12 +252,12 @@
     background: #b91c1c;
   }
 
-  .tab {
-  display: none;
+  #memoriesTab, #talliesTab {
+  display: none; /* hide both by default */
 }
 
-.tab.active {
-  display: block;
+#memoriesTab.active, #talliesTab.active {
+  display: block; /* show active tab */
 }
 </style>
 </head>
@@ -682,8 +682,9 @@ function closeModal() {
   window.onload = async function () {
 
   await renderPhotoPosts();
-  initFishList();
   setupTabs();
+  initFishList();
+  
 
   const uploadBtn = document.getElementById("uploadButton");
   if (uploadBtn) {
