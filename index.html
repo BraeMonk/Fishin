@@ -265,6 +265,40 @@
   display: block; /* show active tab */
 }
 
+  .form-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.form-fields label {
+  width: 100%;
+  font-weight: bold;
+}
+
+.form-fields input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-fields button {
+  align-self: center;
+}
+
   /* === Night at the Lake: Dark Mode === */
 body.dark-mode, html.dark-mode {
   background: #0d1b1e; /* deep night lake blue */
@@ -372,6 +406,12 @@ header.dark-mode {
   right: 1rem;
   z-index: 100;
 }
+
+  .dark-mode .form-fields input[type="text"] {
+  background: #1a2c2c;
+  color: #e0f7fa;
+  border: 1px solid #4a6464;
+}
 </style>
 </head>
 <body>
@@ -388,28 +428,27 @@ header.dark-mode {
 
 <!-- Memories Tab -->
 <section id="memoriesTab" class="tab active">
-  <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-    <input type="file" id="photoInput" class="button" accept="image/*" multiple />
+  <div class="form-wrapper">
+  <input type="file" id="photoInput" class="button" accept="image/*" multiple style="margin-bottom: 1rem;" />
 
-    <div style="margin-top: 10px;">
-      <label>
-        Caption:
-        <input type="text" id="captionInput" placeholder="Enter caption here" />
-      </label>
-      <br>
-      <label style="margin-left: 20px;">
-        Location:
-        <input type="text" id="locationInput" placeholder="Enter location here" />
-      </label>
-      <label style="margin-left: 20px;">
-        Weight (lbs):
-        <input type="text" id="weightInput" placeholder="e.g. 2.5" />
-      </label>
-      <button id="uploadButton" class="button" style="margin-left: 20px;">Upload Photos</button>
-    </div>
+  <div class="form-fields">
+    <label for="captionInput">Caption:
+      <input type="text" id="captionInput" placeholder="Enter caption here" />
+    </label>
 
-    <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed" style="margin-top: 20px; width: 100%; max-width: 600px;"></div>
+    <label for="locationInput">Location:
+      <input type="text" id="locationInput" placeholder="Enter location here" />
+    </label>
+
+    <label for="weightInput">Weight (lbs):
+      <input type="text" id="weightInput" placeholder="e.g. 2.5" />
+    </label>
+
+    <button id="uploadButton" class="button">Upload Photos</button>
   </div>
+
+  <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed" style="margin-top: 20px; width: 100%; max-width: 600px;"></div>
+</div>
 </section>
 
 <!-- Tallies Tab -->
