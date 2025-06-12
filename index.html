@@ -332,6 +332,7 @@
     memoriesTab.classList.remove("active");
   });
 }
+  
   // === IndexedDB Setup ===
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -680,33 +681,42 @@ function closeModal() {
   }
         
   window.onload = async function () {
+  try {
+    // Load fish tallies first
+    initFishList();
 
-  await renderPhotoPosts();
-  setupTabs();
-  initFishList();
-  
+    // Setup tab navigation (needs DOM fully rendered)
+    setupTabs();
 
-  const uploadBtn = document.getElementById("uploadButton");
-  if (uploadBtn) {
-    uploadBtn.addEventListener("click", handleUpload);
-  } else {
-    console.warn("Upload button not found");
-  }
+    // Load your photo feed (can be async)
+    await renderPhotoPosts();
 
-  const modalClose = document.getElementById("modalClose");
-  if (modalClose) {
-    modalClose.addEventListener("click", closeModal);
-  }
+    // Upload button
+    const uploadBtn = document.getElementById("uploadButton");
+    if (uploadBtn) {
+      uploadBtn.addEventListener("click", handleUpload);
+    } else {
+      console.warn("Upload button not found");
+    }
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
-  });
+    // Close buttons and escape key modal handling
+    const modalClose = document.getElementById("modalClose");
+    if (modalClose) {
+      modalClose.addEventListener("click", closeModal);
+    }
 
-  const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
-  if (closeInstagramModalBtn) {
-    closeInstagramModalBtn.addEventListener("click", () => {
-      document.getElementById("instagramModal").style.display = "none";
+    const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
+    if (closeInstagramModalBtn) {
+      closeInstagramModalBtn.addEventListener("click", () => {
+        document.getElementById("instagramModal").style.display = "none";
+      });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
     });
+  } catch (err) {
+    console.error("Initialization failed:", err);
   }
 };
         
