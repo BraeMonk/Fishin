@@ -485,7 +485,7 @@
     });
     buttonRow.appendChild(deleteButton);
 
-    // Download/share button — unchanged
+    // Download/share button
     const shareButton = document.createElement("button");
     shareButton.textContent = "Download";
     shareButton.title = "Download Catch Card";
@@ -502,41 +502,43 @@
       if (buttons) buttons.remove();
 
       html2canvas(clone).then(canvas => {
-  const ctx = canvas.getContext("2d");
-  const watermarkImg = new Image();
-  watermarkImg.src = "icon_192x192.png";
+        const ctx = canvas.getContext("2d");
+        const watermarkImg = new Image();
+        watermarkImg.src = "icon_192x192.png";
 
-  watermarkImg.onload = () => {
-    ctx.globalAlpha = 0.3;
-    const size = 64;
-    const padding = 10;
+        watermarkImg.onload = () => {
+          ctx.globalAlpha = 0.3;
+          const size = 64;
+          const padding = 10;
 
-    // Always bottom-right corner of the canvas
-    ctx.drawImage(
-      watermarkImg,
-      canvas.width - size - padding,
-      canvas.height - size - padding,
-      size,
-      size
-    );
+          // Always bottom-right corner of the canvas
+          ctx.drawImage(
+            watermarkImg,
+            canvas.width - size - padding,
+            canvas.height - size - padding,
+            size,
+            size
+          );
 
-    const link = document.createElement("a");
-    link.download = `catch-card-${photo.id}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+          const link = document.createElement("a");
+          link.download = `catch-card-${photo.id}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
 
-    openInstagramModal();
-    clone.remove();
-  };
-});
+          openInstagramModal();
+          clone.remove();
+        };
+      });
+    });
 
     buttonRow.appendChild(shareButton);
     card.appendChild(buttonRow);
 
     gallery.appendChild(card);
-   }); // closes forEach
-  } // closes renderPhotoPosts ✅
+  }); // closes forEach
+} // ✅ closes renderPhotoPosts correctly
 
+// ✅ Now openModal is correctly outside
 function openModal(src) {
   const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImg");
