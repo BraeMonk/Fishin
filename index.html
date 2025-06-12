@@ -471,32 +471,14 @@
       });
       buttonRow.appendChild(shareButton);
 
-      // Delete button
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
-      deleteButton.title = "Delete this photo";
-      deleteButton.style.backgroundColor = "#dc2626";
+      deleteButton.addEventListener("click", () => {
+  if (!confirm("Delete this photo?")) return;
 
-      deleteButton.addEventListener("click", async () => {
-        // Find photo ID from storedPhotos by matching id or timestamp
-        const photos = JSON.parse(localStorage.getItem("photos")) || [];
-        const photoToDelete = photos.find(p => p.id === photo.id);
-        if (!photoToDelete) return;
-
-        try {
-          await deletePhotoFromDB(photoToDelete.id);
-          await cachePhotosLocally();
-          renderPhotoPosts();
-        } catch (err) {
-          console.error("Error deleting photo:", err);
-        }
-      });
-      buttonRow.appendChild(deleteButton);
-
-      card.appendChild(buttonRow);
-      gallery.appendChild(card);
-    });
-  }
+  const photos = JSON.parse(localStorage.getItem("photos")) || [];
+  const updatedPhotos = photos.filter(p => p.timestamp !== photo.timestamp); // or compare src if timestamp isn't reliable
+  localStorage.setItem("photos", JSON.stringify(updatedPhotos));
+  renderPhotoPosts();
+});
 
   // Modal controls
   function openModal(src) {
