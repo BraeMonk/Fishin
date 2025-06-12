@@ -248,6 +248,7 @@
 
 <section id="talliesTab" style="display:none;">
   <h3>Fish List </h3>
+  <h3>Total Fish Caught: <span id="totalFishCount">0</span></h3>
   <div id="fishList" class="fish-list"></div>
 <button id="clearTallies" class="clear-btn">Clear</button>
 </section>
@@ -588,6 +589,15 @@ function updateCount(index, delta) {
   fishData[index].count = Math.max(0, fishData[index].count + delta);
   document.getElementById(`count-${index}`).textContent = fishData[index].count;
   localStorage.setItem("fishTallies", JSON.stringify(fishData));
+  updateTotalFishCount();
+}
+
+  function updateTotalFishCount() {
+  let total = 0;
+  document.querySelectorAll('.fish-counter span').forEach(span => {
+    total += parseInt(span.textContent, 10);
+  });
+  document.getElementById('totalFishCount').textContent = total;
 }
 
 // Clear button
@@ -634,6 +644,7 @@ function initFishList() {
     await cachePhotosLocally();
     renderPhotoPosts();
     initFishList();
+    updateTotalFishCount();
   })();
 
   if ('serviceWorker' in navigator) {
