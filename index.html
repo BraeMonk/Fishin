@@ -258,12 +258,16 @@
     background: #b91c1c;
   }
 
-  #memoriesTab, #talliesTab {
-  display: none; /* hide both by default */
+  #memoriesTab, #talliesTab, #mapTab{
+  display: none;
+  height: 100%;
+  flex: 1;
 }
 
-#memoriesTab.active, #talliesTab.active {
-  display: block; /* show active tab */
+#memoriesTab.active, #talliesTab.active, #mapTab.active {
+  display: block;
+  height: 100%;
+  flex: 1;
 }
 
   .form-wrapper {
@@ -301,7 +305,7 @@
 }
 
   #mapContainer {
-  height: 100vh;
+  height: 100%;
   min-height: 400px;
   width: 100%;
   border-radius: 8px;
