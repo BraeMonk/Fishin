@@ -361,7 +361,6 @@
     });
   }
 
-  // Upload handler
   async function handleUpload() {
   const input = document.getElementById("photoInput");
   const files = input.files;
@@ -373,26 +372,23 @@
       return;
     }
 
-    const dataURL = await readFileAsDataURL(file);
+    try {
+      const dataURL = await readFileAsDataURL(file);
+      const caption = prompt("Enter a caption for this photo:", "") || "";
+      const location = prompt("Enter a location for this photo:", "") || "";
+      const timestamp = new Date().toISOString();
 
-    const caption = prompt("Enter a caption for this photo:", "") || "";
-    const location = prompt("Enter a location for this photo:", "") || "";
-    const timestamp = new Date().toISOString();
+      await addPhotoToDB({ src: dataURL, caption, location, timestamp });
+      renderPhotoPosts();
 
-    await addPhotoToDB({
-      src: dataURL,
-      caption,
-      location,
-      timestamp
-    });
-
-    await renderPhotoPosts();
-
-    if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
+      if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
+    } catch (error) {
+      console.error("Failed to process file:", error);
+    }
   };
 
   await processFile(files[0], 0);
-  input.value = '';
+  input.value = ''; // Clear input
 }
 
   async function renderPhotoPosts() {
