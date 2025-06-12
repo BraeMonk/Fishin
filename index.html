@@ -1221,12 +1221,23 @@ window.onload = async function () {
         
   // Service worker registration
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('SW registered:', reg.scope))
-        .catch(err => console.error('SW failed:', err));
-    });
-  }
+  window.addEventListener('load', async () => {
+    try {
+      // Unregister any existing service workers
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        await registration.unregister();
+        console.log('Old service worker unregistered:', registration);
+      }
+
+      // Register the new service worker
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      console.log('SW registered:', reg.scope);
+    } catch (err) {
+      console.error('Service Worker error:', err);
+    }
+  });
+}
 </script>
 
 </body>
