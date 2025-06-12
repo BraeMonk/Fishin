@@ -335,18 +335,38 @@
 
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
-  Array.from(files).forEach(file => {
-    if (!file.type.startsWith("image/jpeg")) return;
+  // We'll process files sequentially to keep prompts orderly
+  const processFile = (file, index) => {
+    if (!file.type.startsWith("image/jpeg")) {
+      if (index + 1 < files.length) processFile(files[index + 1], index + 1);
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = function (event) {
-      storedPhotos.push(event.target.result);
+      // Prompt user for caption and location
+      const caption = prompt("Enter a caption for this photo:", "") || "";
+      const location = prompt("Enter a location for this photo:", "") || "";
+
+      const timestamp = new Date().toLocaleString();
+
+      storedPhotos.push({
+        src: event.target.result,
+        caption,
+        location,
+        timestamp
+      });
+
       localStorage.setItem("photos", JSON.stringify(storedPhotos));
       renderPhotoPosts();
+
+      // Process next file if exists
+      if (index + 1 < files.length) processFile(files[index + 1], index + 1);
     };
     reader.readAsDataURL(file);
-  });
+  };
 
+  processFile(files[0], 0);
   input.value = ''; // Clear input
 }
 
