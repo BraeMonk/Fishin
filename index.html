@@ -366,11 +366,10 @@
   const files = input.files;
   if (!files.length) return;
 
-  const processFile = async (file, index) => {
-    if (!file.type.startsWith("image/jpeg")) {
-      if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
-      return;
-    }
+  // Process files sequentially, accumulate promises
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.startsWith("image/")) continue;
 
     try {
       const dataURL = await readFileAsDataURL(file);
@@ -379,16 +378,16 @@
       const timestamp = new Date().toISOString();
 
       await addPhotoToDB({ src: dataURL, caption, location, timestamp });
-      renderPhotoPosts();
-
-      if (index + 1 < files.length) await processFile(files[index + 1], index + 1);
     } catch (error) {
       console.error("Failed to process file:", error);
     }
-  };
+  }
 
-  await processFile(files[0], 0);
-  input.value = ''; // Clear input
+  // After all photos added, render gallery once
+  await renderPhotoPosts();
+
+  // Clear input so user can upload same files again if needed
+  input.value = '';
 }
 
   async function renderPhotoPosts() {
