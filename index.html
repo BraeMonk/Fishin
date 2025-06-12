@@ -249,16 +249,16 @@
   <button id="talliesTabBtn">Tallies</button>
 </div>
 
-<section id="memoriesTab">
+<section id="memoriesTab" class="tab active">
   <input type="file" id="photoInput" accept="image/*" multiple />
   <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed"></div>
 </section>
 
-<section id="talliesTab">
-  <h3>Fish List </h3>
+<section id="talliesTab" class="tab">
+  <h3>Fish List</h3>
   <h3>Total Fish Caught: <span id="totalFishCount">0</span></h3>
   <div id="fishList" class="fish-list"></div>
-<button id="clearTallies" class="clear-btn">Clear</button>
+  <button id="clearTallies" class="clear-btn">Clear</button>
 </section>
 
 <!-- Fullscreen photo modal -->
@@ -285,15 +285,9 @@
   const talliesTab = document.getElementById("talliesTab");
 
   if (!memoriesTabBtn || !talliesTabBtn || !memoriesTab || !talliesTab) {
-    console.warn("Tab elements missing.");
+    console.warn("One or more tab elements are missing.");
     return;
   }
-
-  // Initial state
-  memoriesTabBtn.classList.add("active");
-  memoriesTab.classList.add("active");
-  talliesTabBtn.classList.remove("active");
-  talliesTab.classList.remove("active");
 
   memoriesTabBtn.addEventListener("click", () => {
     memoriesTabBtn.classList.add("active");
@@ -698,28 +692,22 @@ html2canvas(clone).then(canvas => {
   }
         
   window.onload = async function () {
-  // Sync IndexedDB photos to localStorage
   await cachePhotosLocally();
-
-  // Render photo feed
   renderPhotoPosts();
-
-  // Init fish tally list
   initFishList();
 
-  setupTabs();
+  setupTabs(); // 🧠 This is important!
 
-  // Set up file upload input
   const photoInput = document.getElementById("photoInput");
   if (photoInput) {
     photoInput.addEventListener("change", handleUpload);
   }
 
-  // Setup modals
   const modalClose = document.getElementById("modalClose");
   if (modalClose) {
     modalClose.addEventListener("click", closeModal);
   }
+
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
   });
@@ -731,7 +719,7 @@ html2canvas(clone).then(canvas => {
     });
   }
 };
-
+        
   // Service worker registration
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
