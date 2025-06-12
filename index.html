@@ -920,55 +920,81 @@ function closeModal() {
   }
 }
         
-  window.onload = async function () {
-  try {
-    // Load fish tallies first
-    initFishList();
+  // ===== Map Tile Layers (define first!) =====
+let lightTiles, darkTiles;
 
-    // Setup tab navigation (needs DOM fully rendered)
-    setupTabs();
-
-    // Load your photo feed (can be async)
-    await renderPhotoPosts();
-
-    // === Dark Mode Initialization ===
-    const darkToggle = document.getElementById("darkModeToggle");
-if (darkToggle) {
-  const prefersDark = localStorage.getItem("darkMode") === "true";
-  if (prefersDark) {
-    document.body.classList.add("dark-mode");
-    document.documentElement.classList.add("dark-mode");
-  }
-  
-  // Update map tiles on load
-  updateMapTiles(prefersDark);
-
-  darkToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark-mode");
-    document.documentElement.classList.toggle("dark-mode", isDark);
-    localStorage.setItem("darkMode", isDark);
-    darkToggle.textContent = isDark ? "☀️ Day Mode" : "🌙 Night Mode";
-
-    // Update map tiles on toggle
-    updateMapTiles(isDark);
+if (typeof L !== "undefined") {
+  lightTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
   });
 
-  darkToggle.textContent = prefersDark ? "☀️ Day Mode" : "🌙 Night Mode";
+  darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
+  });
 }
 
-    // Upload button
+// ===== Map Theme Switcher =====
+function updateMapTiles(isDarkMode) {
+  if (!window.myMap) return;
+
+  if (isDarkMode) {
+    if (window.myMap.hasLayer(lightTiles)) {
+      window.myMap.removeLayer(lightTiles);
+    }
+    if (!window.myMap.hasLayer(darkTiles)) {
+      darkTiles.addTo(window.myMap);
+    }
+  } else {
+    if (window.myMap.hasLayer(darkTiles)) {
+      window.myMap.removeLayer(darkTiles);
+    }
+    if (!window.myMap.hasLayer(lightTiles)) {
+      lightTiles.addTo(window.myMap);
+    }
+  }
+}
+
+// ===== Main Window Load =====
+window.onload = async function () {
+  try {
+    initFishList();
+    setupTabs();
+    await renderPhotoPosts();
+
+    // === Dark Mode ===
+    const darkToggle = document.getElementById("darkModeToggle");
+    if (darkToggle) {
+      const prefersDark = localStorage.getItem("darkMode") === "true";
+      if (prefersDark) {
+        document.body.classList.add("dark-mode");
+        document.documentElement.classList.add("dark-mode");
+      }
+
+      updateMapTiles(prefersDark); // works now because tile layers exist
+
+      darkToggle.addEventListener("click", () => {
+        const isDark = document.body.classList.toggle("dark-mode");
+        document.documentElement.classList.toggle("dark-mode", isDark);
+        localStorage.setItem("darkMode", isDark);
+        darkToggle.textContent = isDark ? "☀️ Day Mode" : "🌙 Night Mode";
+
+        updateMapTiles(isDark);
+      });
+
+      darkToggle.textContent = prefersDark ? "☀️ Day Mode" : "🌙 Night Mode";
+    }
+
+    // Upload handling
     const uploadBtn = document.getElementById("uploadButton");
     if (uploadBtn) {
       uploadBtn.addEventListener("click", handleUpload);
-    } else {
-      console.warn("Upload button not found");
     }
 
-    // Close buttons and escape key modal handling
+    // Modal handling
     const modalClose = document.getElementById("modalClose");
-    if (modalClose) {
-      modalClose.addEventListener("click", closeModal);
-    }
+    if (modalClose) modalClose.addEventListener("click", closeModal);
 
     const closeInstagramModalBtn = document.getElementById("closeInstagramModal");
     if (closeInstagramModalBtn) {
@@ -977,29 +1003,17 @@ if (darkToggle) {
       });
     }
 
-    window.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", e => {
       if (e.key === "Escape") closeModal();
     });
 
     // ===== Map Initialization =====
-    if (typeof L !== "undefined") { // Make sure Leaflet is loaded
-      const lightTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap contributors'
-});
-
-const darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-  maxZoom: 19,
-  attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>'
-});
-      // Create a global map variable so it can be invalidated on tab switch
+    if (typeof L !== "undefined") {
       window.myMap = L.map("mapContainer").setView([0, 0], 2);
-lightTiles.addTo(window.myMap);
+      lightTiles.addTo(window.myMap); // default on load
 
-      // Try to get user location and update map view
       window.myMap.locate({ setView: true, maxZoom: 15 });
 
-      // When location is found, add marker and circle
       window.myMap.on("locationfound", e => {
         const radius = e.accuracy;
         L.marker(e.latlng).addTo(window.myMap)
@@ -1007,12 +1021,9 @@ lightTiles.addTo(window.myMap);
         L.circle(e.latlng, radius).addTo(window.myMap);
       });
 
-      // Handle location errors
       window.myMap.on("locationerror", e => {
         console.warn("Location error:", e.message);
       });
-    } else {
-      console.warn("Leaflet library is not loaded. Map will not initialize.");
     }
 
   } catch (err) {
