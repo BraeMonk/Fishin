@@ -251,6 +251,17 @@
 
 <section id="memoriesTab" class="tab active">
   <input type="file" id="photoInput" accept="image/*" multiple />
+  
+  <div style="margin-top: 10px;">
+    <label>
+      Caption: <input type="text" id="captionInput" placeholder="Enter caption here" />
+    </label>
+    <label style="margin-left: 20px;">
+      Location: <input type="text" id="locationInput" placeholder="Enter location here" />
+    </label>
+    <button id="uploadButton" style="margin-left: 20px;">Upload Photos</button>
+  </div>
+  
   <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed"></div>
 </section>
 
@@ -364,17 +375,20 @@
   async function handleUpload() {
   const input = document.getElementById("photoInput");
   const files = input.files;
-  if (!files.length) return;
+  if (!files.length) {
+    alert("Please select at least one photo to upload.");
+    return;
+  }
 
-  // Process files sequentially, accumulate promises
+  const caption = document.getElementById("captionInput").value.trim();
+  const location = document.getElementById("locationInput").value.trim();
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file.type.startsWith("image/")) continue;
 
     try {
       const dataURL = await readFileAsDataURL(file);
-      const caption = prompt("Enter a caption for this photo:", "") || "";
-      const location = prompt("Enter a location for this photo:", "") || "";
       const timestamp = new Date().toISOString();
 
       await addPhotoToDB({ src: dataURL, caption, location, timestamp });
@@ -383,11 +397,12 @@
     }
   }
 
-  // After all photos added, render gallery once
   await renderPhotoPosts();
 
-  // Clear input so user can upload same files again if needed
+  // Clear inputs and file input
   input.value = '';
+  document.getElementById("captionInput").value = '';
+  document.getElementById("locationInput").value = '';
 }
 
   async function renderPhotoPosts() {
@@ -659,12 +674,9 @@ function closeModal() {
   await renderPhotoPosts();
   initFishList();
 
-  setupTabs(); // 🧠 This is important!
+  setupTabs();
 
-  const photoInput = document.getElementById("photoInput");
-  if (photoInput) {
-    photoInput.addEventListener("change", handleUpload);
-  }
+  document.getElementById("uploadButton").addEventListener("click", handleUpload);
 
   const modalClose = document.getElementById("modalClose");
   if (modalClose) {
