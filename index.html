@@ -416,6 +416,7 @@
 
   const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
 
+  // Render photos in the order stored — newest first (unshift used on upload)
   storedPhotos.forEach((photo, index) => {
     const card = document.createElement("div");
     card.className = "catch-card";
@@ -458,7 +459,20 @@
     const buttonRow = document.createElement("div");
     buttonRow.className = "catch-buttons";
 
-    // Share (download) button
+    // DELETE BUTTON — always visible (moved out of download click)
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.title = "Delete this photo";
+    deleteButton.addEventListener("click", () => {
+      if (confirm("Are you sure you want to delete this photo?")) {
+        storedPhotos.splice(index, 1);
+        localStorage.setItem("photos", JSON.stringify(storedPhotos));
+        renderPhotoPosts();
+      }
+    });
+    buttonRow.appendChild(deleteButton);
+
+    // SHARE (DOWNLOAD) BUTTON — unchanged
     const shareButton = document.createElement("button");
     shareButton.textContent = "Download";
     shareButton.title = "Download Catch Card";
@@ -471,6 +485,7 @@
       clone.style.background = '#fff';
       document.body.appendChild(clone);
 
+      // Remove buttons so they don't appear on canvas
       const buttons = clone.querySelector(".catch-buttons");
       if (buttons) buttons.remove();
 
@@ -501,21 +516,6 @@
             );
           }
 
-          // Delete button
-          const deleteButton = document.createElement("button");
-          deleteButton.textContent = "Delete";
-          deleteButton.title = "Delete this photo";
-          deleteButton.addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this photo?")) {
-    // Remove from storedPhotos array
-              storedPhotos.splice(index, 1); 
-    // Explanation: Because you unshift photos and render reverses, index corresponds to reversed array
-              localStorage.setItem("photos", JSON.stringify(storedPhotos));
-              renderPhotoPosts();
-            }
-          });
-buttonRow.appendChild(deleteButton);
-
           const link = document.createElement("a");
           link.download = `catch-card-${index + 1}.png`;
           link.href = canvas.toDataURL("image/png");
@@ -528,6 +528,7 @@ buttonRow.appendChild(deleteButton);
     });
 
     buttonRow.appendChild(shareButton);
+
     card.appendChild(buttonRow);
 
     gallery.appendChild(card);
