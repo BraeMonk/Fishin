@@ -270,28 +270,32 @@
   <button id="talliesTabBtn">Tallies</button>
 </div>
 
-<section id="memoriesTab" class="tab active" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
-  <input type="file" id="photoInput" class="button" accept="image/*" multiple />
+<!-- Memories Tab -->
+<section id="memoriesTab" class="tab active">
+  <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+    <input type="file" id="photoInput" class="button" accept="image/*" multiple />
 
-  <div style="margin-top: 10px;">
-    <label>
-      Caption:
-      <input type="text" id="captionInput" placeholder="Enter caption here" />
-    </label>
-    <br>
-    <label style="margin-left: 20px;">
-      Location:
-      <input type="text" id="locationInput" placeholder="Enter location here" />
-    </label>
-    <button id="uploadButton" class="button" style="margin-left: 20px;">Upload Photos</button>
+    <div style="margin-top: 10px;">
+      <label>
+        Caption:
+        <input type="text" id="captionInput" placeholder="Enter caption here" />
+      </label>
+      <br>
+      <label style="margin-left: 20px;">
+        Location:
+        <input type="text" id="locationInput" placeholder="Enter location here" />
+      </label>
+      <button id="uploadButton" class="button" style="margin-left: 20px;">Upload Photos</button>
+    </div>
+
+    <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed" style="margin-top: 20px; width: 100%; max-width: 600px;"></div>
   </div>
-
-  <div id="photoGallery" aria-live="polite" aria-label="Memories photo feed" style="margin-top: 20px; width: 100%; max-width: 600px;"></div>
 </section>
 
+<!-- Tallies Tab -->
 <section id="talliesTab" class="tab">
   <h3>Fish List</h3>
-  <p style="font-size: 0.9em; margin-top: -10px; margin-bottom: 15px;" text-align: center;">
+  <p style="font-size: 0.9em; margin-top: -10px; margin-bottom: 15px; text-align: center;">
     Bonus Tip: Tap the name of a fish to see its recommended rig and bait combos!
   </p>
   <h3>Total Fish Caught: <span id="totalFishCount">0</span></h3>
