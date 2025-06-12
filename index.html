@@ -333,27 +333,35 @@
     const files = input.files;
     if (!files.length) return;
 
-    for (const file of files) {
-      const photoSrc = await readFileAsDataURL(file);
-      const location = prompt("Enter location for this photo:", "") || "";
-      const caption = prompt("Enter caption for this photo:", "") || "";
-      const timestamp = new Date().toISOString();
-      const photoData = { src: photoSrc, caption, location, timestamp };
-      const id = await addPhotoToDB(photoData);
-      photoData.id = id;
+    const storedPhotos = JSON.parse(localStorage.getItem("photos")) || [];
+
+    for (let file of files) {
+      const dataUrl = await readFileAsDataURL(file);
+
+      const photo = {
+        src: dataUrl,
+        caption: prompt("Caption for this photo (optional):") || "",
+        location: prompt("Location where this was taken (optional):") || "",
+        timestamp: Date.now()
+      };
+
+      try {
+        const id = await addPhotoToDB(photo);
+        photo.id = id;
+        storedPhotos.push(photo);
+      } catch (err) {
+        console.error("Error adding photo:", err);
+      }
     }
 
-    await cachePhotosLocally();
-    input.value = "";
+    localStorage.setItem("photos", JSON.stringify(storedPhotos));
     renderPhotoPosts();
   }
 
-  // Sync IndexedDB to localStorage for faster reads
+  // Sync IndexedDB photos to localStorage
   async function cachePhotosLocally() {
     const photos = await getAllPhotosFromDB();
-    // Sort by timestamp ascending for consistent order (newest last)
-    photos.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-    localStorage.setItem('photos', JSON.stringify(photos));
+    localStorage.setItem("photos", JSON.stringify(photos));
   }
 
   // Render memories feed: newest at bottom using flex-direction: column-reverse
@@ -412,28 +420,41 @@
       shareButton.addEventListener("click", () => {
         // Clone card and add watermark before downloading
         const clone = card.cloneNode(true);
-clone.style.position = 'fixed';
-clone.style.top = '-10000px';
-document.body.appendChild(clone);
+        clone.style.position = 'fixed';
+        clone.style.top = '-10000px';
+        clone.style.left = '0';
+        clone.style.background = '#fff'; // Ensure background white for canvas
+        document.body.appendChild(clone);
+        const buttons = clone.querySelector(".catch-buttons");
+        if (buttons) buttons.remove();
 
         // Use html2canvas to capture clone element
         html2canvas(clone).then(canvas => {
           const ctx = canvas.getContext("2d");
-          // Add watermark (simple text here)
-          const text = "Catch Cards App";
-          ctx.font = "18px Arial";
-          ctx.fillStyle = "rgba(0,0,0,0.3)";
-          ctx.textAlign = "right";
-          ctx.fillText(text, canvas.width - 10, canvas.height - 10);
 
-          // Download image
-          const link = document.createElement("a");
-          link.download = `catch-card-${index + 1}.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
+          const watermarkImg = new Image();
+          watermarkImg.src = "icon_192x192.png"; // Make sure this path is correct and accessible
 
-          // Show Instagram modal confirmation
-          openInstagramModal();
+          watermarkImg.onload = () => {
+            ctx.globalAlpha = 0.3; // Semi-transparent watermark
+            const size = 64;
+            ctx.drawImage(
+              watermarkImg,
+              canvas.width - size - 10,
+              canvas.height - size - 10,
+              size,
+              size
+            );
+
+            // After watermark is drawn, download image
+            const link = document.createElement("a");
+            link.download = `catch-card-${index + 1}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+
+            openInstagramModal();
+            clone.remove();
+          };
         });
       });
       buttonRow.appendChild(shareButton);
@@ -445,14 +466,18 @@ document.body.appendChild(clone);
       deleteButton.style.backgroundColor = "#dc2626";
 
       deleteButton.addEventListener("click", async () => {
-        // Find photo ID from IndexedDB by matching timestamp & src (simple match)
+        // Find photo ID from storedPhotos by matching id or timestamp
         const photos = JSON.parse(localStorage.getItem("photos")) || [];
-        const photoToDelete = photos.find(p => p.timestamp === photo.timestamp && p.src === photo.src);
+        const photoToDelete = photos.find(p => p.id === photo.id);
         if (!photoToDelete) return;
 
-        await deletePhotoFromDB(photoToDelete.id);
-        await cachePhotosLocally();
-        renderPhotoPosts();
+        try {
+          await deletePhotoFromDB(photoToDelete.id);
+          await cachePhotosLocally();
+          renderPhotoPosts();
+        } catch (err) {
+          console.error("Error deleting photo:", err);
+        }
       });
       buttonRow.appendChild(deleteButton);
 
@@ -469,8 +494,10 @@ document.body.appendChild(clone);
     modal.style.display = "flex";
   }
   function closeModal() {
-    document.getElementById("imageModal").style.display = "none";
-    document.getElementById("modalImg").src = "";
+    const modal = document.getElementById("imageModal");
+    modal.style.display = "none";
+    const modalImg = document.getElementById("modalImg");
+    modalImg.src = "";
   }
   document.getElementById("modalClose").addEventListener("click", closeModal);
   window.addEventListener("keydown", e => {
@@ -490,137 +517,136 @@ document.body.appendChild(clone);
   });
 
   // ===== Fish Data and Tally =====
-// ===== Fish Data and Tally =====
-const fishData = [
-  { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits', count: 0 },
-  { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow', count: 0 },
-  { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait', count: 0 },
-  { name: 'Walleye', rig: 'Jig Head', bait: 'Nightcrawler', count: 0 },
-  { name: 'Yellow Perch', rig: 'Slip Bobber', bait: 'Minnows', count: 0 },
-  { name: 'Rainbow Trout', rig: 'Fly Rig', bait: 'Dry Fly', count: 0 },
-  { name: 'Brook Trout', rig: 'Inline Spinner', bait: 'Salmon Eggs', count: 0 },
-  { name: 'Lake Trout', rig: 'Downrigger', bait: 'Spoon', count: 0 },
-  { name: 'Brown Trout', rig: 'Drift Rig', bait: 'Worm', count: 0 },
-  { name: 'Black Crappie', rig: 'Light Jig', bait: 'Small Minnow', count: 0 },
-  { name: 'White Crappie', rig: 'Micro Jig', bait: 'Grubs', count: 0 },
-  { name: 'Pumpkinseed Sunfish', rig: 'Bobber Rig', bait: 'Worms', count: 0 },
-  { name: 'Bluegill', rig: 'Bobber Rig', bait: 'Crickets, Worms', count: 0 },
-  { name: 'Rock Bass', rig: 'Light Jig', bait: 'Minnows, Worms', count: 0 },
-  { name: 'White Bass', rig: 'Spinnerbait', bait: 'Shad Imitation', count: 0 },
-  { name: 'Channel Catfish', rig: 'Slip Sinker Rig', bait: 'Stinkbait, Chicken Liver', count: 0 },
-  { name: 'Flathead Catfish', rig: 'Live Bait Rig', bait: 'Live Bluegill', count: 0 },
-  { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad', count: 0 },
-  { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms', count: 0 },
-  { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs', count: 0 },
-  { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls', count: 0 },
-  { name: 'Northern Sunfish', rig: 'Bobber Rig', bait: 'Worms, Insects', count: 0 },
-  { name: 'Muskellunge (Muskie)', rig: 'Large Crankbait Rig, Jig', bait: 'Large Minnows, Topwater Lures', count: 0 },
-  { name: 'Yellow Bullhead', rig: 'Slip Sinker Rig', bait: 'Worms, Cut Bait', count: 0 },
-  { name: 'White Perch (White Bass)', rig: 'Spinnerbait, Jig', bait: 'Minnows', count: 0 },
-  { name: 'Freshwater Drum', rig: 'Bottom Rig', bait: 'Worms, Small Fish', count: 0 },
-  { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies', count: 0 },
-  { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs', count: 0 },
-  { name: 'Cisco (Lake Herring)', rig: 'Jigging Spoon', bait: 'Minnows', count: 0 },
-  { name: 'Mooneye', rig: 'Fly Rig', bait: 'Small Insects, Flies', count: 0 },
-  { name: 'American Eel', rig: 'Bottom Rig', bait: 'Worms, Cut Bait', count: 0 },
-  { name: 'Longnose Gar', rig: 'Rope Lure', bait: 'Minnows, Live Bait', count: 0 },
-  { name: 'Round Goby', rig: 'Bottom Jig', bait: 'Worms, Soft Plastics', count: 0 },
-  { name: 'Spottail Shiner', rig: 'Micro Jig', bait: 'Bread, Small Insects', count: 0 },
-  { name: 'Golden Shiner', rig: 'Micro Hook Rig', bait: 'Dough Balls, Worms', count: 0 }
-];
+  const fishData = [
+    { name: 'Largemouth Bass', rig: 'Texas Rig, Wacky Rig', bait: 'Plastic worms, Jigs, Crankbaits', count: 0 },
+    { name: 'Smallmouth Bass', rig: 'Drop Shot', bait: 'Minnow', count: 0 },
+    { name: 'Northern Pike', rig: 'Spinner Rig', bait: 'Crankbait', count: 0 },
+    { name: 'Walleye', rig: 'Jig Head', bait: 'Nightcrawler', count: 0 },
+    { name: 'Yellow Perch', rig: 'Slip Bobber', bait: 'Minnows', count: 0 },
+    { name: 'Rainbow Trout', rig: 'Fly Rig', bait: 'Dry Fly', count: 0 },
+    { name: 'Brook Trout', rig: 'Inline Spinner', bait: 'Salmon Eggs', count: 0 },
+    { name: 'Lake Trout', rig: 'Downrigger', bait: 'Spoon', count: 0 },
+    { name: 'Brown Trout', rig: 'Drift Rig', bait: 'Worm', count: 0 },
+    { name: 'Black Crappie', rig: 'Light Jig', bait: 'Small Minnow', count: 0 },
+    { name: 'White Crappie', rig: 'Micro Jig', bait: 'Grubs', count: 0 },
+    { name: 'Pumpkinseed Sunfish', rig: 'Bobber Rig', bait: 'Worms', count: 0 },
+    { name: 'Bluegill', rig: 'Bobber Rig', bait: 'Crickets, Worms', count: 0 },
+    { name: 'Rock Bass', rig: 'Light Jig', bait: 'Minnows, Worms', count: 0 },
+    { name: 'White Bass', rig: 'Spinnerbait', bait: 'Shad Imitation', count: 0 },
+    { name: 'Channel Catfish', rig: 'Slip Sinker Rig', bait: 'Stinkbait, Chicken Liver', count: 0 },
+    { name: 'Flathead Catfish', rig: 'Live Bait Rig', bait: 'Live Bluegill', count: 0 },
+    { name: 'Blue Catfish', rig: 'Bottom Rig', bait: 'Cut Shad', count: 0 },
+    { name: 'Burbot', rig: 'Glow Jig', bait: 'Cut Bait, Worms', count: 0 },
+    { name: 'Bowfin', rig: 'Weedless Jig', bait: 'Live Bait, Frogs', count: 0 },
+    { name: 'Carp', rig: 'Hair Rig', bait: 'Sweetcorn, Dough Balls', count: 0 },
+    { name: 'Northern Sunfish', rig: 'Bobber Rig', bait: 'Worms, Insects', count: 0 },
+    { name: 'Muskellunge (Muskie)', rig: 'Large Crankbait Rig, Jig', bait: 'Large Minnows, Topwater Lures', count: 0 },
+    { name: 'Yellow Bullhead', rig: 'Slip Sinker Rig', bait: 'Worms, Cut Bait', count: 0 },
+    { name: 'White Perch (White Bass)', rig: 'Spinnerbait, Jig', bait: 'Minnows', count: 0 },
+    { name: 'Freshwater Drum', rig: 'Bottom Rig', bait: 'Worms, Small Fish', count: 0 },
+    { name: 'Rainbow Smelt', rig: 'Small Jig', bait: 'Small Minnows or Flies', count: 0 },
+    { name: 'Chain Pickerel', rig: 'Spinnerbait, Jig', bait: 'Minnows, Frogs', count: 0 },
+    { name: 'Cisco (Lake Herring)', rig: 'Jigging Spoon', bait: 'Minnows', count: 0 },
+    { name: 'Mooneye', rig: 'Fly Rig', bait: 'Small Insects, Flies', count: 0 },
+    { name: 'American Eel', rig: 'Bottom Rig', bait: 'Worms, Cut Bait', count: 0 },
+    { name: 'Longnose Gar', rig: 'Rope Lure', bait: 'Minnows, Live Bait', count: 0 },
+    { name: 'Round Goby', rig: 'Bottom Jig', bait: 'Worms, Soft Plastics', count: 0 },
+    { name: 'Spottail Shiner', rig: 'Micro Jig', bait: 'Bread, Small Insects', count: 0 },
+    { name: 'Golden Shiner', rig: 'Micro Hook Rig', bait: 'Dough Balls, Worms', count: 0 }
+  ];
 
-// Load from localStorage
-const savedFish = JSON.parse(localStorage.getItem("fishTallies"));
-if (savedFish) {
-  fishData.forEach((f, i) => f.count = savedFish[i]?.count || 0);
-}
+  // Load from localStorage
+  const savedFish = JSON.parse(localStorage.getItem("fishTallies"));
+  if (savedFish) {
+    fishData.forEach((f, i) => f.count = savedFish[i]?.count || 0);
+  }
 
-// Render List
-function renderFishList() {
-  const list = document.getElementById("fishList");
-  list.innerHTML = "";
+  // Render List
+  function renderFishList() {
+    const list = document.getElementById("fishList");
+    list.innerHTML = "";
 
-  fishData.forEach((fish, index) => {
-    const item = document.createElement("div");
-    item.className = "fish-item";
+    fishData.forEach((fish, index) => {
+      const item = document.createElement("div");
+      item.className = "fish-item";
 
-    const name = document.createElement("div");
-    name.className = "fish-name";
-    name.textContent = fish.name;
-    name.addEventListener("click", () => {
-      const tips = document.getElementById(`fish-tips-${index}`);
-      tips.style.display = tips.style.display === "block" ? "none" : "block";
+      const name = document.createElement("div");
+      name.className = "fish-name";
+      name.textContent = fish.name;
+      name.addEventListener("click", () => {
+        const tips = document.getElementById(`fish-tips-${index}`);
+        tips.style.display = tips.style.display === "block" ? "none" : "block";
+      });
+
+      const countRow = document.createElement("div");
+      countRow.className = "fish-counter";
+
+      const minus = document.createElement("button");
+      minus.textContent = "−";
+      minus.addEventListener("click", () => updateCount(index, -1));
+
+      const count = document.createElement("span");
+      count.id = `count-${index}`;
+      count.textContent = fish.count;
+
+      const plus = document.createElement("button");
+      plus.textContent = "+";
+      plus.addEventListener("click", () => updateCount(index, 1));
+
+      countRow.appendChild(minus);
+      countRow.appendChild(count);
+      countRow.appendChild(plus);
+
+      const tips = document.createElement("div");
+      tips.className = "fish-tips";
+      tips.id = `fish-tips-${index}`;
+      tips.innerHTML = `
+        <strong>Rig:</strong> ${fish.rig}<br>
+        <strong>Bait:</strong> ${fish.bait}
+      `;
+      tips.style.display = "none";
+
+      item.appendChild(name);
+      item.appendChild(countRow);
+      item.appendChild(tips);
+      list.appendChild(item);
     });
 
-    const countRow = document.createElement("div");
-    countRow.className = "fish-counter";
+    updateTotalFishCount();
+  }
 
-    const minus = document.createElement("button");
-    minus.textContent = "−";
-    minus.addEventListener("click", () => updateCount(index, -1));
-
-    const count = document.createElement("span");
-    count.id = `count-${index}`;
-    count.textContent = fish.count;
-
-    const plus = document.createElement("button");
-    plus.textContent = "+";
-    plus.addEventListener("click", () => updateCount(index, 1));
-
-    countRow.appendChild(minus);
-    countRow.appendChild(count);
-    countRow.appendChild(plus);
-
-    const tips = document.createElement("div");
-    tips.className = "fish-tips";
-    tips.id = `fish-tips-${index}`;
-    tips.innerHTML = `
-      <strong>Rig:</strong> ${fish.rig}<br>
-      <strong>Bait:</strong> ${fish.bait}
-    `;
-    tips.style.display = "none";
-
-    item.appendChild(name);
-    item.appendChild(countRow);
-    item.appendChild(tips);
-    list.appendChild(item);
-  });
-
-  updateTotalFishCount();
-}
-
-// Update and save
-function updateCount(index, delta) {
-  fishData[index].count = Math.max(0, fishData[index].count + delta);
-  document.getElementById(`count-${index}`).textContent = fishData[index].count;
-  localStorage.setItem("fishTallies", JSON.stringify(fishData));
-  updateTotalFishCount();
-}
+  // Update and save
+  function updateCount(index, delta) {
+    fishData[index].count = Math.max(0, fishData[index].count + delta);
+    document.getElementById(`count-${index}`).textContent = fishData[index].count;
+    localStorage.setItem("fishTallies", JSON.stringify(fishData));
+    updateTotalFishCount();
+  }
 
   function updateTotalFishCount() {
-  let total = 0;
-  document.querySelectorAll('.fish-counter span').forEach(span => {
-    total += parseInt(span.textContent, 10);
-  });
-  document.getElementById('totalFishCount').textContent = total;
-}
-
-// Clear button
-function clearFishTallies() {
-  if (!confirm("Clear all tallies?")) return;
-  fishData.forEach(f => f.count = 0);
-  localStorage.setItem("fishTallies", JSON.stringify(fishData));
-  renderFishList();
-}
-
-// Init function
-function initFishList() {
-  renderFishList();
-  const clearBtn = document.getElementById("clearTallies");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", clearFishTallies);
+    let total = 0;
+    document.querySelectorAll('.fish-counter span').forEach(span => {
+      total += parseInt(span.textContent, 10);
+    });
+    document.getElementById('totalFishCount').textContent = total;
   }
-}
+
+  // Clear button
+  function clearFishTallies() {
+    if (!confirm("Clear all tallies?")) return;
+    fishData.forEach(f => f.count = 0);
+    localStorage.setItem("fishTallies", JSON.stringify(fishData));
+    renderFishList();
+  }
+
+  // Init function
+  function initFishList() {
+    renderFishList();
+    const clearBtn = document.getElementById("clearTallies");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", clearFishTallies);
+    }
+  }
 
   // Tabs switching
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
@@ -637,8 +663,8 @@ function initFishList() {
   talliesTabBtn.addEventListener("click", () => {
     talliesTabBtn.classList.add("active");
     memoriesTabBtn.classList.remove("active");
-    talliesTab.style.display = "";
-    memoriesTab.style.display = "none";
+    talliesTab.style.display = "none";
+    memoriesTab.style.display = "";
   });
 
   // Init
@@ -651,19 +677,22 @@ function initFishList() {
     initFishList();
   })();
 
+  // Service worker registration
   if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.error('SW failed:', err));
-  });
-}
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.error('SW failed:', err));
+    });
+  }
 
+  // On window load
   window.onload = async function() {
-  await cachePhotosLocally(); // Sync localStorage with IndexedDB
-  renderPhotoPosts();         // Populate the gallery
-  document.getElementById("photoInput").addEventListener("change", handleUpload);
-};
+    await cachePhotosLocally(); // Sync localStorage with IndexedDB
+    renderPhotoPosts();         // Populate the gallery
+    initFishList();             // Init fish list
+    document.getElementById("photoInput").addEventListener("change", handleUpload);
+  };
 </script>
 
 </body>
