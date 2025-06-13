@@ -235,7 +235,12 @@
   letter-spacing: 0.1em;
   color: #fdf8f2 !important;
   text-shadow: 1px 1px 2px #000;
-  z-index: 4;
+  z-index: 10; /* higher than other content */
+  background-color: rgba(0,0,0,0.2); /* subtle background so it stands out */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-radius: 8px;
+  white-space: nowrap;
 }
 
 /* Card number (Top Right) */
@@ -252,7 +257,7 @@
   padding: 0.2rem 0.4rem;
   border-radius: 6px;
   text-shadow: 1px 1px 2px #000;
-  z-index: 4;
+  z-index: 9;
 }
 
 /* Image is centered but *under* the background */
