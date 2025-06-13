@@ -190,6 +190,18 @@
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.2);
   }
 
+  /* Export-only overrides for html2canvas */
+.export-style .catch-caption,
+.export-style .catch-weight,
+.export-style .catch-location,
+.export-style .catch-date {
+  color: #000 !important;
+}
+
+  .export-style .catch-buttons {
+  display: none !important;
+}
+
   /* ==== File Input ==== */
   #photoInput {
     display: block;
@@ -915,6 +927,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       const buttons = clone.querySelector(".catch-buttons");
       if (buttons) buttons.remove();
 
+      clone.classList.add("export-style");
+
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
         const watermarkImg = new Image();
@@ -941,6 +955,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
           openInstagramModal();
           clone.remove();
+
+          clone.classList.remove("export-style");
         };
       });
     });
