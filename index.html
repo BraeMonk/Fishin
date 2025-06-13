@@ -190,15 +190,93 @@
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.2);
   }
 
-  /* Export-only overrides for html2canvas */
-.export-style .catch-caption,
+  /* === Export-style collectible trading card === */
+.export-style {
+  width: 420px;
+  height: 620px;
+  background: linear-gradient(135deg, #fdf8f2, #d7c9b8);
+  border: 8px solid #5a432e;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  font-family: 'Palatino Linotype', 'Georgia', serif;
+  position: relative;
+  padding: 1.2rem 1.4rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #2b1f0e !important;
+}
+
+/* Header / Title */
+.export-style .catch-caption {
+  font-size: 1.75rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 0.6rem;
+  border-bottom: 3px solid #5a432e;
+  padding-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #3c2f1c !important;
+  text-shadow: 1px 1px 0 #e3d6b8;
+}
+
+/* Card number in top-right corner */
+.export-style .card-number {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #5a432e;
+  letter-spacing: 0.15em;
+  opacity: 0.6;
+  font-family: monospace, monospace;
+}
+
+/* Photo styling */
+.export-style .catch-photo {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 5px solid #5a432e;
+  box-shadow: inset 0 0 8px #c1b497;
+  margin-bottom: 1rem;
+}
+
+/* Stats container */
+.export-style .catch-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 1px #f7f3e7;
+  color: #3c2f1c !important;
+  flex-grow: 1;
+}
+
+/* Individual stat items */
 .export-style .catch-weight,
 .export-style .catch-location,
 .export-style .catch-date {
-  color: #000 !important;
+  color: #4a3b2f !important;
 }
 
-  .export-style .catch-buttons {
+/* Rarity stars container */
+.export-style .catch-rarity {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 1.3rem;
+  color: #b4883e; /* golden star color */
+  letter-spacing: 0.1em;
+  user-select: none;
+}
+
+/* Hide buttons in export */
+.export-style .catch-buttons {
   display: none !important;
 }
 
@@ -820,6 +898,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   const location = document.getElementById("locationInput").value.trim();
   const weight = document.getElementById("weightInput").value.trim();
 
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file.type.startsWith("image/")) continue;
@@ -849,7 +928,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
   const photos = await getAllPhotosFromDB();
 
-  // Newest first
   photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   photos.forEach((photo) => {
@@ -899,7 +977,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     const buttonRow = document.createElement("div");
     buttonRow.className = "catch-buttons";
 
-    // Delete button — updated for IndexedDB
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.title = "Delete this photo";
@@ -911,7 +988,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     });
     buttonRow.appendChild(deleteButton);
 
-    // Download/share button
     const shareButton = document.createElement("button");
     shareButton.textContent = "Download";
     shareButton.title = "Download Catch Card";
@@ -922,12 +998,27 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       clone.style.top = '-10000px';
       clone.style.left = '0';
       clone.style.background = '#fff';
-      document.body.appendChild(clone);
 
+      // Remove buttons from clone
       const buttons = clone.querySelector(".catch-buttons");
       if (buttons) buttons.remove();
 
+      // Add export style class
       clone.classList.add("export-style");
+
+      // Add collectible elements *to clone* BEFORE html2canvas
+      const cardNumber = document.createElement('div');
+      cardNumber.className = 'card-number';
+      cardNumber.textContent = `#${String(photo.id).padStart(3, '0')}`;
+      clone.appendChild(cardNumber);
+
+      const rarity = document.createElement('div');
+      rarity.className = 'catch-rarity';
+      const starsCount = photo.rarity || 3;
+      rarity.textContent = '★'.repeat(starsCount) + '☆'.repeat(5 - starsCount);
+      clone.appendChild(rarity);
+
+      document.body.appendChild(clone);
 
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
@@ -939,7 +1030,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
           const size = 64;
           const padding = 10;
 
-          // Always bottom-right corner of the canvas
           ctx.drawImage(
             watermarkImg,
             canvas.width - size - padding,
@@ -955,7 +1045,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
           openInstagramModal();
           clone.remove();
-
           clone.classList.remove("export-style");
         };
       });
@@ -965,8 +1054,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     card.appendChild(buttonRow);
 
     gallery.appendChild(card);
-  }); // closes forEach
-} // ✅ closes renderPhotoPosts correctly
+  });
+}
 
 // ✅ Now openModal is correctly outside
 function openModal(src) {
