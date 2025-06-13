@@ -280,11 +280,10 @@
 
 .export-style .image-window {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 90%;
-  height: 60%;
-  transform: translate(-50%, -50%);
+  top: 100px;           /* below the caption */
+  left: 20px;
+  width: calc(100% - 40px);
+  height: 300px;         /* enough space without hitting info/rating */
   overflow: hidden;
   z-index: 1;
   display: flex;
