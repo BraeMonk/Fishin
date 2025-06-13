@@ -223,7 +223,7 @@
 /* Card Title (Top Center) */
 .export-style .catch-caption {
   position: absolute;
-  top: 6px; /* closer to top */
+  top: 8px; /* closer to top */
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.6rem;
@@ -280,7 +280,7 @@
 /* Info (Bottom Left) */
 .export-style .catch-info {
   position: absolute;
-  bottom: 50px;
+  bottom: 40px;
   left: 20px;
   display: flex;
   flex-direction: column;
@@ -1045,6 +1045,14 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
       // Add export style class
       clone.classList.add("export-style");
+
+      const caption = clone.querySelector('.catch-caption');
+      const info = clone.querySelector('.catch-info');
+
+      if (caption && info) {
+        info.removeChild(caption);        // remove caption from info container
+        clone.insertBefore(caption, info); // insert caption before info in clone
+      }
 
       // Add collectible elements *to clone* BEFORE html2canvas
       const cardNumber = document.createElement('div');
