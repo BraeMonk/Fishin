@@ -223,7 +223,7 @@
 /* Card Title (Top Center) */
 .export-style .catch-caption {
   position: absolute;
-  top: 16px;
+  top: 6px; /* closer to top */
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.6rem;
@@ -231,16 +231,17 @@
   text-align: center;
   border-bottom: 2px solid #5a432e;
   padding-bottom: 0.3rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #fdf8f2 !important;
   text-shadow: 1px 1px 2px #000;
-  z-index: 10; /* higher than other content */
-  background-color: rgba(0,0,0,0.2); /* subtle background so it stands out */
-  padding-left: 1rem;
-  padding-right: 1rem;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   white-space: nowrap;
+  margin: 0; /* remove any vertical margin */
 }
 
 /* Card number (Top Right) */
