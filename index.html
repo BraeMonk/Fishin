@@ -244,86 +244,88 @@
 
   /* ==== Tallies Tab ==== */
   #talliesTab h3 {
-    text-align: center;
-    color: #1b3c1a;
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 1rem;
-  }
+  text-align: center;
+  color: #1b3c1a; /* Deep forest green */
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 1rem;
+}
 
-  .fish-list {
-    padding: 1rem 0;
-  }
+.fish-list {
+  padding: 1rem 0;
+}
 
-  .fish-item {
-    background: #fff3dd;
-    border-radius: 14px;
-    padding: 1rem 1.3rem;
-    margin-bottom: 14px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.14);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
-    cursor: default;
-    user-select: none;
-  }
-  .fish-item:hover {
-    transform: scale(1.02);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-  }
+.fish-item {
+  background: #fff3dd;
+  border-radius: 14px;
+  padding: 1rem 1.3rem;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.14);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: default;
+  user-select: none;
+}
 
-  .fish-name {
-    font-weight: 700;
-    font-size: 1.18rem;
-    cursor: pointer;
-    padding-bottom: 5px;
-    border-bottom: 2px solid #b1a07a;
-    margin-bottom: 0.5rem;
-    color: #1b3c1a;
-    user-select: text;
-  }
+.fish-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
 
-  .fish-counter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 8px 0;
-  }
+.fish-name {
+  font-weight: 700;
+  font-size: 1.18rem;
+  cursor: pointer;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #b1a07a;
+  margin-bottom: 0.5rem;
+  color: #1b3c1a; /* Reverted to forest green */
+  user-select: text;
+}
 
-  .fish-counter button {
-    background: #4b2e1a;
-    color: #fff;
-    border: none;
-    padding: 7px 14px;
-    font-size: 1.25rem;
-    border-radius: 8px;
-    cursor: pointer;
-    min-width: 3rem;
-    line-height: 1;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-  .fish-counter button:hover {
-    background: #60391f;
-  }
+.fish-counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+}
 
-  .fish-counter span {
-    font-size: 1.35rem;
-    min-width: 35px;
-    text-align: center;
-    color: #4a4a4a;
-    font-weight: 700;
-    user-select: text;
-  }
+.fish-counter button {
+  background: #4b2e1a;
+  color: #fff;
+  border: none;
+  padding: 7px 14px;
+  font-size: 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 3rem;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
 
-  .fish-tips {
-    margin-top: 8px;
-    font-size: 1rem;
-    color: #4a4a4a;
-    display: none;
-    font-style: italic;
-    user-select: none;
-  }
+.fish-counter button:hover {
+  background: #60391f;
+}
+
+.fish-counter span {
+  font-size: 1.35rem;
+  min-width: 35px;
+  text-align: center;
+  color: #1b3c1a; /* Reverted from #4a4a4a to day mode green */
+  font-weight: 700;
+  user-select: text;
+}
+
+.fish-tips {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: #1b3c1a; /* Reverted from gray to green for visibility */
+  display: none;
+  font-style: italic;
+  user-select: none;
+}
 
   /* ==== Clear Button ==== */
   .clear-btn {
@@ -501,8 +503,14 @@
   }
 
   .dark-mode .fish-name {
-    border-color: #888;
+    color: #c0dcdc;
+    border-color: #c0dcdc;
   }
+
+  .dark-mode .fish-counter span {
+  color: #c0dcdc;      /* match fish tips */
+}
+
 
   .dark-mode .fish-counter button {
     background: #5e3c1f;
