@@ -783,7 +783,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 <header>Fishin' Buddy</header>
 
 <div id="tabs">
-  <button id="memoriesTabBtn" class="active">Memories</button>
+  <button id="memoriesTabBtn" class="active">Catch Cards</button>
   <button id="talliesTabBtn">Tallies</button>
   <button id="mapTabBtn">Map</button>
 </div>
@@ -794,11 +794,11 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   <input type="file" id="photoInput" class="button" accept="image/*" multiple style="margin-bottom: 1rem;" />
 
   <div class="form-fields">
-    <label for="captionInput">Caption:
+    <label for="captionInput">Name:
       <input type="text" id="captionInput" placeholder="Enter caption here" />
     </label>
 
-    <label for="locationInput">Location:
+    <label for="locationInput">Ability:
       <input type="text" id="locationInput" placeholder="Enter location here" />
     </label>
 
@@ -1059,7 +1059,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     buttonRow.appendChild(deleteButton);
 
     const shareButton = document.createElement("button");
-    shareButton.textContent = "Download";
+    shareButton.textContent = "Catch Card";
     shareButton.title = "Download Catch Card";
 
     shareButton.addEventListener("click", () => {
@@ -1087,6 +1087,10 @@ imageWrapper.appendChild(originalImg);
 
       const caption = clone.querySelector('.catch-caption');
       const info = clone.querySelector('.catch-info');
+
+      // Remove weight element from export
+      const weight = clone.querySelector('.catch-weight');
+      if (weight) weight.remove();
 
       if (caption && info) {
         info.removeChild(caption);        // remove caption from info container
