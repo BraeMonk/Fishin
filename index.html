@@ -204,7 +204,7 @@
   background-color: #000;
 }
 
-/* Background Overlay */
+/* Default Background */
 .export-style::before {
   content: "";
   position: absolute;
@@ -218,6 +218,23 @@
   opacity: 1;
   z-index: 2;
   pointer-events: none;
+}
+
+/* Rarity Background Overrides */
+.export-style.rarity-2::before {
+  background-image: url('./Background-2.png');
+}
+
+.export-style.rarity-3::before {
+  background-image: url('./Background-3.png');
+}
+
+.export-style.rarity-4::before {
+  background-image: url('./Background-4.png');
+}
+
+.export-style.rarity-5::before {
+  background-image: url('./Background-5.png');
 }
 
 /* Card Title (Top Center) */
@@ -1069,6 +1086,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       rarity.className = 'catch-rarity';
       rarity.textContent = '★'.repeat(starsCount) + '☆'.repeat(5 - starsCount);
       clone.appendChild(rarity);
+
+      clone.classList.add(`rarity-${starsCount}`);
 
       document.body.appendChild(clone);
 
