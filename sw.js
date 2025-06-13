@@ -1,11 +1,16 @@
-const CACHE_NAME = 'fish-tally-v22'; // Update this version when deploying new releases
+const CACHE_NAME = 'fish-tally-v23'; // Update this version when deploying new releases
 
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   './icon_192x192.png',
-  './icon_512x512.png'
+  './icon_512x512.png',
+  './Background.png',
+  './Background-2.png',
+  './Background-3.png',
+  './Background-4.png',
+  './Background-5.png'
 ];
 
 // Install: Cache app shell and immediately activate new service worker
