@@ -280,22 +280,22 @@
 
 .export-style .image-window {
   position: absolute;
-  top: 100px;           /* below the caption */
-  left: 20px;
-  width: calc(100% - 40px);
-  height: 300px;         /* enough space without hitting info/rating */
+  top: 130px; /* Adjust based on where your window starts */
+  left: 40px; /* Adjust based on horizontal position */
+  width: 340px; /* Card is 420px wide, so with 40px margin each side */
+  height: 280px; /* Adjust based on the window's vertical size */
   overflow: hidden;
-  z-index: 1;
+  z-index: 1; /* Below the frame but above the background */
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 12px; /* optional, only if the frame window is rounded */
 }
 
 .export-style .catch-photo {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Or use `contain` if you want full image visible */
   object-position: center;
   background: transparent;
   display: block;
