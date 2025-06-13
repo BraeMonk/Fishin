@@ -278,19 +278,27 @@
   z-index: 9;
 }
 
-.export-style .catch-photo {
+.export-style .image-window {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 700px;
   height: 1000px;
   transform: translate(-50%, -50%);
-  object-fit: cover;
-  background-color: transparent;
+  overflow: hidden;
   z-index: 1;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.export-style .catch-photo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: transparent;
+  display: block;
 }
 
 .export-style .catch-info {
@@ -1067,6 +1075,15 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
       // Add export style class
       clone.classList.add("export-style");
+
+      // Wrap exported photo in image window for controlled sizing
+const originalImg = clone.querySelector(".catch-photo");
+const imageWrapper = document.createElement("div");
+imageWrapper.className = "image-window";
+
+// Move image into new wrapper
+originalImg.parentNode.replaceChild(imageWrapper, originalImg);
+imageWrapper.appendChild(originalImg);
 
       const caption = clone.querySelector('.catch-caption');
       const info = clone.querySelector('.catch-info');
