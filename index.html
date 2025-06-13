@@ -215,7 +215,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/Background.png'); /* 👈 update this path */
+  background-image: url('./Background.png'); /* 👈 update this path */
   background-size: cover;
   background-position: center;
   opacity: 1; /* adjust brightness/transparency */
@@ -1050,7 +1050,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
         const watermarkImg = new Image();
-        watermarkImg.src = "icon_192x192.png";
+        watermarkImg.src = './icon_192x192.png';
 
         watermarkImg.onload = () => {
           ctx.globalAlpha = 1;
