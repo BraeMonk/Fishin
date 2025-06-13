@@ -918,7 +918,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       html2canvas(clone).then(canvas => {
         const ctx = canvas.getContext("2d");
         const watermarkImg = new Image();
-        watermarkImg.src = "/Fishin/icon_192x192.png";
+        watermarkImg.src = "./icon_192x192.png";
 
         watermarkImg.onload = () => {
           ctx.globalAlpha = 1;
