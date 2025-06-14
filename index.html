@@ -1042,112 +1042,114 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
     const shareButton = document.createElement("button");
     shareButton.textContent = "Catch Card";
-    shareButton.addEventListener("click", () => {
-      const clone = card.cloneNode(true);
-      clone.classList.add("export-style");
-      clone.style.width = "420px";
-      clone.style.height = "620px";
-
-      // Remove buttons from export
-      const buttons = clone.querySelector(".catch-buttons");
-      if (buttons) buttons.remove();
-
-      // Replace photo with image-window wrapper
-      const originalImg = clone.querySelector(".catch-photo");
-      const imageWrapper = document.createElement("div");
-      imageWrapper.className = "image-window";
-      imageWrapper.appendChild(originalImg.cloneNode(true));
-      originalImg.parentNode.replaceChild(imageWrapper, originalImg);
-
-      const insertedImg = imageWrapper.querySelector("img");
-      insertedImg.className = "catch-photo";
-      insertedImg.removeAttribute("style");
-
-      // Move caption above info
-      const caption = clone.querySelector(".catch-caption");
-      const info = clone.querySelector(".catch-info");
-      if (caption && info && info.contains(caption)) {
-        info.removeChild(caption);
-        clone.insertBefore(caption, info);
-      }
-
-      // Remove unneeded info
-      const weight = clone.querySelector(".catch-weight");
-      if (weight) weight.remove();
-      const date = clone.querySelector(".catch-date");
-      if (date) date.remove();
-
-      // Add card number
-      const cardNumber = document.createElement("div");
-      cardNumber.className = "card-number";
-      cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
-      clone.appendChild(cardNumber);
-
-      // Add rarity stars
-      const starsCount = Math.floor(Math.random() * 5) + 1;
-      const rarity = document.createElement("div");
-      rarity.className = "catch-rarity";
-      rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
-      clone.appendChild(rarity);
-      clone.classList.add(`rarity-${starsCount}`);
-
-      // Add to hidden rendering container
-      const renderContainer = document.createElement("div");
-      renderContainer.style.position = "absolute";
-      renderContainer.style.top = "-9999px";
-      renderContainer.style.left = "0";
-      renderContainer.style.width = "420px";
-      renderContainer.style.height = "620px";
-      renderContainer.appendChild(clone);
-      document.body.appendChild(renderContainer);
-
-      function renderCard() {
-        html2canvas(clone, {
-          width: clone.offsetWidth,
-          height: clone.offsetHeight,
-          scrollX: 0,
-          scrollY: 0,
-        }).then((canvas) => {
-          const ctx = canvas.getContext("2d");
-          const watermarkImg = new Image();
-          watermarkImg.src = "./icon_192x192.png";
-
-          watermarkImg.onload = () => {
-            ctx.globalAlpha = 1;
-            const size = 64;
-            const padding = 10;
-
-            ctx.drawImage(
-              watermarkImg,
-              canvas.width - size - padding,
-              canvas.height - size - padding,
-              size,
-              size
-            );
-
-            const link = document.createElement("a");
-            link.download = `catch-card-${photo.id}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-
-            renderContainer.remove();
-          };
-        });
-      }
-
-      const imgToLoad = clone.querySelector(".catch-photo");
-      if (imgToLoad && !imgToLoad.complete) {
-        imgToLoad.onload = renderCard;
-        imgToLoad.onerror = renderCard;
-      } else {
-        renderCard();
-      }
-    });
-
+    shareButton.addEventListener("click", () => exportCatchCard(card, photo));
     buttonRow.appendChild(shareButton);
+
     card.appendChild(buttonRow);
     gallery.appendChild(card);
   });
+}
+
+function exportCatchCard(card, photo) {
+  const clone = card.cloneNode(true);
+  clone.classList.add("export-style");
+  clone.style.width = "420px";
+  clone.style.height = "620px";
+
+  // Remove buttons from export
+  const buttons = clone.querySelector(".catch-buttons");
+  if (buttons) buttons.remove();
+
+  // Replace photo with image-window wrapper
+  const originalImg = clone.querySelector(".catch-photo");
+  const imageWrapper = document.createElement("div");
+  imageWrapper.className = "image-window";
+  imageWrapper.appendChild(originalImg.cloneNode(true));
+  originalImg.parentNode.replaceChild(imageWrapper, originalImg);
+
+  const insertedImg = imageWrapper.querySelector("img");
+  insertedImg.className = "catch-photo";
+  insertedImg.removeAttribute("style");
+
+  // Move caption above info
+  const caption = clone.querySelector(".catch-caption");
+  const info = clone.querySelector(".catch-info");
+  if (caption && info && info.contains(caption)) {
+    info.removeChild(caption);
+    clone.insertBefore(caption, info);
+  }
+
+  // Remove unneeded info
+  const weight = clone.querySelector(".catch-weight");
+  if (weight) weight.remove();
+  const date = clone.querySelector(".catch-date");
+  if (date) date.remove();
+
+  // Add card number
+  const cardNumber = document.createElement("div");
+  cardNumber.className = "card-number";
+  cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
+  clone.appendChild(cardNumber);
+
+  // Add rarity stars
+  const starsCount = Math.floor(Math.random() * 5) + 1;
+  const rarity = document.createElement("div");
+  rarity.className = "catch-rarity";
+  rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
+  clone.appendChild(rarity);
+  clone.classList.add(`rarity-${starsCount}`);
+
+  // Add to hidden rendering container
+  const renderContainer = document.createElement("div");
+  renderContainer.style.position = "absolute";
+  renderContainer.style.top = "-9999px";
+  renderContainer.style.left = "0";
+  renderContainer.style.width = "420px";
+  renderContainer.style.height = "620px";
+  renderContainer.appendChild(clone);
+  document.body.appendChild(renderContainer);
+
+  function renderCard() {
+    html2canvas(clone, {
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
+      scrollX: 0,
+      scrollY: 0,
+    }).then((canvas) => {
+      const ctx = canvas.getContext("2d");
+      const watermarkImg = new Image();
+      watermarkImg.src = "./icon_192x192.png";
+
+      watermarkImg.onload = () => {
+        ctx.globalAlpha = 1;
+        const size = 64;
+        const padding = 10;
+
+        ctx.drawImage(
+          watermarkImg,
+          canvas.width - size - padding,
+          canvas.height - size - padding,
+          size,
+          size
+        );
+
+        const link = document.createElement("a");
+        link.download = `catch-card-${photo.id}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        renderContainer.remove();
+      };
+    });
+  }
+
+  const imgToLoad = clone.querySelector(".catch-photo");
+  if (imgToLoad && !imgToLoad.complete) {
+    imgToLoad.onload = renderCard;
+    imgToLoad.onerror = renderCard;
+  } else {
+    renderCard();
+  }
 }
 
 // ✅ Now openModal is correctly outside
