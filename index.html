@@ -202,7 +202,6 @@
   font-family: 'Palatino Linotype', 'Georgia', serif;
   position: relative;
   box-sizing: border-box;
-  overflow: hidden;
   background-color: #000; /* force black background */
   background-clip: padding-box;
   padding: 0;
@@ -1063,6 +1062,7 @@ shareButton.addEventListener("click", () => {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
 
+  clone.style.visibility = 'hidden';
   clone.style.position = 'fixed';
 clone.style.top = '50%';
 clone.style.left = '50%';
@@ -1070,6 +1070,7 @@ clone.style.left = '50%';
 clone.style.height = '';
 clone.style.transform = 'translate(-50%, -50%)';  // perfectly center
 clone.style.background = 'transparent';   // preserve transparency if needed
+  
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
@@ -1128,34 +1129,43 @@ clone.style.background = 'transparent';   // preserve transparency if needed
   }
 
   function renderCard() {
-    html2canvas(clone).then(canvas => {
-      const ctx = canvas.getContext("2d");
-      const watermarkImg = new Image();
-      watermarkImg.src = './icon_192x192.png';
+  // Ensure clone has fixed size & no clipping
+  clone.style.width = "420px";
+  clone.style.height = "620px";
+  clone.style.overflow = "visible";
 
-      watermarkImg.onload = () => {
-        ctx.globalAlpha = 1;
-        const size = 64;
-        const padding = 10;
+  html2canvas(clone, {
+    width: clone.offsetWidth,
+    height: clone.offsetHeight,
+    scrollX: 0,
+    scrollY: 0,
+  }).then(canvas => {
+    const ctx = canvas.getContext("2d");
+    const watermarkImg = new Image();
+    watermarkImg.src = './icon_192x192.png';
 
-        ctx.drawImage(
-          watermarkImg,
-          canvas.width - size - padding,
-          canvas.height - size - padding,
-          size,
-          size
-        );
+    watermarkImg.onload = () => {
+      ctx.globalAlpha = 1;
+      const size = 64;
+      const padding = 10;
 
-        const link = document.createElement("a");
-        link.download = `catch-card-${photo.id}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+      ctx.drawImage(
+        watermarkImg,
+        canvas.width - size - padding,
+        canvas.height - size - padding,
+        size,
+        size
+      );
 
-        clone.remove();
-      };
-    });
-  }
-});
+      const link = document.createElement("a");
+      link.download = `catch-card-${photo.id}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      clone.remove();
+    };
+  });
+}
 
 // These stay OUTSIDE the click event
 buttonRow.appendChild(shareButton);
