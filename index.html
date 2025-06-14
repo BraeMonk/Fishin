@@ -291,9 +291,11 @@
 
 /* Info box near bottom */
 .export-style .catch-info {
-  position: relative;
-  max-width: 90%;
-  margin: 0 auto 40px;
+  position: absolute;                /* Changed from relative */
+  bottom: 70px;                      /* Adjust based on rarity position */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
   font-size: 1.05rem;
   font-weight: 600;
   color: #fdf8f2 !important;
