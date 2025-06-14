@@ -966,7 +966,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   const location = document.getElementById("locationInput").value.trim();
   const weight = document.getElementById("weightInput").value.trim();
 
-
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file.type.startsWith("image/")) continue;
@@ -980,9 +979,9 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       console.error("Failed to process file:", error);
     }
   }
-  }
+}
 
-  async function renderPhotoPosts() {
+async function renderPhotoPosts() {
   const gallery = document.getElementById("photoGallery");
   gallery.innerHTML = "";
 
@@ -1002,6 +1001,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
     const info = document.createElement("div");
     info.className = "catch-info";
+
     if (photo.caption) {
       const cap = document.createElement("p");
       cap.className = "catch-caption";
