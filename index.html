@@ -97,6 +97,10 @@
     font-size: 1rem;
     user-select: none;
     text-shadow: 0 0 3px #2a1a10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
   }
   .button:hover {
     background-color: #5a3a29;
@@ -106,6 +110,12 @@
   .button:active {
     box-shadow: inset 3px 3px 10px rgba(0, 0, 0, 0.75);
     transform: scale(0.96);
+  }
+
+  button .right-button{
+    display: flex;
+    gap: 0.75rem;
+    align-items: centre;
   }
 
   /* ==== Memories Feed Container ==== */
@@ -770,6 +780,9 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   <div id="darkModeContainer">
   <button id="darkModeToggle" class="button">🌙 Toggle Night Mode</button>
 </div>
+<div id="right-button">
+  <button id="exportToggle" class="button">Export: WebM</button>
+</div>
 
 <header>Fishin' Buddy</header>
 
@@ -835,8 +848,12 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/antimatter15/whammy/whammy.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js"></script>
+  <!-- Whammy.js -->
+<script src="https://cdn.jsdelivr.net/npm/whammy/whammy.js"></script>
 <script>
+  let useWhammy = true; // Set to true to use gif.js instead of Whammy
 
   function setupTabs() {
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
@@ -1148,19 +1165,21 @@ async function renderPhotoPosts() {
   });
 }
 
-// 1. Main export function (call this in your share button)
 function exportCatchCardSmart(card, photo) {
   const imgElem = card.querySelector(".catch-photo");
   const src = imgElem?.src || photo?.src || "";
 
-  // Simple GIF detection: data URI starting with gif OR src ends with .gif
   const isGif =
     src.startsWith("data:image/gif") ||
     /\.gif$/i.test(src) ||
     (photo.src && photo.src.includes("gif"));
 
   if (isGif) {
-    exportCatchCardAsVideo(card, photo);
+    if (useGifJs) {
+      exportCatchCardAsGif(card, photo); // <-- NEW FUNCTION using gif.js
+    } else {
+      exportCatchCardAsVideo(card, photo); // existing Whammy function
+    }
   } else {
     exportCatchCardAsImage(card, photo);
   }
@@ -1281,6 +1300,60 @@ function exportCatchCardAsImage(card, photo) {
   }
 }
 
+  async function exportCatchCardAsGif(card, photo) {
+  const clone = card.cloneNode(true);
+  clone.classList.add("export-style");
+  clone.style.width = "420px";
+  clone.style.height = "620px";
+
+  const renderContainer = document.createElement("div");
+  renderContainer.style.position = "absolute";
+  renderContainer.style.top = "-9999px";
+  renderContainer.style.left = "0";
+  renderContainer.style.width = "420px";
+  renderContainer.style.height = "620px";
+  renderContainer.appendChild(clone);
+  document.body.appendChild(renderContainer);
+
+  const gif = new GIF({
+    workers: 2,
+    quality: 10,
+    width: 420 * 2,
+    height: 620 * 2,
+    workerScript: "https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js",
+  });
+
+  const frameCount = 10;
+  const frameDelay = 100;
+
+  for (let i = 0; i < frameCount; i++) {
+    const canvas = await html2canvas(clone, {
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
+      scrollX: 0,
+      scrollY: 0,
+      backgroundColor: null,
+      scale: 2,
+    });
+
+    gif.addFrame(canvas, { delay: frameDelay });
+
+    await new Promise((res) => setTimeout(res, frameDelay));
+  }
+
+  gif.on("finished", function(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `catch-card-${photo.id}.gif`;
+    a.click();
+    URL.revokeObjectURL(url);
+    renderContainer.remove();
+  });
+
+  gif.render();
+}
+
 async function exportCatchCard(card, photo) {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
@@ -1397,57 +1470,75 @@ async function exportCatchCard(card, photo) {
     } finally {
       renderContainer.remove();
     }
-  } else {
-    // Animated GIF export path — export as WebM video using Whammy.js
+    } else {
+    // Animated GIF export path — WebM via Whammy.js OR GIF via gif.js
     try {
-      // Rough simulation of animation: capture 10 frames, 100ms apart
-      const frames = [];
-      const frameCount = 10;
-      const frameDelay = 100;
+      if (useWhammy) {
+        // === Whammy path ===
+        const encoder = new Whammy.Video(10); // 10 fps
 
-      const encoder = new Whammy.Video(1000 / frameDelay);
+        for (let i = 0; i < 10; i++) {
+          const canvasFrame = await html2canvas(clone, {
+            width: clone.offsetWidth,
+            height: clone.offsetHeight,
+            scrollX: 0,
+            scrollY: 0,
+            backgroundColor: null,
+            scale: 2,
+          });
 
-      for (let i = 0; i < frameCount; i++) {
-        // html2canvas only captures current frame of GIF (likely first frame),
-        // so the animation won't be smooth without GIF frame parsing
-        // but this simulates animation by waiting between frames
+          encoder.add(canvasFrame);
+          await new Promise((r) => setTimeout(r, 100));
+        }
 
-        // capture canvas
-        // higher resolution scale for quality
-        // You can experiment with scale and width/height
-        // to balance quality and speed
-        const canvasFrame = await html2canvas(clone, {
-          width: clone.offsetWidth,
-          height: clone.offsetHeight,
-          scrollX: 0,
-          scrollY: 0,
-          backgroundColor: null,
-          scale: 2,
+        const output = encoder.compile();
+        const url = URL.createObjectURL(output);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `catch-card-${photo.id}.webm`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+      } else {
+        // === gif.js path ===
+        const gif = new GIF({
+          workers: 2,
+          quality: 10,
+          width: 420 * 2,
+          height: 620 * 2,
         });
 
-        encoder.add(canvasFrame);
+        for (let i = 0; i < 10; i++) {
+          const canvasFrame = await html2canvas(clone, {
+            width: clone.offsetWidth,
+            height: clone.offsetHeight,
+            scrollX: 0,
+            scrollY: 0,
+            backgroundColor: null,
+            scale: 2,
+          });
 
-        // Wait for next frame delay
-        await new Promise((r) => setTimeout(r, frameDelay));
+          gif.addFrame(canvasFrame, { delay: 100 });
+          await new Promise((r) => setTimeout(r, 100));
+        }
+
+        gif.on("finished", function (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `catch-card-${photo.id}.gif`;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+
+        gif.render();
       }
-
-      const output = encoder.compile();
-
-      // Create download link
-      const url = URL.createObjectURL(output);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `catch-card-${photo.id}.webm`;
-      a.click();
-
-      URL.revokeObjectURL(url);
     } catch (e) {
-      alert("Failed to export animated video: " + e.message);
+      alert("Failed to export animation: " + e.message);
     } finally {
       renderContainer.remove();
     }
   }
-}
   
 // ✅ Now openModal is correctly outside
 function openModal(src) {
@@ -1701,6 +1792,23 @@ window.onload = async function () {
         updateMapTiles(isDark);
       });
     }
+
+    // === Export Method Toggle ===
+const exportToggle = document.getElementById("exportToggle");
+if (exportToggle) {
+  // Get saved preference or default to true (use Whammy)
+  let useWhammy = localStorage.getItem("useWhammy");
+  useWhammy = useWhammy === null ? true : useWhammy === "true";
+
+  // Set initial button text
+  exportToggle.textContent = useWhammy ? "Export: WebM" : "Export: GIF";
+
+  exportToggle.addEventListener("click", () => {
+    useWhammy = !useWhammy;
+    localStorage.setItem("useWhammy", useWhammy);
+    exportToggle.textContent = useWhammy ? "Export: WebM" : "Export: GIF";
+  });
+}
 
     // === Upload Button ===
     const uploadBtn = document.getElementById("uploadButton");
