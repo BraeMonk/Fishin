@@ -852,10 +852,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   <!-- Whammy.js -->
 <script src="https://cdn.jsdelivr.net/npm/whammy/whammy.js"></script>
 <script>
-  let useWhammy = false;
-  let useGifJs = true;
   
-
   function setupTabs() {
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
   const talliesTabBtn = document.getElementById("talliesTabBtn");
@@ -1772,6 +1769,7 @@ function updateMapTiles(isDarkMode) {
   }
 }
 
+  let useWhammy = true;
 // ===== Main Window Load =====
 window.onload = async function () {
   try {
@@ -1801,11 +1799,11 @@ window.onload = async function () {
       });
     }
 
-    //// === Export Method Toggle ===
-const exportToggle = document.getElementById("exportToggle");
-if (exportToggle) {
-  // Load saved preference or default to true (use Whammy)
-  let saved = localStorage.getItem("useWhammy");
+    const exportToggle = document.getElementById("exportToggle");
+  if (!exportToggle) return;
+
+  // Load saved preference from localStorage, fallback to true
+  const saved = localStorage.getItem("useWhammy");
   useWhammy = saved === null ? true : saved === "true";
 
   // Set initial button text
@@ -1816,7 +1814,7 @@ if (exportToggle) {
     localStorage.setItem("useWhammy", useWhammy);
     exportToggle.textContent = useWhammy ? "Export: WebM" : "Export: GIF";
   });
-}
+};
 
     // === Upload Button ===
     const uploadBtn = document.getElementById("uploadButton");
