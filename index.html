@@ -1070,9 +1070,11 @@ async function renderPhotoPosts() {
 
     shareButton.addEventListener("click", () => {
       const clone = card.cloneNode(true);
-      clone.style.position = 'fixed';
-      clone.style.top = '-10000px';
+      clone.style.position = 'absolute';
+      clone.style.top = '0';
       clone.style.left = '0';
+      clone.style.opacity = '0'; // invisible but still in flow
+      clone.style.pointerEvents = 'none'; // don’t block clicks
       clone.style.background = '#000';
 
       const buttons = clone.querySelector(".catch-buttons");
