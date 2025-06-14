@@ -1077,7 +1077,11 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   shareButton.textContent = "Catch Card";
   shareButton.addEventListener("click", () => {
     // Automatically pick the right export method based on file type
-    const isGif = photo.src.toLowerCase().endsWith(".gif");
+    const isGif =
+  (photo.type && photo.type === "image/gif") ||
+  (photo.name && photo.name.toLowerCase().endsWith(".gif")) ||
+  photo.src.toLowerCase().includes(".gif") ||
+  photo.src.toLowerCase().includes("image/gif");
     if (isGif) {
       exportCatchCardAsGif(card, photo); // animated export
     } else {
