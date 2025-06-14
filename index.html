@@ -959,8 +959,6 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   const location = document.getElementById("locationInput").value.trim();
   const weight = document.getElementById("weightInput").value.trim();
 
-  let anyUploaded = false; // Track if anything was uploaded
-
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file.type.startsWith("image/")) continue;
@@ -969,18 +967,33 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       const dataURL = await readFileAsDataURL(file);
       const timestamp = new Date().toISOString();
 
-      await addPhotoToDB({ src: dataURL, caption, location, weight, timestamp });
+      const photoData = {
+        src: dataURL,
+        caption,
+        location,
+        weight,
+        timestamp,
+      };
 
-      anyUploaded = true; // Mark at least one successful upload
+      // 👇 Save to DB and retrieve assigned ID
+      const id = await addPhotoToDB(photoData);
+
+      // 👇 Add the ID to the local object
+      photoData.id = id;
+
+      // 👇 Render immediately to top of gallery
+      renderSinglePhoto(photoData);
+
     } catch (error) {
       console.error("Failed to process file:", error);
     }
   }
 
-  // Only refresh photo gallery if something was actually uploaded
-  if (anyUploaded) {
-    await renderPhotoPosts();
-  }
+  // Optional: Clear form
+  input.value = "";
+  document.getElementById("captionInput").value = "";
+  document.getElementById("locationInput").value = "";
+  document.getElementById("weightInput").value = "";
 }
 
 async function renderPhotoPosts() {
@@ -1172,6 +1185,72 @@ clone.insertBefore(bg, clone.firstChild);
   }
 }
 
+  function renderSinglePhoto(photo) {
+  const gallery = document.getElementById("photoGallery");
+
+  const card = document.createElement("div");
+  card.className = "catch-card";
+
+  const img = document.createElement("img");
+  img.src = photo.src;
+  img.alt = photo.caption || "Catch photo";
+  img.className = "catch-photo";
+  img.addEventListener("click", () => openModal(photo.src));
+  card.appendChild(img);
+
+  const info = document.createElement("div");
+  info.className = "catch-info";
+
+  if (photo.caption) {
+    const cap = document.createElement("p");
+    cap.className = "catch-caption";
+    cap.textContent = photo.caption;
+    info.appendChild(cap);
+  }
+  if (photo.location) {
+    const loc = document.createElement("p");
+    loc.className = "catch-location";
+    loc.textContent = "Ability: " + photo.location;
+    info.appendChild(loc);
+  }
+  if (photo.timestamp) {
+    const dt = document.createElement("p");
+    dt.className = "catch-date";
+    dt.textContent = "Caught: " + new Date(photo.timestamp).toLocaleString();
+    info.appendChild(dt);
+  }
+  if (photo.weight) {
+    const wt = document.createElement("p");
+    wt.className = "catch-weight";
+    wt.textContent = "Weight: " + photo.weight + " lbs";
+    info.appendChild(wt);
+  }
+  card.appendChild(info);
+
+  const buttonRow = document.createElement("div");
+  buttonRow.className = "catch-buttons";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener("click", async () => {
+    if (confirm("Delete this photo?")) {
+      await deletePhotoFromDB(photo.id);
+      await renderPhotoPosts();
+    }
+  });
+  buttonRow.appendChild(deleteButton);
+
+  const shareButton = document.createElement("button");
+  shareButton.textContent = "Catch Card";
+  shareButton.addEventListener("click", () => exportCatchCard(card, photo));
+  buttonRow.appendChild(shareButton);
+
+  card.appendChild(buttonRow);
+
+  // 👇 Add new photo to the top of the gallery
+  gallery.prepend(card);
+}
+  
 // ✅ Now openModal is correctly outside
 function openModal(src) {
   const modal = document.getElementById("imageModal");
