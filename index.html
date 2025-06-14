@@ -1072,14 +1072,14 @@ shareButton.addEventListener("click", () => {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
 
-  // Clean styling to avoid layout bugs
-  clone.style.position = 'absolute';
-  clone.style.top = '0';
-  clone.style.left = '0';
-  clone.style.opacity = '1';
-  clone.style.pointerEvents = 'auto';
-  clone.style.background = '#000';
-
+  clone.style.position = 'fixed';          // fix it relative to viewport
+clone.style.top = '-9999px';             // way offscreen vertically
+clone.style.left = '-9999px';            // way offscreen horizontally
+clone.style.width = '420px';              // match your card width exactly
+clone.style.height = '620px';             // match your card height exactly
+clone.style.opacity = '1';                // fully visible inside that offscreen spot
+clone.style.pointerEvents = 'none';       // no mouse interactions
+clone.style.background = '#000';          // black background if needed
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
