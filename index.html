@@ -201,7 +201,7 @@
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: #000;
+  background-color: transparent;
 }
 
 /* Default Background */
@@ -283,10 +283,10 @@
 
 .export-style .image-window {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 85%; /* or 100% if you want full bleed */
-  height: 70%; /* adjust as needed */
+  top: 50%;  /* center vertically */
+  left: 50%; /* center horizontally */
+  width: 85%; /* about 357px (85% of 420) */
+  height: 70%; /* about 434px (70% of 620) */
   transform: translate(-50%, -50%);
   overflow: hidden;
 
@@ -296,13 +296,14 @@
 
   background: transparent;
   z-index: 1;
+  border-radius: 10px; /* optional, for styling */
 }
 
 .export-style .catch-photo {
   width: 100%;
   height: 100%;
-  object-fit: cover;        /* ensures crop + scale */
-  object-position: center;  /* centers image */
+  object-fit: contain;  /* Use contain for full image visibility */
+  object-position: center;
   display: block;
   z-index: 1;
 }
@@ -1079,7 +1080,7 @@ clone.style.width = '420px';              // match your card width exactly
 clone.style.height = '620px';             // match your card height exactly
 clone.style.opacity = '1';                // fully visible inside that offscreen spot
 clone.style.pointerEvents = 'none';       // no mouse interactions
-clone.style.background = '#000';          // black background if needed
+clone.style.background = 'transparent';          // black background if needed
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
