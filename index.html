@@ -1076,15 +1076,16 @@ shareButton.addEventListener("click", () => {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
 
-  clone.style.position = 'absolute';
-clone.style.top = '0';
-clone.style.left = '0';
-clone.style.visibility = 'hidden';            // way offscreen horizontally
-clone.style.width = '420px';              // match your card width exactly
-clone.style.height = '620px';             // match your card height exactly
-clone.style.opacity = '1';                // fully visible inside that offscreen spot
-clone.style.pointerEvents = 'none';       // no mouse interactions
-clone.style.background = 'transparent';          // black background if needed
+  clone.style.position = 'fixed';
+clone.style.top = '50%';
+clone.style.left = '50%';
+clone.style.transform = 'translate(-50%, -50%)';  // perfectly center
+clone.style.width = '420px';
+clone.style.height = '620px';
+clone.style.zIndex = '9999';              // ensure it's above everything
+clone.style.opacity = '1';
+clone.style.pointerEvents = 'none';       // ignore mouse events
+clone.style.background = 'transparent';   // preserve transparency if needed
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
