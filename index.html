@@ -1793,12 +1793,12 @@ window.onload = async function () {
       });
     }
 
-    // === Export Method Toggle ===
+    //// === Export Method Toggle ===
 const exportToggle = document.getElementById("exportToggle");
 if (exportToggle) {
-  // Get saved preference or default to true (use Whammy)
-  let useWhammy = localStorage.getItem("useWhammy");
-  useWhammy = useWhammy === null ? true : useWhammy === "true";
+  // Load saved preference or default to true (use Whammy)
+  let saved = localStorage.getItem("useWhammy");
+  useWhammy = saved === null ? true : saved === "true";
 
   // Set initial button text
   exportToggle.textContent = useWhammy ? "Export: WebM" : "Export: GIF";
