@@ -212,7 +212,8 @@
 /* Background image stays full size and covers container */
 .export-style::before {
   content: "";
-  position: absolute;
+  position: relative;
+  overflow: visible;
   top: 0;
   left: 0;
   width: 100%;
@@ -286,14 +287,15 @@
 
 /* Flexible image container */
 .export-style .image-window {
-  position: relative;  /* relative inside card */
+  position: absolute;  /* relative inside card */
   width: 85%;          /* relative to card width */
-  max-height: 60vh;    /* limit height relative to viewport */
+  height: 70%;    /* limit height relative to viewport */
   margin: 80px auto 20px; /* push down from caption, center horizontally */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 0;
+  transform: none;
 }
 
 /* Image scales within container */
@@ -1060,16 +1062,18 @@ shareButton.title = "Download Catch Card";
 
 shareButton.addEventListener("click", () => {
   const clone = card.cloneNode(true);
-  clone.classList.add("export-style");
+clone.classList.add("export-style");
 
-  clone.style.visibility = 'hidden';
-  clone.style.position = 'fixed';
-clone.style.top = '50%';
-clone.style.left = '50%';
-  clone.style.width = '';
-clone.style.height = '';
-clone.style.transform = 'translate(-50%, -50%)';  // perfectly center
-clone.style.background = 'transparent';   // preserve transparency if needed
+clone.style.position = 'relative'; // not fixed
+clone.style.top = '';
+clone.style.left = '';
+clone.style.transform = '';
+clone.style.visibility = 'hidden';
+
+clone.style.width = '420px';
+clone.style.height = '620px';
+
+document.body.appendChild(clone);
   
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
