@@ -209,23 +209,18 @@
   z-index: 0;
 }
 
-/* Background image stays full size and covers container */
-.export-style::before {
-  content: "";
-  position: relative;
-  overflow: visible;
+/* Real background layer as DOM element */
+.export-style .card-background {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('./Background.png');
   background-size: cover;
   background-position: center;
-  opacity: 1;
-  z-index: 2;
-  pointer-events: none;
   border-radius: 18px;
-  box-shadow: none;
+  z-index: 1;
+  pointer-events: none;
 }
 
 /* Rarity backgrounds override */
@@ -1056,6 +1051,23 @@ function exportCatchCard(card, photo) {
   clone.classList.add("export-style");
   clone.style.width = "420px";
   clone.style.height = "620px";
+
+  // Add real DOM background based on rarity
+const bg = document.createElement("div");
+bg.className = "card-background";
+
+const backgroundMap = {
+  1: "./Background.png",
+  2: "./Background-2.png",
+  3: "./Background-3.png",
+  4: "./Background-4.png",
+  5: "./Background-5.png"
+};
+
+bg.style.backgroundImage = `url('${backgroundMap[starsCount]}')`;
+
+// Insert background as first child
+clone.insertBefore(bg, clone.firstChild);
 
   // Remove buttons from export
   const buttons = clone.querySelector(".catch-buttons");
