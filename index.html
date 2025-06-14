@@ -298,7 +298,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   z-index: 0;
 }
 
@@ -1082,9 +1081,7 @@ clone.style.left = '50%';
 clone.style.transform = 'translate(-50%, -50%)';  // perfectly center
 clone.style.width = '420px';
 clone.style.height = '620px';
-clone.style.zIndex = '9999';              // ensure it's above everything
-clone.style.opacity = '1';
-clone.style.pointerEvents = 'none';       // ignore mouse events
+clone.style.zIndex = '9999';
 clone.style.background = 'transparent';   // preserve transparency if needed
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
