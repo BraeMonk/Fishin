@@ -959,6 +959,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   const location = document.getElementById("locationInput").value.trim();
   const weight = document.getElementById("weightInput").value.trim();
 
+  let anyUploaded = false; // Track if anything was uploaded
+
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     if (!file.type.startsWith("image/")) continue;
@@ -968,9 +970,16 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       const timestamp = new Date().toISOString();
 
       await addPhotoToDB({ src: dataURL, caption, location, weight, timestamp });
+
+      anyUploaded = true; // Mark at least one successful upload
     } catch (error) {
       console.error("Failed to process file:", error);
     }
+  }
+
+  // Only refresh photo gallery if something was actually uploaded
+  if (anyUploaded) {
+    await renderPhotoPosts();
   }
 }
 
