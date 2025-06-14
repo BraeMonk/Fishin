@@ -995,7 +995,6 @@ async function renderPhotoPosts() {
   gallery.innerHTML = "";
 
   const photos = await getAllPhotosFromDB();
-
   photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
   photos.forEach((photo) => {
@@ -1057,124 +1056,120 @@ async function renderPhotoPosts() {
     buttonRow.appendChild(deleteButton);
 
     const shareButton = document.createElement("button");
-shareButton.textContent = "Catch Card";
-shareButton.title = "Download Catch Card";
+    shareButton.textContent = "Catch Card";
+    shareButton.title = "Download Catch Card";
 
-shareButton.addEventListener("click", () => {
-  const clone = card.cloneNode(true);
-clone.classList.add("export-style");
+    shareButton.addEventListener("click", () => {
+      const clone = card.cloneNode(true);
+      clone.classList.add("export-style");
 
-clone.style.position = 'relative'; // not fixed
-clone.style.top = '';
-clone.style.left = '';
-clone.style.transform = '';
-clone.style.visibility = 'hidden';
+      // Clean styling to prevent visual glitches
+      clone.style.position = "absolute";
+      clone.style.left = "-9999px"; // Off-screen to avoid flash
+      clone.style.top = "0";
+      clone.style.width = "420px";
+      clone.style.height = "620px";
+      clone.style.visibility = "hidden";
 
-clone.style.width = '420px';
-clone.style.height = '620px';
+      // Remove buttons from export
+      const buttons = clone.querySelector(".catch-buttons");
+      if (buttons) buttons.remove();
 
-document.body.appendChild(clone);
-  
-  // Remove buttons
-  const buttons = clone.querySelector(".catch-buttons");
-  if (buttons) buttons.remove();
+      // Replace photo with image-window wrapper
+      const originalImg = clone.querySelector(".catch-photo");
+      const imageWrapper = document.createElement("div");
+      imageWrapper.className = "image-window";
+      imageWrapper.appendChild(originalImg.cloneNode(true));
+      originalImg.parentNode.replaceChild(imageWrapper, originalImg);
 
-  // Replace image with proper image window
-  const originalImg = clone.querySelector(".catch-photo");
-  const imageWrapper = document.createElement("div");
-  imageWrapper.className = "image-window";
-  imageWrapper.appendChild(originalImg.cloneNode(true)); // clone instead of move
-  const originalParent = originalImg.parentNode;
-  originalParent.replaceChild(imageWrapper, originalImg);
+      const insertedImg = imageWrapper.querySelector("img");
+      insertedImg.className = "catch-photo";
+      insertedImg.removeAttribute("style");
 
-  // Fix class and remove any inline image styling
-  const insertedImg = imageWrapper.querySelector("img");
-  insertedImg.className = "catch-photo";
-  insertedImg.removeAttribute("style");
+      // Move caption above info
+      const caption = clone.querySelector(".catch-caption");
+      const info = clone.querySelector(".catch-info");
+      if (caption && info && info.contains(caption)) {
+        info.removeChild(caption);
+        clone.insertBefore(caption, info);
+      }
 
-  // Move caption above info
-  const caption = clone.querySelector(".catch-caption");
-  const info = clone.querySelector(".catch-info");
-  if (caption && info && info.contains(caption)) {
-    info.removeChild(caption);
-    clone.insertBefore(caption, info);
-  }
+      // Remove unneeded info
+      const weight = clone.querySelector(".catch-weight");
+      if (weight) weight.remove();
+      const date = clone.querySelector(".catch-date");
+      if (date) date.remove();
 
-  // Remove unwanted info
-  const weight = clone.querySelector(".catch-weight");
-  if (weight) weight.remove();
-  const date = clone.querySelector(".catch-date");
-  if (date) date.remove();
+      // Add card number
+      const cardNumber = document.createElement("div");
+      cardNumber.className = "card-number";
+      cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
+      clone.appendChild(cardNumber);
 
-  // Add card number
-  const cardNumber = document.createElement('div');
-  cardNumber.className = 'card-number';
-  cardNumber.textContent = `#${String(photo.id).padStart(3, '0')}`;
-  clone.appendChild(cardNumber);
+      // Add random rarity stars
+      const starsCount = Math.floor(Math.random() * 5) + 1;
+      const rarity = document.createElement("div");
+      rarity.className = "catch-rarity";
+      rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
+      clone.appendChild(rarity);
+      clone.classList.add(`rarity-${starsCount}`);
 
-  // Add random rarity stars
-  const starsCount = Math.floor(Math.random() * 5) + 1;
-  const rarity = document.createElement('div');
-  rarity.className = 'catch-rarity';
-  rarity.textContent = '★'.repeat(starsCount) + '☆'.repeat(5 - starsCount);
-  clone.appendChild(rarity);
-  clone.classList.add(`rarity-${starsCount}`);
+      // Add to hidden rendering container
+      const renderContainer = document.createElement("div");
+      renderContainer.style.position = "absolute";
+      renderContainer.style.top = "-9999px";
+      renderContainer.style.left = "0";
+      renderContainer.style.width = "420px";
+      renderContainer.style.height = "620px";
+      renderContainer.appendChild(clone);
+      document.body.appendChild(renderContainer);
 
-  // Append to DOM invisibly
-  document.body.appendChild(clone);
+      function renderCard() {
+        html2canvas(clone, {
+          width: clone.offsetWidth,
+          height: clone.offsetHeight,
+          scrollX: 0,
+          scrollY: 0,
+        }).then((canvas) => {
+          const ctx = canvas.getContext("2d");
+          const watermarkImg = new Image();
+          watermarkImg.src = "./icon_192x192.png";
 
-  // Wait for image to load before rendering
-  const imgToLoad = clone.querySelector(".catch-photo");
-  if (imgToLoad && !imgToLoad.complete) {
-    imgToLoad.onload = renderCard;
-    imgToLoad.onerror = renderCard;
-  } else {
-    renderCard();
-  }
+          watermarkImg.onload = () => {
+            ctx.globalAlpha = 1;
+            const size = 64;
+            const padding = 10;
 
-  function renderCard() {
-  // Ensure clone has fixed size & no clipping
-  clone.style.width = "420px";
-  clone.style.height = "620px";
-  clone.style.overflow = "visible";
+            ctx.drawImage(
+              watermarkImg,
+              canvas.width - size - padding,
+              canvas.height - size - padding,
+              size,
+              size
+            );
 
-  html2canvas(clone, {
-    width: clone.offsetWidth,
-    height: clone.offsetHeight,
-    scrollX: 0,
-    scrollY: 0,
-  }).then(canvas => {
-    const ctx = canvas.getContext("2d");
-    const watermarkImg = new Image();
-    watermarkImg.src = './icon_192x192.png';
+            const link = document.createElement("a");
+            link.download = `catch-card-${photo.id}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
 
-    watermarkImg.onload = () => {
-      ctx.globalAlpha = 1;
-      const size = 64;
-      const padding = 10;
+            renderContainer.remove();
+          };
+        });
+      }
 
-      ctx.drawImage(
-        watermarkImg,
-        canvas.width - size - padding,
-        canvas.height - size - padding,
-        size,
-        size
-      );
+      const imgToLoad = clone.querySelector(".catch-photo");
+      if (imgToLoad && !imgToLoad.complete) {
+        imgToLoad.onload = renderCard;
+        imgToLoad.onerror = renderCard;
+      } else {
+        renderCard();
+      }
+    });
 
-      const link = document.createElement("a");
-      link.download = `catch-card-${photo.id}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-
-      clone.remove();
-    };
-  });
-}
-
-// These stay OUTSIDE the click event
-buttonRow.appendChild(shareButton);
-card.appendChild(buttonRow);
-gallery.appendChild(card);
+    buttonRow.appendChild(shareButton);
+    card.appendChild(buttonRow);
+    gallery.appendChild(card);
   });
 }
 
