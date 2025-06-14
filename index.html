@@ -201,7 +201,11 @@
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
-  background-color: transparent;
+
+  background-color: #000; /* force black background */
+  background-clip: padding-box;
+  padding: 0; /* remove any default padding */
+  margin: 0;  /* ensure no offset */
 }
 
 /* Default Background */
@@ -216,7 +220,7 @@
   background-size: cover;
   background-position: center;
   opacity: 1;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
 }
 
