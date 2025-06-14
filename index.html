@@ -948,6 +948,84 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     });
   }
 
+  function renderSinglePhoto(photo) {
+  const gallery = document.getElementById("photoGallery");
+
+  const card = document.createElement("div");
+  card.className = "catch-card";
+
+  const img = document.createElement("img");
+  img.src = photo.src;
+  img.alt = photo.caption || "Catch photo";
+  img.className = "catch-photo";
+  img.addEventListener("click", () => openModal(photo.src));
+  card.appendChild(img);
+
+  const info = document.createElement("div");
+  info.className = "catch-info";
+
+  if (photo.caption) {
+    const cap = document.createElement("p");
+    cap.className = "catch-caption";
+    cap.textContent = photo.caption;
+    info.appendChild(cap);
+  }
+
+  if (photo.location) {
+    const loc = document.createElement("p");
+    loc.className = "catch-location";
+    loc.textContent = "Ability: " + photo.location;
+    info.appendChild(loc);
+  }
+
+  if (photo.timestamp) {
+    const dt = document.createElement("p");
+    dt.className = "catch-date";
+    dt.textContent = "Caught: " + new Date(photo.timestamp).toLocaleString();
+    info.appendChild(dt);
+  }
+
+  if (photo.weight) {
+    const wt = document.createElement("p");
+    wt.className = "catch-weight";
+    wt.textContent = "Weight: " + photo.weight + " lbs";
+    info.appendChild(wt);
+  }
+
+  card.appendChild(info);
+
+  const buttonRow = document.createElement("div");
+  buttonRow.className = "catch-buttons";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener("click", async () => {
+    if (confirm("Delete this photo?")) {
+      await deletePhotoFromDB(photo.id);
+      await renderPhotoPosts(); // Refresh gallery
+    }
+  });
+  buttonRow.appendChild(deleteButton);
+
+  const shareButton = document.createElement("button");
+  shareButton.textContent = "Catch Card";
+  shareButton.addEventListener("click", () => {
+    // Automatically pick the right export method based on file type
+    const isGif = photo.src.toLowerCase().endsWith(".gif");
+    if (isGif) {
+      exportCatchCardAsVideo(card, photo); // animated export
+    } else {
+      exportCatchCard(card, photo); // static PNG export
+    }
+  });
+  buttonRow.appendChild(shareButton);
+
+  card.appendChild(buttonRow);
+
+  // Show newest first
+  gallery.prepend(card);
+}
+
   async function handleUpload() {
   const input = document.getElementById("photoInput");
   const files = input.files;
