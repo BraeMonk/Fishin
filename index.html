@@ -1059,7 +1059,7 @@ async function renderPhotoPosts() {
 
     const shareButton = document.createElement("button");
     shareButton.textContent = "Catch Card";
-    shareButton.addEventListener("click", () => exportCatchCard(card, photo));
+    shareButton.addEventListener("click", () => exportCatchCardSmart(card, photo));
     buttonRow.appendChild(shareButton);
 
     card.appendChild(buttonRow);
