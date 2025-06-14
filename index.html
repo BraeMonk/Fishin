@@ -234,13 +234,11 @@
 }
 
 .export-style.rarity-5::before {
-  background-image: url('./Background-5.png');
-}
+  background-image: url('./Background-5') 
 
-/* Card Title (Top Center) */
-.export-style .catch-caption {
+    .export-style .catch-caption {
   position: absolute;
-  top: 50px; /* closer to top */
+  top: 50px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 1.6rem;
@@ -257,8 +255,12 @@
   z-index: 10;
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  white-space: nowrap;
-  margin: 0; /* remove any vertical margin */
+  margin: 0;
+
+  /* Added for wrapping and sizing */
+  max-width: 90%;  /* Adjust as needed to stay inside card */
+  white-space: normal; /* Allows line breaks */
+  word-wrap: break-word; /* Ensures long words break */
 }
 
 /* Card number (Top Right) */
