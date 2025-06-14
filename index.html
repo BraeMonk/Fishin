@@ -1200,14 +1200,13 @@ function exportCatchCardAsImage(card, photo) {
   }
 }
 
-// 3. Export as video for GIFs — requires Whammy.js or your own encoder
-async function exportCatchCardAsVideo(card, photo) {
-  // Clone and setup card same as image export for styling
+async function exportCatchCard(card, photo) {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
   clone.style.width = "420px";
   clone.style.height = "620px";
 
+  // Background & rarity
   const bg = document.createElement("div");
   bg.className = "card-background";
   const backgroundMap = {
@@ -1215,9 +1214,10 @@ async function exportCatchCardAsVideo(card, photo) {
     2: "./Background-2.png",
     3: "./Background-3.png",
     4: "./Background-4.png",
-    5: "./Background-5.png"
+    5: "./Background-5.png",
   };
-  const starsCount = Math.floor(Math.random() * 5) + 1;
+  // For consistent rarity, use photo.rarity or fallback random
+  const starsCount = photo.rarity || Math.floor(Math.random() * 5) + 1;
   const rarity = document.createElement("div");
   rarity.className = "catch-rarity";
   rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
@@ -1226,19 +1226,23 @@ async function exportCatchCardAsVideo(card, photo) {
   bg.style.backgroundImage = `url('${backgroundMap[starsCount]}')`;
   clone.insertBefore(bg, clone.firstChild);
 
+  // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
 
+  // Wrap photo in image-window
   const originalImg = clone.querySelector(".catch-photo");
   const imageWrapper = document.createElement("div");
   imageWrapper.className = "image-window";
   imageWrapper.appendChild(originalImg.cloneNode(true));
   originalImg.parentNode.replaceChild(imageWrapper, originalImg);
 
+  // Clean up inserted image styles
   const insertedImg = imageWrapper.querySelector("img");
   insertedImg.className = "catch-photo";
   insertedImg.removeAttribute("style");
 
+  // Reposition caption above info
   const caption = clone.querySelector(".catch-caption");
   const info = clone.querySelector(".catch-info");
   if (caption && info && info.contains(caption)) {
@@ -1246,17 +1250,19 @@ async function exportCatchCardAsVideo(card, photo) {
     clone.insertBefore(caption, info);
   }
 
+  // Remove weight and date
   const weight = clone.querySelector(".catch-weight");
   if (weight) weight.remove();
   const date = clone.querySelector(".catch-date");
   if (date) date.remove();
 
+  // Add card number
   const cardNumber = document.createElement("div");
   cardNumber.className = "card-number";
   cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
   clone.appendChild(cardNumber);
 
-  // Container for offscreen rendering
+  // Offscreen container for rendering
   const renderContainer = document.createElement("div");
   renderContainer.style.position = "absolute";
   renderContainer.style.top = "-9999px";
@@ -1266,55 +1272,84 @@ async function exportCatchCardAsVideo(card, photo) {
   renderContainer.appendChild(clone);
   document.body.appendChild(renderContainer);
 
-  // We’ll grab frames from the gif by creating an offscreen <img> and <canvas>
-  const gifSrc = insertedImg.src;
+  // Check if image is animated GIF by file extension or mime type
+  // (better would be to check actual content, but this is common heuristic)
+  const imgSrc = insertedImg.src.toLowerCase();
+  const isGif = imgSrc.endsWith(".gif") || imgSrc.includes("image/gif");
 
-  // Load the GIF as Image
-  const gifImage = new Image();
-  gifImage.crossOrigin = "anonymous"; // important if hosted remotely
-  gifImage.src = gifSrc;
-
-  gifImage.onload = async () => {
+  if (!isGif) {
+    // Static PNG export path
     try {
-      // For demonstration, capture first 10 frames at 100ms intervals (adjust as needed)
+      const canvas = await html2canvas(clone, {
+        width: clone.offsetWidth,
+        height: clone.offsetHeight,
+        scrollX: 0,
+        scrollY: 0,
+        backgroundColor: null,
+        scale: 2, // higher res
+      });
+      // Add watermark on canvas
+      const ctx = canvas.getContext("2d");
+      const watermarkImg = new Image();
+      watermarkImg.src = "./icon_192x192.png";
+      await new Promise((res) => {
+        watermarkImg.onload = res;
+      });
+      const size = 64,
+        padding = 10;
+      ctx.globalAlpha = 1;
+      ctx.drawImage(
+        watermarkImg,
+        canvas.width - size - padding,
+        canvas.height - size - padding,
+        size,
+        size
+      );
+
+      // Download PNG
+      const link = document.createElement("a");
+      link.download = `catch-card-${photo.id}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      alert("Failed to export PNG: " + e.message);
+    } finally {
+      renderContainer.remove();
+    }
+  } else {
+    // Animated GIF export path — export as WebM video using Whammy.js
+    try {
+      // Rough simulation of animation: capture 10 frames, 100ms apart
       const frames = [];
       const frameCount = 10;
-      const frameDelay = 100; // ms
+      const frameDelay = 100;
 
-      const offscreenCanvas = document.createElement("canvas");
-      offscreenCanvas.width = clone.offsetWidth;
-      offscreenCanvas.height = clone.offsetHeight;
-      const ctx = offscreenCanvas.getContext("2d");
+      const encoder = new Whammy.Video(1000 / frameDelay);
 
-      // We'll use a library like Whammy for encoding video
-      // Whammy requires an array of frames (canvas/frame + duration)
-
-      // To capture frames, for now we'll do repeated html2canvas snapshots (slow, but works)
       for (let i = 0; i < frameCount; i++) {
-        // For each frame:
-        // You might want to advance the GIF frame here if possible
-        // But html2canvas can't render GIF animation frames directly
+        // html2canvas only captures current frame of GIF (likely first frame),
+        // so the animation won't be smooth without GIF frame parsing
+        // but this simulates animation by waiting between frames
 
-        // Instead, draw clone DOM to canvas, which will show static GIF frame (usually first frame)
-        // So animated GIF video export requires a more advanced gif parsing lib or canvas frame extraction
-
+        // capture canvas
+        // higher resolution scale for quality
+        // You can experiment with scale and width/height
+        // to balance quality and speed
         const canvasFrame = await html2canvas(clone, {
           width: clone.offsetWidth,
           height: clone.offsetHeight,
           scrollX: 0,
           scrollY: 0,
           backgroundColor: null,
+          scale: 2,
         });
 
-        frames.push({ image: canvasFrame, duration: frameDelay });
+        encoder.add(canvasFrame);
 
-        // Artificial delay between frames (simulate animation)
+        // Wait for next frame delay
         await new Promise((r) => setTimeout(r, frameDelay));
       }
 
-      // Encode video with Whammy
-      const encoder = new Whammy.Video(1000 / frameDelay);
-      frames.forEach(({ image }) => encoder.add(image));
       const output = encoder.compile();
 
       // Create download link
@@ -1324,94 +1359,13 @@ async function exportCatchCardAsVideo(card, photo) {
       a.download = `catch-card-${photo.id}.webm`;
       a.click();
 
-      // Cleanup
       URL.revokeObjectURL(url);
-      renderContainer.remove();
-    } catch (err) {
-      console.error("Error exporting video:", err);
+    } catch (e) {
+      alert("Failed to export animated video: " + e.message);
+    } finally {
       renderContainer.remove();
     }
-  };
-
-  gifImage.onerror = () => {
-    alert("Failed to load GIF image for video export.");
-    renderContainer.remove();
-  };
-}
-
-  const imgToLoad = clone.querySelector(".catch-photo");
-  if (imgToLoad && !imgToLoad.complete) {
-    imgToLoad.onload = renderCard;
-    imgToLoad.onerror = renderCard;
-  } else {
-    renderCard();
   }
-}
-
-  function renderSinglePhoto(photo) {
-  const gallery = document.getElementById("photoGallery");
-
-  const card = document.createElement("div");
-  card.className = "catch-card";
-
-  const img = document.createElement("img");
-  img.src = photo.src;
-  img.alt = photo.caption || "Catch photo";
-  img.className = "catch-photo";
-  img.addEventListener("click", () => openModal(photo.src));
-  card.appendChild(img);
-
-  const info = document.createElement("div");
-  info.className = "catch-info";
-
-  if (photo.caption) {
-    const cap = document.createElement("p");
-    cap.className = "catch-caption";
-    cap.textContent = photo.caption;
-    info.appendChild(cap);
-  }
-  if (photo.location) {
-    const loc = document.createElement("p");
-    loc.className = "catch-location";
-    loc.textContent = "Ability: " + photo.location;
-    info.appendChild(loc);
-  }
-  if (photo.timestamp) {
-    const dt = document.createElement("p");
-    dt.className = "catch-date";
-    dt.textContent = "Caught: " + new Date(photo.timestamp).toLocaleString();
-    info.appendChild(dt);
-  }
-  if (photo.weight) {
-    const wt = document.createElement("p");
-    wt.className = "catch-weight";
-    wt.textContent = "Weight: " + photo.weight + " lbs";
-    info.appendChild(wt);
-  }
-  card.appendChild(info);
-
-  const buttonRow = document.createElement("div");
-  buttonRow.className = "catch-buttons";
-
-  const deleteButton = document.createElement("button");
-  deleteButton.textContent = "Delete";
-  deleteButton.addEventListener("click", async () => {
-    if (confirm("Delete this photo?")) {
-      await deletePhotoFromDB(photo.id);
-      await renderPhotoPosts();
-    }
-  });
-  buttonRow.appendChild(deleteButton);
-
-  const shareButton = document.createElement("button");
-  shareButton.textContent = "Catch Card";
-  shareButton.addEventListener("click", () => exportCatchCard(card, photo));
-  buttonRow.appendChild(shareButton);
-
-  card.appendChild(buttonRow);
-
-  // 👇 Add new photo to the top of the gallery
-  gallery.prepend(card);
 }
   
 // ✅ Now openModal is correctly outside
