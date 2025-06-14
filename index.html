@@ -190,10 +190,12 @@
     box-shadow: 0 4px 10px rgb(0 0 0 / 0.2);
   }
 
-/* === Export-style collectible trading card === */
+/* Flexible Export-style collectible trading card */
 .export-style {
-  width: 420px;
-  height: 620px;
+  max-width: 420px;      /* max width, but can shrink */
+  max-height: 90vh;      /* max height relative to viewport */
+  width: 90vw;           /* width scales with viewport */
+  height: auto;          /* height adapts to content */
   border: 8px solid #5a432e;
   border-radius: 18px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
@@ -201,15 +203,14 @@
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
-  z-index: 0;
-
   background-color: #000; /* force black background */
   background-clip: padding-box;
-  padding: 0; /* remove any default padding */
-  margin: 0;  /* ensure no offset */
+  padding: 0;
+  margin: 0 auto; /* center horizontally if used in flow */
+  z-index: 0;
 }
 
-/* Default Background */
+/* Background image stays full size and covers container */
 .export-style::before {
   content: "";
   position: absolute;
@@ -227,24 +228,22 @@
   box-shadow: none;
 }
 
-/* Rarity Background Overrides */
+/* Rarity backgrounds override */
 .export-style.rarity-2::before {
   background-image: url('./Background-2.png');
 }
-
 .export-style.rarity-3::before {
   background-image: url('./Background-3.png');
 }
-
 .export-style.rarity-4::before {
   background-image: url('./Background-4.png');
 }
-
 .export-style.rarity-5::before {
   background-image: url('./Background-5.png');
 }
 
-    .export-style .catch-caption {
+/* Caption styling stays the same */
+.export-style .catch-caption {
   position: absolute;
   top: 38px;
   left: 50%;
@@ -264,14 +263,12 @@
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   margin: 0;
-
-  /* Added for wrapping and sizing */
-  max-width: 95%;  /* Adjust as needed to stay inside card */
-  white-space: normal; /* Allows line breaks */
-  word-wrap: break-word; /* Ensures long words break */
+  max-width: 95%;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
-/* Card number (Top Right) */
+/* Card number top-right */
 .export-style .card-number {
   position: absolute;
   top: 10px;
@@ -288,59 +285,50 @@
   z-index: 9;
 }
 
+/* Flexible image container */
 .export-style .image-window {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 85%;
-  height: 70%;
+  position: relative;  /* relative inside card */
+  width: 85%;          /* relative to card width */
+  max-height: 60vh;    /* limit height relative to viewport */
+  margin: 80px auto 20px; /* push down from caption, center horizontally */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 0;
 }
 
+/* Image scales within container */
 .export-style .catch-photo {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;  /* Use contain for full image visibility */
+  object-fit: contain;
   object-position: center;
   display: block;
   z-index: 1;
 }
 
+/* Info box near bottom */
 .export-style .catch-info {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+  position: relative;
+  max-width: 90%;
+  margin: 0 auto 40px;
   font-size: 1.05rem;
   font-weight: 600;
   color: #fdf8f2 !important;
   text-shadow: 1px 1px 2px #000;
-  z-index: 10;
   text-align: left;
-
-  background-color: rgba(0, 0, 0, 0.2); /* shaded box background */
+  background-color: rgba(0, 0, 0, 0.2);
   padding: 0.6rem 1rem;
   border-radius: 8px;
   border-top: 2px solid #5a432e;
   border-bottom: 2px solid #5a432e;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  z-index: 10;
 }
 
-/* Stat Items */
-.export-style .catch-weight,
-.export-style .catch-location,
-.export-style .catch-date {
-  color: #fdf8f2 !important;
-  text-shadow: 1px 1px 2px #000;
-}
-
-/* Rarity stars (Bottom Center) */
+/* Rarity stars bottom center */
 .export-style .catch-rarity {
   position: absolute;
   bottom: 16px;
@@ -354,7 +342,7 @@
   z-index: 9;
 }
 
-/* Hide buttons in export */
+/* Hide buttons when exporting */
 .export-style .catch-buttons {
   display: none !important;
 }
@@ -1078,10 +1066,9 @@ shareButton.addEventListener("click", () => {
   clone.style.position = 'fixed';
 clone.style.top = '50%';
 clone.style.left = '50%';
+  clone.style.width = '';
+clone.style.height = '';
 clone.style.transform = 'translate(-50%, -50%)';  // perfectly center
-clone.style.width = '420px';
-clone.style.height = '620px';
-clone.style.zIndex = '9999';
 clone.style.background = 'transparent';   // preserve transparency if needed
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
