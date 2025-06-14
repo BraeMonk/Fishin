@@ -1088,6 +1088,16 @@ async function renderPhotoPosts() {
       originalImg.parentNode.replaceChild(imageWrapper, originalImg);
       imageWrapper.appendChild(originalImg);
 
+      originalImg.style.position = 'relative';
+      originalImg.style.margin = '0';
+      originalImg.style.padding = '0';
+      originalImg.style.display = 'block';
+      originalImg.style.objectFit = 'cover';
+      originalImg.style.objectPosition = 'center';
+      originalImg.style.width = '100%';
+      originalImg.style.height = '100%';
+      originalImg.classList.add('catch-photo'); // just to be sure it's not lost
+
       const caption = clone.querySelector('.catch-caption');
       const info = clone.querySelector('.catch-info');
 
