@@ -986,12 +986,14 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       const timestamp = new Date().toISOString();
 
       const photoData = {
-        src: dataURL,
-        caption,
-        location,
-        weight,
-        timestamp,
-      };
+  src: dataURL,
+  caption,
+  location,
+  weight,
+  timestamp,
+  name: file.name,
+  type: file.type,
+};
 
       // 👇 Save to DB and retrieve assigned ID
       const id = await addPhotoToDB(photoData);
