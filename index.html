@@ -1079,7 +1079,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
     // Automatically pick the right export method based on file type
     const isGif = photo.src.toLowerCase().endsWith(".gif");
     if (isGif) {
-      exportCatchCardAsVideo(card, photo); // animated export
+      exportCatchCardAsGif(card, photo); // animated export
     } else {
       exportCatchCard(card, photo); // static PNG export
     }
