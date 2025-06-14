@@ -1050,6 +1050,14 @@ const backgroundMap = {
   5: "./Background-5.png"
 };
 
+  // Add rarity stars
+  const starsCount = Math.floor(Math.random() * 5) + 1;
+  const rarity = document.createElement("div");
+  rarity.className = "catch-rarity";
+  rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
+  clone.appendChild(rarity);
+  clone.classList.add(`rarity-${starsCount}`);
+
 bg.style.backgroundImage = `url('${backgroundMap[starsCount]}')`;
 
 // Insert background as first child
@@ -1089,14 +1097,6 @@ clone.insertBefore(bg, clone.firstChild);
   cardNumber.className = "card-number";
   cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
   clone.appendChild(cardNumber);
-
-  // Add rarity stars
-  const starsCount = Math.floor(Math.random() * 5) + 1;
-  const rarity = document.createElement("div");
-  rarity.className = "catch-rarity";
-  rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
-  clone.appendChild(rarity);
-  clone.classList.add(`rarity-${starsCount}`);
 
   // Add to hidden rendering container
   const renderContainer = document.createElement("div");
