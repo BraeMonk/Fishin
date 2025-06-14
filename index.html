@@ -222,6 +222,8 @@
   opacity: 1;
   z-index: 0;
   pointer-events: none;
+  border-radius: 18px;
+  box-shadow: none;
 }
 
 /* Rarity Background Overrides */
@@ -309,7 +311,7 @@
   object-fit: contain;  /* Use contain for full image visibility */
   object-position: center;
   display: block;
-  z-index: 1;
+  z-index: 2;
 }
 
 .export-style .catch-info {
@@ -324,7 +326,7 @@
   font-weight: 600;
   color: #fdf8f2 !important;
   text-shadow: 1px 1px 2px #000;
-  z-index: 4;
+  z-index: 10;
   text-align: left;
 
   background-color: rgba(0, 0, 0, 0.2); /* shaded box background */
@@ -353,7 +355,7 @@
   letter-spacing: 0.08em;
   text-shadow: 1px 1px 2px #000;
   user-select: none;
-  z-index: 4;
+  z-index: 9;
 }
 
 /* Hide buttons in export */
