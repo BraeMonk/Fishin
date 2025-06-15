@@ -1312,7 +1312,7 @@ function exportCatchCardAsImage(card, photo) {
   clone.style.width = "420px";
   clone.style.height = "620px";
 
-  // Offscreen rendering container
+  // Offscreen container
   const renderContainer = document.createElement("div");
   renderContainer.style.position = "absolute";
   renderContainer.style.top = "-9999px";
@@ -1322,7 +1322,6 @@ function exportCatchCardAsImage(card, photo) {
   renderContainer.appendChild(clone);
   document.body.appendChild(renderContainer);
 
-  // Initialize gif.js with worker explicitly set
   const gif = new GIF({
     workers: 2,
     quality: 10,
@@ -1348,7 +1347,6 @@ function exportCatchCardAsImage(card, photo) {
 
       gif.addFrame(canvas, { delay: frameDelay });
 
-      // Simulate animation over time (optional)
       await new Promise((res) => setTimeout(res, frameDelay));
     }
 
@@ -1359,13 +1357,16 @@ function exportCatchCardAsImage(card, photo) {
       a.download = `catch-card-${photo.id}.gif`;
       a.click();
       URL.revokeObjectURL(url);
+
+      // Now safe to remove the offscreen container
+      renderContainer.remove();
     });
 
     gif.render();
+
   } catch (err) {
     alert("GIF export failed: " + err.message);
-  } finally {
-    renderContainer.remove();
+    renderContainer.remove(); // Clean up if error occurs
   }
 }
 
