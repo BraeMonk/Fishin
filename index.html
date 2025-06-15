@@ -1680,7 +1680,7 @@ function exportCatchCardAsImage(card, photo) {
     await waitForStop();
 
     const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
-    manualDownload(videoBlob, `catch-card-${photo.id}.mp4`);
+    manualDownload(videoBlob, `catch-card-${photo.id}.webm`);
   } finally {
     renderContainer.remove();
     canvas.remove();
