@@ -1635,7 +1635,7 @@ function exportCatchCardAsImage(card, photo) {
   const ctx = canvas.getContext("2d");
 
   // Setup MediaRecorder
-  const stream = canvas.captureStream(10);
+  const stream = canvas.captureStream(20);
   const recordedChunks = [];
   const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 
