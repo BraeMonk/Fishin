@@ -795,7 +795,7 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 <!-- Memories Tab -->
 <section id="memoriesTab" class="tab active">
   <div class="form-wrapper">
-  <input type="file" id="photoInput" class="button" accept="image/*" multiple style="margin-bottom: 1rem;" />
+  <input type="file" id="photoInput" class="button" accept="image/*, video/*" multiple style="margin-bottom: 1rem;" />
 
   <div class="form-fields">
     <label for="captionInput">Name:
@@ -978,31 +978,39 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    if (!file.type.startsWith("image/")) continue;
+    const fileType = file.type;
+
+    // Allow images, gifs, and videos
+    if (
+      !fileType.startsWith("image/") &&
+      !fileType.startsWith("video/")
+    ) continue;
 
     try {
       const dataURL = await readFileAsDataURL(file);
       const timestamp = new Date().toISOString();
 
       const photoData = {
-  src: dataURL,
-  caption,
-  location,
-  weight,
-  timestamp,
-  name: file.name,
-  type: file.type,
-};
+        caption,
+        location,
+        weight,
+        timestamp,
+        name: file.name,
+        type: fileType,
+      };
 
-      // 👇 Save to DB and retrieve assigned ID
+      // Store appropriately based on media type
+      if (fileType.startsWith("video/")) {
+        photoData.videoSrc = dataURL;
+        photoData.src = ""; // optional fallback
+      } else {
+        photoData.src = dataURL;
+      }
+
       const id = await addPhotoToDB(photoData);
-
-      // 👇 Add the ID to the local object
       photoData.id = id;
 
-      // 👇 Render immediately to top of gallery
       renderSinglePhoto(photoData);
-
     } catch (error) {
       console.error("Failed to process file:", error);
     }
@@ -1179,14 +1187,21 @@ function exportCatchCardSmart(card, photo) {
     /\.gif$/i.test(src) ||
     (photo.src && photo.src.includes("gif"));
 
+  const isVideo =
+    src.startsWith("data:video") ||
+    /\.(webm|mp4|mov)$/i.test(src) ||
+    (photo.videoSrc && /\.(webm|mp4|mov)$/i.test(photo.videoSrc));
+
   if (isGif) {
     if (useGifJs) {
-      exportCatchCardAsGif(card, photo); // <-- NEW FUNCTION using gif.js
+      exportCatchCardAsGif(card, photo); // gif.js path
     } else {
-      exportCatchCardAsVideo(card, photo); // existing Whammy function
+      exportCatchCardAsVideo(card, photo, src); // fallback to video path
     }
+  } else if (isVideo) {
+    exportCatchCardAsVideo(card, photo, photo.videoSrc || src); // <-- call the real deal
   } else {
-    exportCatchCardAsImage(card, photo);
+    exportCatchCardAsImage(card, photo); // static PNG
   }
 }
 
@@ -1368,6 +1383,121 @@ function exportCatchCardAsImage(card, photo) {
     alert("GIF export failed: " + err.message);
     renderContainer.remove(); // Clean up if error occurs
   }
+}
+
+  async function exportCatchCardAsVideo(card, photo, videoSrc) {
+  const clone = card.cloneNode(true);
+  clone.classList.add("export-style");
+  clone.style.width = "420px";
+  clone.style.height = "620px";
+
+  // Remove buttons
+  const buttons = clone.querySelector(".catch-buttons");
+  if (buttons) buttons.remove();
+
+  // Background & rarity stars
+  const bg = document.createElement("div");
+  bg.className = "card-background";
+  const backgroundMap = {
+    1: "./Background.png",
+    2: "./Background-2.png",
+    3: "./Background-3.png",
+    4: "./Background-4.png",
+    5: "./Background-5.png",
+  };
+  const starsCount = photo.rarity || Math.floor(Math.random() * 5) + 1;
+  const rarity = document.createElement("div");
+  rarity.className = "catch-rarity";
+  rarity.textContent = "★".repeat(starsCount) + "☆".repeat(5 - starsCount);
+  clone.appendChild(rarity);
+  clone.classList.add(`rarity-${starsCount}`);
+  bg.style.backgroundImage = `url('${backgroundMap[starsCount]}')`;
+  clone.insertBefore(bg, clone.firstChild);
+
+  // Replace image with video element inside image-window wrapper
+  const originalImg = clone.querySelector(".catch-photo");
+  const imageWrapper = document.createElement("div");
+  imageWrapper.className = "image-window";
+
+  const video = document.createElement("video");
+  video.src = videoSrc;
+  video.autoplay = true;
+  video.loop = true;
+  video.muted = true;
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.style.objectFit = "contain";
+
+  imageWrapper.appendChild(video);
+  originalImg.parentNode.replaceChild(imageWrapper, originalImg);
+
+  // Caption above info
+  const caption = clone.querySelector(".catch-caption");
+  const info = clone.querySelector(".catch-info");
+  if (caption && info && info.contains(caption)) {
+    info.removeChild(caption);
+    clone.insertBefore(caption, info);
+  }
+
+  // Remove weight and date for cleaner card
+  const weight = clone.querySelector(".catch-weight");
+  if (weight) weight.remove();
+  const date = clone.querySelector(".catch-date");
+  if (date) date.remove();
+
+  // Add card number
+  const cardNumber = document.createElement("div");
+  cardNumber.className = "card-number";
+  cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
+  clone.appendChild(cardNumber);
+
+  // Offscreen container for rendering
+  const renderContainer = document.createElement("div");
+  renderContainer.style.position = "absolute";
+  renderContainer.style.top = "-9999px";
+  renderContainer.style.left = "0";
+  renderContainer.style.width = "420px";
+  renderContainer.style.height = "620px";
+  renderContainer.appendChild(clone);
+  document.body.appendChild(renderContainer);
+
+  // Prepare Whammy video encoder (10fps)
+  const encoder = new Whammy.Video(10);
+
+  // Wait for video to start playing to capture frames
+  await new Promise((resolve) => {
+    video.onplaying = resolve;
+    // In case already playing
+    if (!video.paused) resolve();
+  });
+
+  const frameCount = 10;
+  const frameDelay = 100; // ms
+
+  for (let i = 0; i < frameCount; i++) {
+    const canvasFrame = await html2canvas(clone, {
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
+      scrollX: 0,
+      scrollY: 0,
+      backgroundColor: null,
+      scale: 2,
+    });
+
+    encoder.add(canvasFrame);
+    await new Promise((r) => setTimeout(r, frameDelay));
+  }
+
+  // Compile video and trigger download
+  const output = encoder.compile();
+  const url = URL.createObjectURL(output);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `catch-card-${photo.id}.webm`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  renderContainer.remove();
 }
 
 async function exportCatchCard(card, photo) {
