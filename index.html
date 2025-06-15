@@ -1003,8 +1003,8 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
       if (fileType.startsWith("video/")) {
         photoData.videoSrc = dataURL;
         photoData.src = ""; // optional fallback
-      } else {
-        photoData.src = dataURL;
+      } else if (fileType.startsWith("image/")) {
+        photoData.src = dataURL; // includes gifs, png, jpg, etc.
       }
 
       const id = await addPhotoToDB(photoData);
