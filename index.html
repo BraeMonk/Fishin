@@ -1833,17 +1833,59 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
   }
 }
   
-// ✅ Now openModal is correctly outside
 function openModal(src) {
   const modal = document.getElementById("imageModal");
   const modalImg = document.getElementById("modalImg");
-  modalImg.src = src;
+
+  // Check file extension for video or gif
+  const isVideo = src.match(/\.(mp4|webm|ogg)$/i);
+  const isGif = src.match(/\.gif$/i);
+
+  if (isVideo) {
+    // Handle video
+    let video = document.getElementById("modalVideo");
+    if (!video) {
+      video = document.createElement("video");
+      video.id = "modalVideo";
+      video.controls = true;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = false; // or true if you want muted by default
+      video.style.maxWidth = "100%";
+      video.style.maxHeight = "100%";
+
+      modalImg.style.display = "none";
+      modal.appendChild(video);
+    }
+    video.src = src;
+    video.style.display = "block";
+
+  } else {
+    // Handle image or GIF (both displayed as <img>)
+    modalImg.src = src;
+    modalImg.style.display = "block";
+
+    const video = document.getElementById("modalVideo");
+    if (video) {
+      video.pause();
+      video.style.display = "none";
+      video.src = "";
+    }
+  }
+
   modal.style.display = "flex";
 }
 
 function closeModal() {
-  const modal = document.getElementById("imageModal"); // also fix here
+  const modal = document.getElementById("imageModal");
   modal.style.display = "none";
+
+  const video = document.getElementById("modalVideo");
+  if (video) {
+    video.muted = true;
+    video.pause();
+    video.currentTime = 0;
+  }
 }
 
   const fishData = [
