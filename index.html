@@ -1628,17 +1628,21 @@ function exportCatchCardAsImage(card, photo) {
   cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
   clone.appendChild(cardNumber);
 
-  // Offscreen container for rendering
-  const renderContainer = document.createElement("div");
-  Object.assign(renderContainer.style, {
-    position: "absolute",
-    top: "-9999px",
-    left: "0",
-    width: "420px",
-    height: "620px",
-  });
-  renderContainer.appendChild(clone);
-  document.body.appendChild(renderContainer);
+  // Offscreen container for rendering (keeps layout context intact)
+const renderContainer = document.createElement("div");
+Object.assign(renderContainer.style, {
+  position: "fixed",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "420px",
+  height: "620px",
+  opacity: "0",
+  pointerEvents: "none",
+  zIndex: "-1",
+});
+renderContainer.appendChild(clone);
+document.body.appendChild(renderContainer);
 
   // Wait for video to be ready
   await new Promise((resolve, reject) => {
