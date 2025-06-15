@@ -1505,7 +1505,7 @@ function exportCatchCardAsImage(card, photo) {
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
 
-  // Add background based on rarity
+  // Background and rarity setup
   const bg = document.createElement("div");
   bg.className = "card-background";
   const backgroundMap = {
@@ -1534,21 +1534,12 @@ function exportCatchCardAsImage(card, photo) {
   video.autoplay = true;
   video.loop = true;
   video.muted = true;
-  video.volume = 0;
-  video.defaultMuted = true;
   video.style.width = "100%";
   video.style.height = "100%";
   video.style.objectFit = "contain";
 
-  video.addEventListener("volumechange", () => {
-    if (!video.muted || video.volume > 0) {
-      video.muted = true;
-      video.volume = 0;
-    }
-  });
-
   imageWrapper.appendChild(video);
-  originalImg.parentNode.replaceChild(imageWrapper, originalImg);
+  if (originalImg) originalImg.parentNode.replaceChild(imageWrapper, originalImg);
 
   // Rearrange caption
   const caption = clone.querySelector(".catch-caption");
@@ -1558,7 +1549,7 @@ function exportCatchCardAsImage(card, photo) {
     clone.insertBefore(caption, info);
   }
 
-  // Remove unnecessary elements
+  // Remove weight and date
   const weight = clone.querySelector(".catch-weight");
   if (weight) weight.remove();
   const date = clone.querySelector(".catch-date");
@@ -1572,32 +1563,39 @@ function exportCatchCardAsImage(card, photo) {
 
   // Offscreen container for rendering
   const renderContainer = document.createElement("div");
-  renderContainer.style.position = "absolute";
-  renderContainer.style.top = "-9999px";
-  renderContainer.style.left = "0";
-  renderContainer.style.width = "420px";
-  renderContainer.style.height = "620px";
+  Object.assign(renderContainer.style, {
+    position: "absolute",
+    top: "-9999px",
+    left: "0",
+    width: "420px",
+    height: "620px",
+  });
   renderContainer.appendChild(clone);
   document.body.appendChild(renderContainer);
 
-  // Wait for video to play
-  await new Promise((resolve) => {
-    video.onplaying = resolve;
-    if (!video.paused) resolve();
+  // Wait for video to be ready
+  await new Promise((resolve, reject) => {
+    if (video.readyState >= 3) resolve();
+    else {
+      video.onplaying = resolve;
+      setTimeout(() => reject(new Error("Video failed to start playing")), 5000);
+    }
   });
 
   // Create canvas for recording
   const canvas = document.createElement("canvas");
   canvas.width = clone.offsetWidth * 2;
   canvas.height = clone.offsetHeight * 2;
-  canvas.style.position = "fixed";
-  canvas.style.top = "-9999px";
-  canvas.style.left = "0";
+  Object.assign(canvas.style, {
+    position: "fixed",
+    top: "-9999px",
+    left: "0",
+  });
   document.body.appendChild(canvas);
   const ctx = canvas.getContext("2d");
 
   // Setup MediaRecorder
-  const stream = canvas.captureStream(10); // 10 fps
+  const stream = canvas.captureStream(10);
   const recordedChunks = [];
   const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
 
@@ -1605,42 +1603,49 @@ function exportCatchCardAsImage(card, photo) {
     if (e.data.size > 0) recordedChunks.push(e.data);
   };
 
-  // Handle finalization after recording ends
-  const finalizeRecording = () => {
-    const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
-    manualDownload(videoBlob, `catch-card-${photo.id}.webm`);
-    renderContainer.remove();
-    canvas.remove();
-    hideExportProgress();
-  };
+  const waitForStop = () =>
+    new Promise((resolve, reject) => {
+      mediaRecorder.onstop = resolve;
+      mediaRecorder.onerror = (e) => reject(e.error);
+    });
 
   // Start recording and rendering
   showExportProgress();
-  mediaRecorder.onstop = finalizeRecording;
-  mediaRecorder.start();
 
-  const recordDurationMs = 5000;
-  const frameDelay = 1000 / 10;
-  const totalFrames = Math.floor(recordDurationMs / frameDelay);
+  try {
+    mediaRecorder.start();
 
-  for (let i = 0; i < totalFrames; i++) {
-    const snapshot = await html2canvas(clone, {
-      width: clone.offsetWidth,
-      height: clone.offsetHeight,
-      backgroundColor: null,
-      scale: 2,
-      useCORS: true,
-    });
+    const recordDurationMs = 5000;
+    const frameDelay = 1000 / 10;
+    const totalFrames = Math.floor(recordDurationMs / frameDelay);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(snapshot, 0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < totalFrames; i++) {
+      const snapshot = await html2canvas(clone, {
+        width: clone.offsetWidth,
+        height: clone.offsetHeight,
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      });
 
-    updateExportProgress(((i + 1) / totalFrames) * 100, `Recording frame ${i + 1} of ${totalFrames}`);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(snapshot, 0, 0, canvas.width, canvas.height);
 
-    await new Promise((r) => setTimeout(r, frameDelay));
+      updateExportProgress(((i + 1) / totalFrames) * 100, `Recording frame ${i + 1} of ${totalFrames}`);
+
+      await new Promise((r) => setTimeout(r, frameDelay));
+    }
+
+    mediaRecorder.stop();
+    await waitForStop();
+
+    const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
+    manualDownload(videoBlob, `catch-card-${photo.id}.webm`);
+  } finally {
+    renderContainer.remove();
+    canvas.remove();
+    hideExportProgress();
   }
-
-  mediaRecorder.stop();
 }
   
 async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy = true) {
