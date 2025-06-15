@@ -1656,7 +1656,7 @@ function exportCatchCardAsImage(card, photo) {
     mediaRecorder.start();
 
     const recordDurationMs = 5000;
-    const frameDelay = 1000 / 10;
+    const frameDelay = 1000 / 20;
     const totalFrames = Math.floor(recordDurationMs / frameDelay);
 
     for (let i = 0; i < totalFrames; i++) {
