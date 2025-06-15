@@ -1369,15 +1369,15 @@ function exportCatchCardAsImage(card, photo) {
   document.body.appendChild(renderContainer);
 
   const gif = new GIF({
-    workers: 2,
-    quality: 10,
-    width: 420 * 2,
-    height: 620 * 2,
+    workers: 2,              // restored to 2 workers for better performance
+    quality: 10,             // restored to quality 10 (good balance)
+    width: 420,
+    height: 620,
     workerScript: "https://cdn.jsdelivr.net/npm/gif.js.optimized@0.2.0/dist/gif.worker.js",
   });
 
-  const frameCount = 10;
-  const frameDelay = 100;
+  const frameCount = 5;      // fewer frames for speed
+  const frameDelay = 150;    // slightly longer delay per frame for smoothness
 
   gif.on("finished", function (blob) {
     const url = URL.createObjectURL(blob);
@@ -1397,7 +1397,7 @@ function exportCatchCardAsImage(card, photo) {
         scrollX: 0,
         scrollY: 0,
         backgroundColor: null,
-        scale: 2,
+        scale: 1,           // 1x scale for faster rendering
         useCORS: true,
       });
 
@@ -1406,7 +1406,6 @@ function exportCatchCardAsImage(card, photo) {
     }
 
     gif.render();
-
   } catch (err) {
     alert("GIF export failed: " + err.message);
     renderContainer.remove();
@@ -1417,7 +1416,7 @@ function exportCatchCardAsImage(card, photo) {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
   clone.style.width = "420px";
-  clone.style.height = "620px";
+clone.style.height = "620px";
 
   // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
@@ -1615,9 +1614,33 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
   // Find video inside clone if any
   const video = clone.querySelector("video.catch-photo");
 
-  // If video exists, export WebM video using MediaRecorder + canvas capture
   if (video) {
-    await video.play(); // Ensure video is playing
+    // Wait for video to be ready and playing
+    await new Promise((resolve, reject) => {
+      function onPlay() {
+        video.removeEventListener("playing", onPlay);
+        resolve();
+      }
+      video.addEventListener("playing", onPlay);
+      video.play().catch(reject);
+    });
+
+    // Load background image once
+    let bgImg = null;
+    const bgDiv = clone.querySelector(".card-background");
+    if (bgDiv) {
+      const bgStyle = window.getComputedStyle(bgDiv).backgroundImage;
+      const urlMatch = bgStyle.match(/url\(["']?(.+?)["']?\)/);
+      if (urlMatch) {
+        bgImg = new Image();
+        bgImg.src = urlMatch[1];
+        await new Promise((res) => {
+          if (bgImg.complete) res();
+          else bgImg.onload = res;
+          bgImg.onerror = res; // fallback on error
+        });
+      }
+    }
 
     const canvas = document.createElement("canvas");
     canvas.width = 420 * 2; // 2x scale for quality
@@ -1640,27 +1663,9 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
     function drawFrame() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw background
-      const bgDiv = clone.querySelector(".card-background");
-      if (bgDiv) {
-        const bgStyle = window.getComputedStyle(bgDiv).backgroundImage;
-        const urlMatch = bgStyle.match(/url\(["']?(.+?)["']?\)/);
-        if (urlMatch) {
-          const bgImg = new Image();
-          bgImg.src = urlMatch[1];
-          if (bgImg.complete) {
-            ctx.drawImage(bgImg, 0, 0, 420, 620);
-          } else {
-            bgImg.onload = () => {
-              ctx.drawImage(bgImg, 0, 0, 420, 620);
-            };
-            ctx.fillStyle = "#222";
-            ctx.fillRect(0, 0, 420, 620);
-          }
-        } else {
-          ctx.fillStyle = "#222";
-          ctx.fillRect(0, 0, 420, 620);
-        }
+      // Draw background once loaded
+      if (bgImg && bgImg.complete) {
+        ctx.drawImage(bgImg, 0, 0, 420, 620);
       } else {
         ctx.fillStyle = "#222";
         ctx.fillRect(0, 0, 420, 620);
@@ -1730,15 +1735,12 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
   } else {
     // No video — fallback to PNG or GIF export
 
-    // Find inserted image in clone
     const insertedImg = clone.querySelector(".catch-photo");
     const imgSrc = insertedImg ? insertedImg.src.toLowerCase() : "";
-
-    // Check if GIF
     const isGif = imgSrc.endsWith(".gif") || imgSrc.includes("image/gif");
 
     if (!isGif) {
-      // PNG export path
+      // PNG export
       try {
         const canvas = await html2canvas(clone, {
           width: clone.offsetWidth,
@@ -1750,7 +1752,6 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
           useCORS: true,
         });
 
-        // Add watermark
         const ctx = canvas.getContext("2d");
         const watermarkImg = new Image();
         watermarkImg.src = "./icon_192x192.png";
@@ -1778,7 +1779,7 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
         renderContainer.remove();
       }
     } else {
-      // Animated GIF export path (Whammy or gif.js)
+      // Animated GIF export path
       try {
         if (useWhammy) {
           const encoder = new Whammy.Video(10); // 10fps
