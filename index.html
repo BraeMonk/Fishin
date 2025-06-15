@@ -1571,6 +1571,35 @@ clone.style.height = "620px";
   renderContainer.remove();
 }
 
+  function isIOS() {
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+function manualDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+
+  if (isIOS()) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.textContent = "⬇️ Tap here to download your card";
+    link.style.position = "fixed";
+    link.style.bottom = "20px";
+    link.style.left = "20px";
+    link.style.background = "#fff";
+    link.style.padding = "10px";
+    link.style.border = "1px solid #999";
+    link.style.zIndex = "10000";
+    document.body.appendChild(link);
+  } else {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+}
+  
 async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy = true) {
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
@@ -1764,10 +1793,7 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
         const blob = new Blob(recordedChunks, { type: "video/webm" });
         const url = URL.createObjectURL(blob);
 
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `catch-card-${photo.id}.webm`;
-        a.click();
+        manualDownload(blob, `catch-card-${photo.id}.webm`);
 
         URL.revokeObjectURL(url);
         renderContainer.remove();
@@ -1872,10 +1898,7 @@ async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy =
 
           gif.on("finished", function (blob) {
             const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `catch-card-${photo.id}.gif`;
-            a.click();
+            manualDownload(blob, `catch-card-${photo.id}.gif`);
             URL.revokeObjectURL(url);
             renderContainer.remove();
           });
