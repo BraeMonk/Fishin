@@ -1185,14 +1185,25 @@ async function renderPhotoPosts() {
     let mediaElement;
 
     if (photo.videoSrc) {
-      mediaElement = document.createElement("video");
+  mediaElement = document.createElement("video");
+
+  // 🔇 Always mute — even if autoplay fails or iPhone weirdness happens
+  mediaElement.muted = true;
+  mediaElement.volume = 0;
+  mediaElement.defaultMuted = true;
+  mediaElement.addEventListener("volumechange", () => {
+    if (!mediaElement.muted || mediaElement.volume > 0) {
       mediaElement.muted = true;
-      mediaElement.src = photo.videoSrc;
-      mediaElement.autoplay = true;   // autoplay on load
-      mediaElement.loop = true;       // loop forever
-      mediaElement.playsInline = true; // important for mobile autoplay
-      mediaElement.className = "catch-photo";
-      mediaElement.addEventListener("click", () => openModal(photo.videoSrc));
+      mediaElement.volume = 0;
+    }
+  });
+
+  mediaElement.src = photo.videoSrc;
+  mediaElement.autoplay = true;     // autoplay on load
+  mediaElement.loop = true;         // loop forever
+  mediaElement.playsInline = true;  // 🔑 allows autoplay on iOS
+  mediaElement.className = "catch-photo";
+  mediaElement.addEventListener("click", () => openModal(photo.videoSrc));
     } else if (photo.src) {
       mediaElement = document.createElement("img");
       mediaElement.src = photo.src;
