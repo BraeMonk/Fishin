@@ -1251,18 +1251,9 @@ async function renderPhotoPosts() {
     shareButton.addEventListener("click", (event) => {
       event.stopPropagation(); // 🔒 prevents modal from opening
 
-      const isGif =
-        (photo.type && photo.type === "image/gif") ||
-        (photo.name && photo.name.toLowerCase().endsWith(".gif")) ||
-        photo.src.toLowerCase().includes(".gif") ||
-        photo.src.toLowerCase().includes("image/gif");
-
-      if (isGif) {
-        exportCatchCardAsGif(card, photo);
-      } else {
-        exportCatchCard(card, photo);
-      }
+      exportCatchCardSmart(card, photo);
     });
+                    
     buttonRow.appendChild(shareButton);
 
     card.appendChild(buttonRow);
