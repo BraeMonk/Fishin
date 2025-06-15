@@ -356,6 +356,29 @@
   display: none !important;
 }
 
+  #export-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #222;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#export-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-10px);
+}
+  
   /* ==== File Input ==== */
   #photoInput {
     display: block;
@@ -915,6 +938,23 @@ function updateExportProgress(percent, message = "") {
 
 function hideExportProgress() {
   document.getElementById("exportProgress").style.display = "none";
+}
+
+  function showToast(message, duration = 3000) {
+  let toast = document.getElementById("export-toast");
+
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "export-toast";
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, duration);
 }
   
   function setupTabs() {
@@ -1640,11 +1680,35 @@ function exportCatchCardAsImage(card, photo) {
     await waitForStop();
 
     const videoBlob = new Blob(recordedChunks, { type: "video/webm" });
-    manualDownload(videoBlob, `catch-card-${photo.id}.webm`);
+    manualDownload(videoBlob, `catch-card-${photo.id}.mp4`);
   } finally {
     renderContainer.remove();
     canvas.remove();
     hideExportProgress();
+  }
+}
+
+  // Other export functions...
+
+function manualDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Show toast based on file type
+  const extension = filename.split('.').pop().toLowerCase();
+  if (extension === 'png') {
+    showToast("Image download complete!");
+  } else if (extension === 'mp4' || extension === 'webm') {
+    showToast("Video download complete!");
+  } else {
+    showToast("Download complete!");
   }
 }
   
