@@ -1121,24 +1121,24 @@ async function renderPhotoPosts() {
 
     let mediaElement;
 
-if (photo.videoSrc) {
-  mediaElement = document.createElement("video");
-  mediaElement.muted = true;
-  mediaElement.src = photo.videoSrc;
-  mediaElement.autoplay = true;   // autoplay on load
-  mediaElement.loop = true;       // loop forever
-  mediaElement.playsInline = true; // important for mobile autoplay
-  mediaElement.className = "catch-photo";
-  mediaElement.addEventListener("click", () => openModal(photo.videoSrc));
-} else if (photo.src) {
-  mediaElement = document.createElement("img");
-  mediaElement.src = photo.src;
-  mediaElement.alt = photo.caption || "Catch photo";
-  mediaElement.className = "catch-photo";
-  mediaElement.addEventListener("click", () => openModal(photo.videoSrc || photo.src));
-}
+    if (photo.videoSrc) {
+      mediaElement = document.createElement("video");
+      mediaElement.muted = true;
+      mediaElement.src = photo.videoSrc;
+      mediaElement.autoplay = true;   // autoplay on load
+      mediaElement.loop = true;       // loop forever
+      mediaElement.playsInline = true; // important for mobile autoplay
+      mediaElement.className = "catch-photo";
+      mediaElement.addEventListener("click", () => openModal(photo.videoSrc));
+    } else if (photo.src) {
+      mediaElement = document.createElement("img");
+      mediaElement.src = photo.src;
+      mediaElement.alt = photo.caption || "Catch photo";
+      mediaElement.className = "catch-photo";
+      mediaElement.addEventListener("click", () => openModal(photo.videoSrc || photo.src));
+    }
 
-if (mediaElement) card.appendChild(mediaElement);
+    if (mediaElement) card.appendChild(mediaElement);
 
     const info = document.createElement("div");
     info.className = "catch-info";
@@ -1173,33 +1173,41 @@ if (mediaElement) card.appendChild(mediaElement);
     buttonRow.className = "catch-buttons";
 
     const deleteButton = document.createElement("button");
-deleteButton.textContent = "Delete";
-deleteButton.addEventListener("click", async (event) => {
-  event.stopPropagation(); // 🔒 prevent modal from opening
-  if (confirm("Delete this photo?")) {
-    await deletePhotoFromDB(photo.id);
-    await renderPhotoPosts();
-  }
-});
-buttonRow.appendChild(deleteButton);
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async (event) => {
+      event.stopPropagation(); // 🔒 prevent modal from opening
+      if (confirm("Delete this photo?")) {
+        await deletePhotoFromDB(photo.id);
+        await renderPhotoPosts();
+      }
+    });
+    buttonRow.appendChild(deleteButton);
 
     const shareButton = document.createElement("button");
-shareButton.textContent = "Catch Card";
-shareButton.addEventListener("click", (event) => {
-  event.stopPropagation(); // 🔒 prevents modal from opening
+    shareButton.textContent = "Catch Card";
+    shareButton.addEventListener("click", (event) => {
+      event.stopPropagation(); // 🔒 prevents modal from opening
 
-  const isGif =
-    (photo.type && photo.type === "image/gif") ||
-    (photo.name && photo.name.toLowerCase().endsWith(".gif")) ||
-    photo.src.toLowerCase().includes(".gif") ||
-    photo.src.toLowerCase().includes("image/gif");
+      const isGif =
+        (photo.type && photo.type === "image/gif") ||
+        (photo.name && photo.name.toLowerCase().endsWith(".gif")) ||
+        photo.src.toLowerCase().includes(".gif") ||
+        photo.src.toLowerCase().includes("image/gif");
 
-  if (isGif) {
-    exportCatchCardAsGif(card, photo);
-  } else {
-    exportCatchCard(card, photo);
-  }
-});
+      if (isGif) {
+        exportCatchCardAsGif(card, photo);
+      } else {
+        exportCatchCard(card, photo);
+      }
+    });
+    buttonRow.appendChild(shareButton);
+
+    card.appendChild(buttonRow);
+
+    gallery.appendChild(card);
+  });  // End of forEach
+
+} // End of renderPhotoPosts
 
 function exportCatchCardSmart(card, photo) {
   const imgElem = card.querySelector(".catch-photo");
