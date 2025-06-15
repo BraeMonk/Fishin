@@ -299,6 +299,18 @@
   z-index: 1;
 }
 
+  .export-style .image-window img,
+.export-style .image-window video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  z-index: 1;
+  border-radius: 12px;      /* optional for consistent style */
+  background-color: black;  /* optional */
+}
+
 /* Info box near bottom */
 .export-style .catch-info {
   position: absolute;                /* Changed from relative */
@@ -859,6 +871,12 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   <div id="map" style="height: 100%; width: 100%; min-height: 500px;"></div>
 </section>
 
+  <div id="exportProgress" style="display: none; position: fixed; bottom: 20px; left: 20px; width: 300px; background: #333; color: #fff; padding: 10px; z-index: 10000; border-radius: 6px;">
+  <div id="exportProgressText" style="margin-bottom: 6px;">Exporting...</div>
+  <div style="background: #555; height: 8px; border-radius: 4px;">
+    <div id="exportProgressBar" style="height: 8px; width: 0%; background: limegreen; border-radius: 4px;"></div>
+  </div>
+</div>
 <!-- Fullscreen photo modal -->
 <div id="imageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <span id="modalClose" class="modal-close" aria-label="Close modal">&times;</span>
@@ -878,8 +896,26 @@ body, header, #tabs button, section, .button, .catch-card, .fish-item {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
   <!-- Whammy.js -->
 <script src="https://cdn.jsdelivr.net/npm/whammy/whammy.js"></script>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
 <script>
   let useWhammy = true;
+
+  function showExportProgress() {
+  document.getElementById("exportProgress").style.display = "block";
+  updateExportProgress(0, "Exporting frames...");
+}
+
+function updateExportProgress(percent, message = "") {
+  const text = document.getElementById("exportProgressText");
+  const bar = document.getElementById("exportProgressBar");
+
+  text.textContent = message || `Progress: ${percent.toFixed(0)}%`;
+  bar.style.width = `${percent}%`;
+}
+
+function hideExportProgress() {
+  document.getElementById("exportProgress").style.display = "none";
+}
   
   function setupTabs() {
   const memoriesTabBtn = document.getElementById("memoriesTabBtn");
@@ -1379,27 +1415,14 @@ function exportCatchCardAsImage(card, photo) {
   }
 }
 
-  function showExportSpinner() {
-  const spinner = document.createElement("div");
-  spinner.className = "export-spinner-overlay";
-  spinner.innerHTML = `<div class="export-spinner"></div>`;
-  document.body.appendChild(spinner);
-}
-
-function hideExportSpinner() {
-  const spinner = document.querySelector(".export-spinner-overlay");
-  if (spinner) spinner.remove();
-}
-
-async function exportCatchCardAsGif(card, photo) {
-  showExportSpinner();
+  async function exportCatchCardAsGif(card, photo) {
+  showExportProgress();
 
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
   clone.style.width = "420px";
   clone.style.height = "620px";
 
-  // Offscreen container
   const renderContainer = document.createElement("div");
   renderContainer.style.position = "absolute";
   renderContainer.style.top = "-9999px";
@@ -1409,27 +1432,10 @@ async function exportCatchCardAsGif(card, photo) {
   renderContainer.appendChild(clone);
   document.body.appendChild(renderContainer);
 
-  const gif = new GIF({
-    workers: 1,
-    quality: 5,
-    width: 420,
-    height: 620,
-    workerScript: "https://cdn.jsdelivr.net/npm/gif.js.optimized@0.2.0/dist/gif.worker.js",
-  });
-
   const frameCount = 10;
   const frameDelay = 100;
 
-  gif.on("finished", function (blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `catch-card-${photo.id}.gif`;
-    a.click();
-    URL.revokeObjectURL(url);
-    renderContainer.remove();
-    hideExportSpinner();
-  });
+  const imageBuffers = [];
 
   try {
     for (let i = 0; i < frameCount; i++) {
@@ -1443,30 +1449,64 @@ async function exportCatchCardAsGif(card, photo) {
         useCORS: true,
       });
 
-      gif.addFrame(canvas, { delay: frameDelay });
+      const blob = await new Promise((res) => canvas.toBlob(res, 'image/png'));
+      const buffer = await blob.arrayBuffer();
+      imageBuffers.push({ name: `frame${String(i).padStart(3, '0')}.png`, buffer });
+
+      const percent = ((i + 1) / frameCount) * 100;
+      updateExportProgress(percent, `Captured frame ${i + 1}/${frameCount}`);
+
       await new Promise((res) => setTimeout(res, frameDelay));
     }
 
-    gif.render();
+    updateExportProgress(100, "Encoding video...");
+
+    // ffmpeg
+    const { createFFmpeg, fetchFile } = FFmpeg;
+    const ffmpeg = createFFmpeg({ log: false });
+    await ffmpeg.load();
+
+    // Write all frames
+    for (const frame of imageBuffers) {
+      ffmpeg.FS('writeFile', frame.name, new Uint8Array(frame.buffer));
+    }
+
+    // Encode video
+    await ffmpeg.run(
+      '-framerate', '10',
+      '-pattern_type', 'glob',
+      '-i', 'frame*.png',
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      'output.mp4'
+    );
+
+    const data = ffmpeg.FS('readFile', 'output.mp4');
+    const blob = new Blob([data.buffer], { type: 'video/mp4' });
+    manualDownload(blob, `catch-card-${photo.id}.mp4`);
 
   } catch (err) {
-    alert("GIF export failed: " + err.message);
+    alert("MP4 export failed: " + err.message);
+  } finally {
     renderContainer.remove();
-    hideExportSpinner();
+    hideExportProgress();
   }
 }
 
   async function exportCatchCardAsVideo(card, photo, videoSrc) {
+
+  const { createFFmpeg, fetchFile } = FFmpeg;
+  const ffmpeg = createFFmpeg({ log: true });
+  await ffmpeg.load();
+
   const clone = card.cloneNode(true);
   clone.classList.add("export-style");
   clone.style.width = "420px";
-clone.style.height = "620px";
+  clone.style.height = "620px";
 
-  // Remove buttons
   const buttons = clone.querySelector(".catch-buttons");
   if (buttons) buttons.remove();
 
-  // Background & rarity stars
   const bg = document.createElement("div");
   bg.className = "card-background";
   const backgroundMap = {
@@ -1485,7 +1525,6 @@ clone.style.height = "620px";
   bg.style.backgroundImage = `url('${backgroundMap[starsCount]}')`;
   clone.insertBefore(bg, clone.firstChild);
 
-  // Replace image with video element inside image-window wrapper
   const originalImg = clone.querySelector(".catch-photo");
   const imageWrapper = document.createElement("div");
   imageWrapper.className = "image-window";
@@ -1502,7 +1541,6 @@ clone.style.height = "620px";
   imageWrapper.appendChild(video);
   originalImg.parentNode.replaceChild(imageWrapper, originalImg);
 
-  // Caption above info
   const caption = clone.querySelector(".catch-caption");
   const info = clone.querySelector(".catch-info");
   if (caption && info && info.contains(caption)) {
@@ -1510,19 +1548,16 @@ clone.style.height = "620px";
     clone.insertBefore(caption, info);
   }
 
-  // Remove weight and date for cleaner card
   const weight = clone.querySelector(".catch-weight");
   if (weight) weight.remove();
   const date = clone.querySelector(".catch-date");
   if (date) date.remove();
 
-  // Add card number
   const cardNumber = document.createElement("div");
   cardNumber.className = "card-number";
   cardNumber.textContent = `#${String(photo.id).padStart(3, "0")}`;
   clone.appendChild(cardNumber);
 
-  // Offscreen container for rendering
   const renderContainer = document.createElement("div");
   renderContainer.style.position = "absolute";
   renderContainer.style.top = "-9999px";
@@ -1532,72 +1567,54 @@ clone.style.height = "620px";
   renderContainer.appendChild(clone);
   document.body.appendChild(renderContainer);
 
-  // Prepare Whammy video encoder (10fps)
-  const encoder = new Whammy.Video(10);
-
-  // Wait for video to start playing to capture frames
   await new Promise((resolve) => {
     video.onplaying = resolve;
-    // In case already playing
     if (!video.paused) resolve();
   });
 
   const frameCount = 10;
-  const frameDelay = 100; // ms
+  const frameDelay = 100;
+  const frameFiles = [];
+
+  showExportProgress();
 
   for (let i = 0; i < frameCount; i++) {
-    const canvasFrame = await html2canvas(clone, {
+    const canvas = await html2canvas(clone, {
       width: clone.offsetWidth,
       height: clone.offsetHeight,
-      scrollX: 0,
-      scrollY: 0,
       backgroundColor: null,
       scale: 2,
+      useCORS: true,
     });
 
-    encoder.add(canvasFrame);
+    const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+    const buffer = await blob.arrayBuffer();
+    const filename = `frame${String(i).padStart(3, "0")}.png`;
+
+    ffmpeg.FS("writeFile", filename, new Uint8Array(buffer));
+    frameFiles.push(filename);
+
     await new Promise((r) => setTimeout(r, frameDelay));
   }
 
-  // Compile video and trigger download
-  const output = encoder.compile();
-  const url = URL.createObjectURL(output);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `catch-card-${photo.id}.webm`;
-  a.click();
-  URL.revokeObjectURL(url);
+    updateExportProgress(100, "Finalizing video...");
+
+  await ffmpeg.run(
+    "-framerate", "10",
+    "-i", "frame%03d.png",
+    "-c:v", "libx264",
+    "-preset", "ultrafast",
+    "-pix_fmt", "yuv420p",
+    "output.mp4"
+  );
+
+  const data = ffmpeg.FS("readFile", "output.mp4");
+  const mp4Blob = new Blob([data.buffer], { type: "video/mp4" });
+
+  manualDownload(mp4Blob, `catch-card-${photo.id}.mp4`);
 
   renderContainer.remove();
-}
-
-  function isIOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-function manualDownload(blob, filename) {
-  const url = URL.createObjectURL(blob);
-
-  if (isIOS()) {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.textContent = "⬇️ Tap here to download your card";
-    link.style.position = "fixed";
-    link.style.bottom = "20px";
-    link.style.left = "20px";
-    link.style.background = "#fff";
-    link.style.padding = "10px";
-    link.style.border = "1px solid #999";
-    link.style.zIndex = "10000";
-    document.body.appendChild(link);
-  } else {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  hideExportProgress();
 }
   
 async function exportCatchCard(card, photo, recordDurationMs = 5000, useWhammy = true) {
