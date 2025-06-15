@@ -1135,7 +1135,7 @@ if (photo.videoSrc) {
   mediaElement.src = photo.src;
   mediaElement.alt = photo.caption || "Catch photo";
   mediaElement.className = "catch-photo";
-  mediaElement.addEventListener("click", () => openModal(photo.src));
+  mediaElement.addEventListener("click", () => openModal(photo.videoSrc || photo.src));
 }
 
 if (mediaElement) card.appendChild(mediaElement);
