@@ -1119,12 +1119,26 @@ async function renderPhotoPosts() {
     const card = document.createElement("div");
     card.className = "catch-card";
 
-    const img = document.createElement("img");
-    img.src = photo.src;
-    img.alt = photo.caption || "Catch photo";
-    img.className = "catch-photo";
-    img.addEventListener("click", () => openModal(photo.src));
-    card.appendChild(img);
+    let mediaElement;
+
+if (photo.videoSrc) {
+  mediaElement = document.createElement("video");
+  mediaElement.src = photo.videoSrc;
+  mediaElement.muted = true;      // mute video so autoplay works without user interaction
+  mediaElement.autoplay = true;   // autoplay on load
+  mediaElement.loop = true;       // loop forever
+  mediaElement.playsInline = true; // important for mobile autoplay
+  mediaElement.className = "catch-photo";
+  mediaElement.addEventListener("click", () => openModal(photo.videoSrc));
+} else if (photo.src) {
+  mediaElement = document.createElement("img");
+  mediaElement.src = photo.src;
+  mediaElement.alt = photo.caption || "Catch photo";
+  mediaElement.className = "catch-photo";
+  mediaElement.addEventListener("click", () => openModal(photo.src));
+}
+
+if (mediaElement) card.appendChild(mediaElement);
 
     const info = document.createElement("div");
     info.className = "catch-info";
@@ -1531,11 +1545,22 @@ async function exportCatchCard(card, photo) {
   if (buttons) buttons.remove();
 
   // Wrap photo in image-window
-  const originalImg = clone.querySelector(".catch-photo");
-  const imageWrapper = document.createElement("div");
-  imageWrapper.className = "image-window";
-  imageWrapper.appendChild(originalImg.cloneNode(true));
-  originalImg.parentNode.replaceChild(imageWrapper, originalImg);
+  let mediaElement = clone.querySelector(".catch-photo");
+const imageWrapper = document.createElement("div");
+imageWrapper.className = "image-window";
+
+if (mediaElement.tagName === "VIDEO") {
+  const videoClone = mediaElement.cloneNode(true);
+  videoClone.muted = true;
+  videoClone.loop = true;
+  videoClone.autoplay = true;
+  videoClone.controls = false;
+  imageWrapper.appendChild(videoClone);
+} else {
+  imageWrapper.appendChild(mediaElement.cloneNode(true));
+}
+
+mediaElement.parentNode.replaceChild(imageWrapper, mediaElement);
 
   // Clean up inserted image styles
   const insertedImg = imageWrapper.querySelector("img");
