@@ -1268,6 +1268,7 @@ function exportCatchCardAsImage(card, photo) {
       scrollX: 0,
       scrollY: 0,
       backgroundColor: null,
+      useCORS: true,
     }).then((canvas) => {
       const ctx = canvas.getContext("2d");
       const watermarkImg = new Image();
@@ -1342,6 +1343,7 @@ function exportCatchCardAsImage(card, photo) {
         scrollY: 0,
         backgroundColor: null,
         scale: 2,
+        useCORS: true,
       });
 
       gif.addFrame(canvas, { delay: frameDelay });
@@ -1454,6 +1456,7 @@ async function exportCatchCard(card, photo) {
         scrollY: 0,
         backgroundColor: null,
         scale: 2, // higher res
+        useCORS: true,
       });
       // Add watermark on canvas
       const ctx = canvas.getContext("2d");
